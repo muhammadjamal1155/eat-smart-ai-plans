@@ -1,5 +1,5 @@
-
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,6 +10,7 @@ import { toast } from '@/hooks/use-toast';
 
 const AuthSection = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleAuth = async (type: 'login' | 'register') => {
     setIsLoading(true);
@@ -21,11 +22,8 @@ const AuthSection = () => {
         description: type === 'login' ? "You've been logged in." : "Please check your email to verify your account.",
       });
       
-      // Simulate navigation to dashboard
-      const dashboardElement = document.querySelector('#dashboard');
-      if (dashboardElement) {
-        dashboardElement.scrollIntoView({ behavior: 'smooth' });
-      }
+      // Navigate to dashboard
+      navigate('/dashboard');
     }, 2000);
   };
 

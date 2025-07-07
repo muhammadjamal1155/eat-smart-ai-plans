@@ -1,50 +1,49 @@
 
 import { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Contact, Home, User, BarChart, Calendar, Info } from 'lucide-react';
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const location = useLocation();
 
   const navItems = [
-    { name: 'Home', href: '#home', icon: Home },
-    { name: 'Dashboard', href: '#dashboard', icon: BarChart },
-    { name: 'Meal Plans', href: '#meal-plans', icon: Calendar },
-    { name: 'About', href: '#about', icon: Info },
-    { name: 'Contact', href: '#contact', icon: Contact },
+    { name: 'Home', href: '/', icon: Home },
+    { name: 'Dashboard', href: '/dashboard', icon: BarChart },
+    { name: 'Meal Plans', href: '/meal-plans', icon: Calendar },
+    { name: 'Insights', href: '/insights', icon: BarChart },
+    { name: 'About', href: '/about', icon: Info },
+    { name: 'Contact', href: '/contact', icon: Contact },
   ];
-
-  const handleNavClick = (href: string) => {
-    const element = document.querySelector(href);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
-    setIsOpen(false);
-  };
 
   return (
     <nav className="fixed top-0 w-full bg-white/95 backdrop-blur-sm border-b border-gray-100 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <div className="flex items-center space-x-2">
+          <Link to="/" className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-health-500 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-sm">N</span>
             </div>
             <span className="font-poppins font-bold text-xl text-gray-900">NutriGuide AI</span>
-          </div>
+          </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
             {navItems.map((item) => (
-              <button
+              <Link
                 key={item.name}
-                onClick={() => handleNavClick(item.href)}
-                className="text-gray-600 hover:text-health-600 font-medium transition-colors duration-200"
+                to={item.href}
+                className={`font-medium transition-colors duration-200 ${
+                  location.pathname === item.href
+                    ? 'text-health-600'
+                    : 'text-gray-600 hover:text-health-600'
+                }`}
               >
                 {item.name}
-              </button>
+              </Link>
             ))}
             <Button className="btn-primary">
               <User className="w-4 h-4 mr-2" />
@@ -65,14 +64,19 @@ const Navigation = () => {
               <SheetContent side="right" className="w-80">
                 <div className="flex flex-col space-y-6 mt-6">
                   {navItems.map((item) => (
-                    <button
+                    <Link
                       key={item.name}
-                      onClick={() => handleNavClick(item.href)}
-                      className="flex items-center space-x-3 text-gray-600 hover:text-health-600 font-medium transition-colors duration-200"
+                      to={item.href}
+                      onClick={() => setIsOpen(false)}
+                      className={`flex items-center space-x-3 font-medium transition-colors duration-200 ${
+                        location.pathname === item.href
+                          ? 'text-health-600'
+                          : 'text-gray-600 hover:text-health-600'
+                      }`}
                     >
                       <item.icon className="w-5 h-5" />
                       <span>{item.name}</span>
-                    </button>
+                    </Link>
                   ))}
                   <Button className="btn-primary mt-4">
                     <User className="w-4 h-4 mr-2" />

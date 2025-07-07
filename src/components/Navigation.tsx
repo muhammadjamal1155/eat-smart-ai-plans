@@ -1,22 +1,40 @@
 
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Contact, Home, User, BarChart, Calendar, Info } from 'lucide-react';
+import { Contact, Home, User, BarChart, Calendar, Info, LogOut } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from '@/hooks/use-toast';
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, logout, isAuthenticated } = useAuth();
 
-  const navItems = [
+  const publicNavItems = [
     { name: 'Home', href: '/', icon: Home },
-    { name: 'Dashboard', href: '/dashboard', icon: BarChart },
-    { name: 'Meal Plans', href: '/meal-plans', icon: Calendar },
-    { name: 'Insights', href: '/insights', icon: BarChart },
     { name: 'About', href: '/about', icon: Info },
     { name: 'Contact', href: '/contact', icon: Contact },
   ];
+
+  const privateNavItems = [
+    { name: 'Dashboard', href: '/dashboard', icon: BarChart },
+    { name: 'Meal Plans', href: '/meal-plans', icon: Calendar },
+    { name: 'Insights', href: '/insights', icon: BarChart },
+  ];
+
+  const navItems = isAuthenticated ? [...publicNavItems, ...privateNavItems] : publicNavItems;
+
+  const handleLogout = () => {
+    logout();
+    toast({
+      title: "Logged out successfully",
+      description: "You've been logged out of your account.",
+    });
+    navigate('/');
+  };
 
   return (
     <nav className="fixed top-0 w-full bg-white/95 backdrop-blur-sm border-b border-gray-100 z-50">
@@ -45,10 +63,21 @@ const Navigation = () => {
                 {item.name}
               </Link>
             ))}
-            <Button className="btn-primary">
-              <User className="w-4 h-4 mr-2" />
-              Sign In
-            </Button>
+            
+            {isAuthenticated ? (
+              <div className="flex items-center space-x-4">
+                <span className="text-sm text-gray-600">Welcome, {user?.name}</span>
+                <Button variant="outline" size="sm" onClick={handleLogout}>
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Logout
+                </Button>
+              </div>
+            ) : (
+              <Button className="btn-primary">
+                <User className="w-4 h-4 mr-2" />
+                Sign In
+              </Button>
+            )}
           </div>
 
           {/* Mobile Navigation */}
@@ -78,10 +107,21 @@ const Navigation = () => {
                       <span>{item.name}</span>
                     </Link>
                   ))}
-                  <Button className="btn-primary mt-4">
-                    <User className="w-4 h-4 mr-2" />
-                    Sign In
-                  </Button>
+                  
+                  {isAuthenticated ? (
+                    <div className="pt-4 border-t">
+                      <div className="text-sm text-gray-600 mb-3">Welcome, {user?.name}</div>
+                      <Button variant="outline" className="w-full" onClick={handleLogout}>
+                        <LogOut className="w-4 h-4 mr-2" />
+                        Logout
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button className="btn-primary mt-4">
+                      <User className="w-4 h-4 mr-2" />
+                      Sign In
+                    </Button>
+                  )}
                 </div>
               </SheetContent>
             </Sheet>

@@ -4,8 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, User, BarChart, ArrowUp, ArrowDown } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 const DashboardSection = () => {
+  const { user } = useAuth();
+
   const nutritionTargets = [
     { name: 'Calories', current: 1680, target: 2000, unit: 'kcal', color: 'bg-blue-500' },
     { name: 'Protein', current: 85, target: 120, unit: 'g', color: 'bg-health-500' },
@@ -128,18 +131,22 @@ const DashboardSection = () => {
                   <div className="w-16 h-16 bg-health-100 rounded-full flex items-center justify-center mx-auto">
                     <User className="w-8 h-8 text-health-600" />
                   </div>
-                  <h3 className="font-semibold text-gray-900">Sarah Johnson</h3>
-                  <p className="text-sm text-gray-600">Goal: Weight Loss</p>
+                  <h3 className="font-semibold text-gray-900">{user?.name || 'User'}</h3>
+                  <p className="text-sm text-gray-600">Goal: {user?.goal?.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Weight Loss'}</p>
                 </div>
                 
                 <div className="space-y-3 pt-4 border-t">
                   <div className="flex justify-between">
                     <span className="text-gray-600">Current Weight</span>
-                    <span className="font-medium">68 kg</span>
+                    <span className="font-medium">{user?.weight || 68} kg</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Target Weight</span>
-                    <span className="font-medium">60 kg</span>
+                    <span className="text-gray-600">Height</span>
+                    <span className="font-medium">{user?.height || 175} cm</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Age</span>
+                    <span className="font-medium">{user?.age || 25} years</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Progress</span>

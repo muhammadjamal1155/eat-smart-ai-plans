@@ -1,28 +1,59 @@
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 const AuthSection = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    age: '',
+    gender: '',
+    weight: '',
+    height: '',
+    goal: '',
+    password: '',
+  });
+  
   const navigate = useNavigate();
+  const { login } = useAuth();
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
 
   const handleAuth = async (type: 'login' | 'register') => {
     setIsLoading(true);
+    
     // Simulate authentication
     setTimeout(() => {
       setIsLoading(false);
+      
+      const userData = {
+        id: '1',
+        name: type === 'register' ? formData.name : 'John Doe',
+        email: type === 'register' ? formData.email : 'john@example.com',
+        age: type === 'register' ? parseInt(formData.age) : 30,
+        weight: type === 'register' ? parseInt(formData.weight) : 70,
+        height: type === 'register' ? parseInt(formData.height) : 175,
+        goal: type === 'register' ? formData.goal : 'weight-loss',
+      };
+
+      login(userData);
+      
       toast({
         title: type === 'login' ? "Welcome back!" : "Account created successfully!",
-        description: type === 'login' ? "You've been logged in." : "Please check your email to verify your account.",
+        description: type === 'login' ? "You've been logged in." : "Your account has been created and you're now logged in.",
       });
       
-      // Navigate to dashboard
       navigate('/dashboard');
     }, 2000);
   };
@@ -51,19 +82,36 @@ const AuthSection = () => {
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="name">Full Name</Label>
-                    <Input id="name" placeholder="Enter your full name" />
+                    <Input 
+                      id="name" 
+                      placeholder="Enter your full name"
+                      value={formData.name}
+                      onChange={(e) => handleInputChange('name', e.target.value)}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="email">Email</Label>
-                    <Input id="email" type="email" placeholder="Enter your email" />
+                    <Input 
+                      id="email" 
+                      type="email" 
+                      placeholder="Enter your email"
+                      value={formData.email}
+                      onChange={(e) => handleInputChange('email', e.target.value)}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="age">Age</Label>
-                    <Input id="age" type="number" placeholder="Your age" />
+                    <Input 
+                      id="age" 
+                      type="number" 
+                      placeholder="Your age"
+                      value={formData.age}
+                      onChange={(e) => handleInputChange('age', e.target.value)}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="gender">Gender</Label>
-                    <Select>
+                    <Select onValueChange={(value) => handleInputChange('gender', value)}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select gender" />
                       </SelectTrigger>
@@ -76,15 +124,27 @@ const AuthSection = () => {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="weight">Weight (kg)</Label>
-                    <Input id="weight" type="number" placeholder="Your weight" />
+                    <Input 
+                      id="weight" 
+                      type="number" 
+                      placeholder="Your weight"
+                      value={formData.weight}
+                      onChange={(e) => handleInputChange('weight', e.target.value)}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="height">Height (cm)</Label>
-                    <Input id="height" type="number" placeholder="Your height" />
+                    <Input 
+                      id="height" 
+                      type="number" 
+                      placeholder="Your height"
+                      value={formData.height}
+                      onChange={(e) => handleInputChange('height', e.target.value)}
+                    />
                   </div>
                   <div className="space-y-2 md:col-span-2">
                     <Label htmlFor="goal">Dietary Goal</Label>
-                    <Select>
+                    <Select onValueChange={(value) => handleInputChange('goal', value)}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select your primary goal" />
                       </SelectTrigger>
@@ -99,7 +159,13 @@ const AuthSection = () => {
                   </div>
                   <div className="space-y-2 md:col-span-2">
                     <Label htmlFor="password">Password</Label>
-                    <Input id="password" type="password" placeholder="Create a password" />
+                    <Input 
+                      id="password" 
+                      type="password" 
+                      placeholder="Create a password"
+                      value={formData.password}
+                      onChange={(e) => handleInputChange('password', e.target.value)}
+                    />
                   </div>
                 </div>
                 <Button 

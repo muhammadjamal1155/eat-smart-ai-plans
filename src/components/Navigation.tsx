@@ -36,6 +36,25 @@ const Navigation = () => {
     navigate('/');
   };
 
+  const handleSignInClick = () => {
+    // Scroll to auth section on home page
+    if (location.pathname === '/') {
+      const authSection = document.getElementById('auth');
+      if (authSection) {
+        authSection.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else {
+      // Navigate to home page and then scroll to auth
+      navigate('/');
+      setTimeout(() => {
+        const authSection = document.getElementById('auth');
+        if (authSection) {
+          authSection.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    }
+  };
+
   return (
     <nav className="fixed top-0 w-full bg-white/95 backdrop-blur-sm border-b border-gray-100 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -73,7 +92,7 @@ const Navigation = () => {
                 </Button>
               </div>
             ) : (
-              <Button className="btn-primary">
+              <Button className="btn-primary" onClick={handleSignInClick}>
                 <User className="w-4 h-4 mr-2" />
                 Sign In
               </Button>
@@ -117,7 +136,7 @@ const Navigation = () => {
                       </Button>
                     </div>
                   ) : (
-                    <Button className="btn-primary mt-4">
+                    <Button className="btn-primary mt-4" onClick={handleSignInClick}>
                       <User className="w-4 h-4 mr-2" />
                       Sign In
                     </Button>

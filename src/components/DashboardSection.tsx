@@ -5,6 +5,8 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, User, BarChart, ArrowUp, ArrowDown } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import NutritionChart from './NutritionChart';
+import QuickActions from './QuickActions';
 
 const DashboardSection = () => {
   const { user } = useAuth();
@@ -14,6 +16,23 @@ const DashboardSection = () => {
     { name: 'Protein', current: 85, target: 120, unit: 'g', color: 'bg-health-500' },
     { name: 'Carbs', current: 180, target: 250, unit: 'g', color: 'bg-orange-500' },
     { name: 'Fats', current: 65, target: 80, unit: 'g', color: 'bg-purple-500' },
+  ];
+
+  const weeklyData = [
+    { day: 'Mon', calories: 1800, protein: 95 },
+    { day: 'Tue', calories: 1650, protein: 88 },
+    { day: 'Wed', calories: 1900, protein: 102 },
+    { day: 'Thu', calories: 1750, protein: 91 },
+    { day: 'Fri', calories: 1680, protein: 85 },
+    { day: 'Sat', calories: 1820, protein: 98 },
+    { day: 'Sun', calories: 1720, protein: 89 },
+  ];
+
+  const nutritionComparison = [
+    { nutrient: 'Calories', current: 1680, target: 2000 },
+    { nutrient: 'Protein', current: 85, target: 120 },
+    { nutrient: 'Carbs', current: 180, target: 250 },
+    { nutrient: 'Fats', current: 65, target: 80 },
   ];
 
   const recommendedFoods = [
@@ -53,8 +72,9 @@ const DashboardSection = () => {
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
-          {/* Left Column - Nutrition Targets */}
+          {/* Left Column - Main Content */}
           <div className="lg:col-span-2 space-y-6">
+            {/* Nutrition Targets */}
             <Card className="shadow-lg border-0">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
@@ -84,10 +104,24 @@ const DashboardSection = () => {
               </CardContent>
             </Card>
 
+            {/* Charts */}
+            <div className="grid md:grid-cols-2 gap-6">
+              <NutritionChart 
+                type="line" 
+                data={weeklyData} 
+                title="Weekly Progress" 
+              />
+              <NutritionChart 
+                type="bar" 
+                data={nutritionComparison} 
+                title="Today vs Targets" 
+              />
+            </div>
+
             {/* Recommended Foods */}
             <Card className="shadow-lg border-0">
               <CardHeader>
-                <CardTitle>Recommended Foods</CardTitle>
+                <CardTitle>AI Recommended Foods</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid md:grid-cols-3 gap-4">
@@ -117,8 +151,9 @@ const DashboardSection = () => {
             </Card>
           </div>
 
-          {/* Right Column - Quick Stats & Actions */}
+          {/* Right Column - Sidebar */}
           <div className="space-y-6">
+            {/* Profile Summary */}
             <Card className="shadow-lg border-0">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
@@ -131,14 +166,14 @@ const DashboardSection = () => {
                   <div className="w-16 h-16 bg-health-100 rounded-full flex items-center justify-center mx-auto">
                     <User className="w-8 h-8 text-health-600" />
                   </div>
-                  <h3 className="font-semibold text-gray-900">{user?.name || 'User'}</h3>
+                  <h3 className="font-semibold text-gray-900">{user?.name || 'Demo User'}</h3>
                   <p className="text-sm text-gray-600">Goal: {user?.goal?.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Weight Loss'}</p>
                 </div>
                 
                 <div className="space-y-3 pt-4 border-t">
                   <div className="flex justify-between">
                     <span className="text-gray-600">Current Weight</span>
-                    <span className="font-medium">{user?.weight || 68} kg</span>
+                    <span className="font-medium">{user?.weight || 70} kg</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Height</span>
@@ -146,7 +181,7 @@ const DashboardSection = () => {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Age</span>
-                    <span className="font-medium">{user?.age || 25} years</span>
+                    <span className="font-medium">{user?.age || 28} years</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Progress</span>
@@ -159,21 +194,10 @@ const DashboardSection = () => {
               </CardContent>
             </Card>
 
-            <Card className="shadow-lg border-0">
-              <CardContent className="p-6 space-y-4">
-                <Button className="w-full btn-primary">
-                  <Calendar className="w-4 h-4 mr-2" />
-                  Generate New Meal Plan
-                </Button>
-                <Button variant="outline" className="w-full btn-secondary">
-                  View Progress Report
-                </Button>
-                <Button variant="outline" className="w-full btn-secondary">
-                  Update Goals
-                </Button>
-              </CardContent>
-            </Card>
+            {/* Quick Actions */}
+            <QuickActions />
 
+            {/* Achievement Card */}
             <Card className="shadow-lg border-0 bg-health-50">
               <CardContent className="p-6 text-center space-y-3">
                 <div className="w-12 h-12 bg-health-500 rounded-full flex items-center justify-center mx-auto">
@@ -183,6 +207,10 @@ const DashboardSection = () => {
                 <p className="text-sm text-health-700">
                   You're 70% closer to your goal this week. Keep it up!
                 </p>
+                <Button className="w-full btn-primary mt-3">
+                  <Calendar className="w-4 h-4 mr-2" />
+                  Plan Next Week
+                </Button>
               </CardContent>
             </Card>
           </div>

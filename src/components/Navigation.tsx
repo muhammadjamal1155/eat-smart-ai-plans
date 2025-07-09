@@ -1,150 +1,178 @@
-
 import { useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Contact, Home, User, BarChart, Calendar, Info, LogOut } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { toast } from '@/hooks/use-toast';
+import { Utensils, User, LogOut } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Button } from './ui/button';
+
+interface NavLink {
+  href: string;
+  label: string;
+  isHashLink?: boolean;
+}
 
 const Navigation = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const location = useLocation();
-  const navigate = useNavigate();
-  const { user, logout, isAuthenticated } = useAuth();
+  const { user, logout } = useAuth();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const publicNavItems = [
-    { name: 'Home', href: '/', icon: Home },
-    { name: 'About', href: '/about', icon: Info },
-    { name: 'Contact', href: '/contact', icon: Contact },
-  ];
-
-  const privateNavItems = [
-    { name: 'Dashboard', href: '/dashboard', icon: BarChart },
-    { name: 'Meal Plans', href: '/meal-plans', icon: Calendar },
-    { name: 'Insights', href: '/insights', icon: BarChart },
-  ];
-
-  const navItems = isAuthenticated ? [...publicNavItems, ...privateNavItems] : publicNavItems;
-
-  const handleLogout = () => {
-    logout();
-    toast({
-      title: "Logged out successfully",
-      description: "You've been logged out of your account.",
-    });
-    navigate('/');
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
-  const handleSignInClick = () => {
-    // Scroll to auth section on home page
-    if (location.pathname === '/') {
-      const authSection = document.getElementById('auth');
-      if (authSection) {
-        authSection.scrollIntoView({ behavior: 'smooth' });
-      }
-    } else {
-      // Navigate to home page and then scroll to auth
-      navigate('/');
-      setTimeout(() => {
-        const authSection = document.getElementById('auth');
-        if (authSection) {
-          authSection.scrollIntoView({ behavior: 'smooth' });
-        }
-      }, 100);
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error("Logout failed:", error);
     }
   };
 
   return (
-    <nav className="fixed top-0 w-full bg-white/95 backdrop-blur-sm border-b border-gray-100 z-50">
+    <nav className="bg-white shadow-lg fixed w-full z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-health-500 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">N</span>
+        <div className="flex justify-between h-16">
+          <div className="flex items-center">
+            <div className="flex-shrink-0 flex items-center">
+              <Utensils className="h-8 w-8 text-health-600" />
+              <span className="ml-2 text-xl font-bold text-gray-900">NutriPlan</span>
             </div>
-            <span className="font-poppins font-bold text-xl text-gray-900">NutriGuide AI</span>
-          </Link>
+            <div className="hidden md:ml-6 md:flex md:space-x-8">
+              <a href="#dashboard" className="text-gray-900 hover:text-health-600 px-3 py-2 text-sm font-medium">
+                Dashboard
+              </a>
+              <a href="#meal-plans" className="text-gray-900 hover:text-health-600 px-3 py-2 text-sm font-medium">
+                Meal Plans
+              </a>
+              <a href="#insights" className="text-gray-900 hover:text-health-600 px-3 py-2 text-sm font-medium">
+                AI Insights
+              </a>
+              <a href="#about" className="text-gray-900 hover:text-health-600 px-3 py-2 text-sm font-medium">
+                About
+              </a>
+              <a href="#contact" className="text-gray-900 hover:text-health-600 px-3 py-2 text-sm font-medium">
+                Contact
+              </a>
+            </div>
+          </div>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
-            {navItems.map((item) => (
-              <Link
-                key={item.name}
-                to={item.href}
-                className={`font-medium transition-colors duration-200 ${
-                  location.pathname === item.href
-                    ? 'text-health-600'
-                    : 'text-gray-600 hover:text-health-600'
-                }`}
-              >
-                {item.name}
-              </Link>
-            ))}
-            
-            {isAuthenticated ? (
-              <div className="flex items-center space-x-4">
-                <span className="text-sm text-gray-600">Welcome, {user?.name}</span>
-                <Button variant="outline" size="sm" onClick={handleLogout}>
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Logout
-                </Button>
-              </div>
+          <div className="hidden md:flex items-center space-x-4">
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                    <User className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end" forceMount>
+                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem>
+                    <Link to="/dashboard" className="block px-4 py-2 hover:bg-gray-100">
+                      Dashboard
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Link to="/meal-plans" className="block px-4 py-2 hover:bg-gray-100">
+                      Meal Plans
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Link to="/insights" className="block px-4 py-2 hover:bg-gray-100">
+                      AI Insights
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
+                    Logout
+                    <LogOut className="ml-auto h-4 w-4" />
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             ) : (
-              <Button className="btn-primary" onClick={handleSignInClick}>
-                <User className="w-4 h-4 mr-2" />
-                Sign In
-              </Button>
+              <>
+                <Link to="/login" className="text-gray-900 hover:text-health-600 px-3 py-2 text-sm font-medium">
+                  Login
+                </Link>
+                <Link to="/register" className="btn-primary px-4 py-2 text-sm font-medium rounded-md">
+                  Register
+                </Link>
+              </>
             )}
           </div>
 
-          {/* Mobile Navigation */}
-          <div className="md:hidden">
-            <Sheet open={isOpen} onOpenChange={setIsOpen}>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="sm">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                  </svg>
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="right" className="w-80">
-                <div className="flex flex-col space-y-6 mt-6">
-                  {navItems.map((item) => (
-                    <Link
-                      key={item.name}
-                      to={item.href}
-                      onClick={() => setIsOpen(false)}
-                      className={`flex items-center space-x-3 font-medium transition-colors duration-200 ${
-                        location.pathname === item.href
-                          ? 'text-health-600'
-                          : 'text-gray-600 hover:text-health-600'
-                      }`}
-                    >
-                      <item.icon className="w-5 h-5" />
-                      <span>{item.name}</span>
-                    </Link>
-                  ))}
-                  
-                  {isAuthenticated ? (
-                    <div className="pt-4 border-t">
-                      <div className="text-sm text-gray-600 mb-3">Welcome, {user?.name}</div>
-                      <Button variant="outline" className="w-full" onClick={handleLogout}>
-                        <LogOut className="w-4 h-4 mr-2" />
-                        Logout
-                      </Button>
-                    </div>
-                  ) : (
-                    <Button className="btn-primary mt-4" onClick={handleSignInClick}>
-                      <User className="w-4 h-4 mr-2" />
-                      Sign In
-                    </Button>
-                  )}
-                </div>
-              </SheetContent>
-            </Sheet>
+          <div className="-mr-2 flex md:hidden">
+            <button
+              onClick={toggleMobileMenu}
+              type="button"
+              className="bg-white inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-health-500"
+              aria-controls="mobile-menu"
+              aria-expanded={isMobileMenuOpen}
+            >
+              <span className="sr-only">Open main menu</span>
+              <svg className={`${isMobileMenuOpen ? 'hidden' : 'block'} h-6 w-6`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+              <svg className={`${isMobileMenuOpen ? 'block' : 'hidden'} h-6 w-6`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
           </div>
+        </div>
+        
+        <div className={`${isMobileMenuOpen ? 'block' : 'none'} md:hidden`} id="mobile-menu">
+          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+            <a href="#dashboard" className="text-gray-900 hover:text-health-600 block px-3 py-2 rounded-md text-base font-medium">
+              Dashboard
+            </a>
+            <a href="#meal-plans" className="text-gray-900 hover:text-health-600 block px-3 py-2 rounded-md text-base font-medium">
+              Meal Plans
+            </a>
+            <a href="#insights" className="text-gray-900 hover:text-health-600 block px-3 py-2 rounded-md text-base font-medium">
+              AI Insights
+            </a>
+            <a href="#about" className="text-gray-900 hover:text-health-600 block px-3 py-2 rounded-md text-base font-medium">
+              About
+            </a>
+            <a href="#contact" className="text-gray-900 hover:text-health-600 block px-3 py-2 rounded-md text-base font-medium">
+              Contact
+            </a>
+          </div>
+          {user ? (
+            <div className="pt-4 pb-3 border-t border-gray-200">
+              <div className="mt-3 px-2 space-y-1">
+                <button
+                  onClick={handleLogout}
+                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-900 hover:text-health-600"
+                >
+                  Logout
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="pt-4 pb-3 border-t border-gray-200">
+              <div className="mt-3 px-2 space-y-1">
+                <Link
+                  to="/login"
+                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-900 hover:text-health-600"
+                >
+                  Login
+                </Link>
+                <Link
+                  to="/register"
+                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-900 hover:text-health-600"
+                >
+                  Register
+                </Link>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </nav>

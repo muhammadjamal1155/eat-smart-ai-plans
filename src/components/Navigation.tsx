@@ -1,7 +1,8 @@
+
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { Utensils, User, LogOut } from 'lucide-react';
+import { Utensils, User, LogOut, Menu, X } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,15 +13,10 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Button } from './ui/button';
 
-interface NavLink {
-  href: string;
-  label: string;
-  isHashLink?: boolean;
-}
-
 const Navigation = () => {
   const { user, logout } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const location = useLocation();
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -34,31 +30,110 @@ const Navigation = () => {
     }
   };
 
+  const handleHashScroll = (hashId: string) => {
+    // Only scroll to hash if we're on the home page
+    if (location.pathname === '/') {
+      const element = document.querySelector(hashId);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  };
+
+  const isActivePath = (path: string) => {
+    return location.pathname === path;
+  };
+
   return (
     <nav className="bg-white shadow-lg fixed w-full z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <div className="flex-shrink-0 flex items-center">
-              <Utensils className="h-8 w-8 text-health-600" />
-              <span className="ml-2 text-xl font-bold text-gray-900">NutriPlan</span>
+              <Link to="/" className="flex items-center">
+                <Utensils className="h-8 w-8 text-health-600" />
+                <span className="ml-2 text-xl font-bold text-gray-900">NutriPlan</span>
+              </Link>
             </div>
             <div className="hidden md:ml-6 md:flex md:space-x-8">
-              <a href="#dashboard" className="text-gray-900 hover:text-health-600 px-3 py-2 text-sm font-medium">
-                Dashboard
-              </a>
-              <a href="#meal-plans" className="text-gray-900 hover:text-health-600 px-3 py-2 text-sm font-medium">
-                Meal Plans
-              </a>
-              <a href="#insights" className="text-gray-900 hover:text-health-600 px-3 py-2 text-sm font-medium">
-                AI Insights
-              </a>
-              <a href="#about" className="text-gray-900 hover:text-health-600 px-3 py-2 text-sm font-medium">
+              {user ? (
+                <>
+                  <Link 
+                    to="/dashboard" 
+                    className={`px-3 py-2 text-sm font-medium transition-colors ${
+                      isActivePath('/dashboard') 
+                        ? 'text-health-600 border-b-2 border-health-600' 
+                        : 'text-gray-900 hover:text-health-600'
+                    }`}
+                  >
+                    Dashboard
+                  </Link>
+                  <Link 
+                    to="/meal-plans" 
+                    className={`px-3 py-2 text-sm font-medium transition-colors ${
+                      isActivePath('/meal-plans') 
+                        ? 'text-health-600 border-b-2 border-health-600' 
+                        : 'text-gray-900 hover:text-health-600'
+                    }`}
+                  >
+                    Meal Plans
+                  </Link>
+                  <Link 
+                    to="/insights" 
+                    className={`px-3 py-2 text-sm font-medium transition-colors ${
+                      isActivePath('/insights') 
+                        ? 'text-health-600 border-b-2 border-health-600' 
+                        : 'text-gray-900 hover:text-health-600'
+                    }`}
+                  >
+                    AI Insights
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link 
+                    to="/" 
+                    onClick={() => handleHashScroll('#dashboard')}
+                    className="text-gray-900 hover:text-health-600 px-3 py-2 text-sm font-medium"
+                  >
+                    Features
+                  </Link>
+                  <Link 
+                    to="/" 
+                    onClick={() => handleHashScroll('#meal-plans')}
+                    className="text-gray-900 hover:text-health-600 px-3 py-2 text-sm font-medium"
+                  >
+                    Meal Plans
+                  </Link>
+                  <Link 
+                    to="/" 
+                    onClick={() => handleHashScroll('#insights')}
+                    className="text-gray-900 hover:text-health-600 px-3 py-2 text-sm font-medium"
+                  >
+                    AI Insights
+                  </Link>
+                </>
+              )}
+              <Link 
+                to="/about" 
+                className={`px-3 py-2 text-sm font-medium transition-colors ${
+                  isActivePath('/about') 
+                    ? 'text-health-600 border-b-2 border-health-600' 
+                    : 'text-gray-900 hover:text-health-600'
+                }`}
+              >
                 About
-              </a>
-              <a href="#contact" className="text-gray-900 hover:text-health-600 px-3 py-2 text-sm font-medium">
+              </Link>
+              <Link 
+                to="/contact" 
+                className={`px-3 py-2 text-sm font-medium transition-colors ${
+                  isActivePath('/contact') 
+                    ? 'text-health-600 border-b-2 border-health-600' 
+                    : 'text-gray-900 hover:text-health-600'
+                }`}
+              >
                 Contact
-              </a>
+              </Link>
             </div>
           </div>
 
@@ -73,18 +148,18 @@ const Navigation = () => {
                 <DropdownMenuContent className="w-56" align="end" forceMount>
                   <DropdownMenuLabel>My Account</DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem>
-                    <Link to="/dashboard" className="block px-4 py-2 hover:bg-gray-100">
+                  <DropdownMenuItem asChild>
+                    <Link to="/dashboard" className="w-full cursor-pointer">
                       Dashboard
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <Link to="/meal-plans" className="block px-4 py-2 hover:bg-gray-100">
+                  <DropdownMenuItem asChild>
+                    <Link to="/meal-plans" className="w-full cursor-pointer">
                       Meal Plans
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <Link to="/insights" className="block px-4 py-2 hover:bg-gray-100">
+                  <DropdownMenuItem asChild>
+                    <Link to="/insights" className="w-full cursor-pointer">
                       AI Insights
                     </Link>
                   </DropdownMenuItem>
@@ -97,10 +172,10 @@ const Navigation = () => {
               </DropdownMenu>
             ) : (
               <>
-                <Link to="/login" className="text-gray-900 hover:text-health-600 px-3 py-2 text-sm font-medium">
+                <Link to="/" className="text-gray-900 hover:text-health-600 px-3 py-2 text-sm font-medium">
                   Login
                 </Link>
-                <Link to="/register" className="btn-primary px-4 py-2 text-sm font-medium rounded-md">
+                <Link to="/" className="btn-primary px-4 py-2 text-sm font-medium rounded-md">
                   Register
                 </Link>
               </>
@@ -116,40 +191,119 @@ const Navigation = () => {
               aria-expanded={isMobileMenuOpen}
             >
               <span className="sr-only">Open main menu</span>
-              <svg className={`${isMobileMenuOpen ? 'hidden' : 'block'} h-6 w-6`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-              <svg className={`${isMobileMenuOpen ? 'block' : 'hidden'} h-6 w-6`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              {isMobileMenuOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
             </button>
           </div>
         </div>
         
-        <div className={`${isMobileMenuOpen ? 'block' : 'none'} md:hidden`} id="mobile-menu">
+        <div className={`${isMobileMenuOpen ? 'block' : 'hidden'} md:hidden`} id="mobile-menu">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-            <a href="#dashboard" className="text-gray-900 hover:text-health-600 block px-3 py-2 rounded-md text-base font-medium">
-              Dashboard
-            </a>
-            <a href="#meal-plans" className="text-gray-900 hover:text-health-600 block px-3 py-2 rounded-md text-base font-medium">
-              Meal Plans
-            </a>
-            <a href="#insights" className="text-gray-900 hover:text-health-600 block px-3 py-2 rounded-md text-base font-medium">
-              AI Insights
-            </a>
-            <a href="#about" className="text-gray-900 hover:text-health-600 block px-3 py-2 rounded-md text-base font-medium">
+            {user ? (
+              <>
+                <Link 
+                  to="/dashboard" 
+                  className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+                    isActivePath('/dashboard') 
+                      ? 'text-health-600 bg-health-50' 
+                      : 'text-gray-900 hover:text-health-600 hover:bg-gray-50'
+                  }`}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Dashboard
+                </Link>
+                <Link 
+                  to="/meal-plans" 
+                  className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+                    isActivePath('/meal-plans') 
+                      ? 'text-health-600 bg-health-50' 
+                      : 'text-gray-900 hover:text-health-600 hover:bg-gray-50'
+                  }`}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Meal Plans
+                </Link>
+                <Link 
+                  to="/insights" 
+                  className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+                    isActivePath('/insights') 
+                      ? 'text-health-600 bg-health-50' 
+                      : 'text-gray-900 hover:text-health-600 hover:bg-gray-50'
+                  }`}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  AI Insights
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link 
+                  to="/" 
+                  onClick={() => {
+                    handleHashScroll('#dashboard');
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="text-gray-900 hover:text-health-600 hover:bg-gray-50 block px-3 py-2 rounded-md text-base font-medium"
+                >
+                  Features
+                </Link>
+                <Link 
+                  to="/" 
+                  onClick={() => {
+                    handleHashScroll('#meal-plans');
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="text-gray-900 hover:text-health-600 hover:bg-gray-50 block px-3 py-2 rounded-md text-base font-medium"
+                >
+                  Meal Plans
+                </Link>
+                <Link 
+                  to="/" 
+                  onClick={() => {
+                    handleHashScroll('#insights');
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="text-gray-900 hover:text-health-600 hover:bg-gray-50 block px-3 py-2 rounded-md text-base font-medium"
+                >
+                  AI Insights
+                </Link>
+              </>
+            )}
+            <Link 
+              to="/about" 
+              className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+                isActivePath('/about') 
+                  ? 'text-health-600 bg-health-50' 
+                  : 'text-gray-900 hover:text-health-600 hover:bg-gray-50'
+              }`}
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
               About
-            </a>
-            <a href="#contact" className="text-gray-900 hover:text-health-600 block px-3 py-2 rounded-md text-base font-medium">
+            </Link>
+            <Link 
+              to="/contact" 
+              className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+                isActivePath('/contact') 
+                  ? 'text-health-600 bg-health-50' 
+                  : 'text-gray-900 hover:text-health-600 hover:bg-gray-50'
+              }`}
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
               Contact
-            </a>
+            </Link>
           </div>
           {user ? (
             <div className="pt-4 pb-3 border-t border-gray-200">
               <div className="mt-3 px-2 space-y-1">
                 <button
-                  onClick={handleLogout}
-                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-900 hover:text-health-600"
+                  onClick={() => {
+                    handleLogout();
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-900 hover:text-health-600 hover:bg-gray-50 w-full text-left"
                 >
                   Logout
                 </button>
@@ -159,14 +313,16 @@ const Navigation = () => {
             <div className="pt-4 pb-3 border-t border-gray-200">
               <div className="mt-3 px-2 space-y-1">
                 <Link
-                  to="/login"
-                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-900 hover:text-health-600"
+                  to="/"
+                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-900 hover:text-health-600 hover:bg-gray-50"
+                  onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Login
                 </Link>
                 <Link
-                  to="/register"
-                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-900 hover:text-health-600"
+                  to="/"
+                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-900 hover:text-health-600 hover:bg-gray-50"
+                  onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Register
                 </Link>

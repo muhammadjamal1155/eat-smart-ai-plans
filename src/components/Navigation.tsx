@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -88,6 +87,16 @@ const Navigation = () => {
                   >
                     AI Insights
                   </Link>
+                  <Link 
+                    to="/analytics" 
+                    className={`px-3 py-2 text-sm font-medium transition-colors ${
+                      isActivePath('/analytics') 
+                        ? 'text-health-600 border-b-2 border-health-600' 
+                        : 'text-gray-900 hover:text-health-600'
+                    }`}
+                  >
+                    Analytics
+                  </Link>
                 </>
               ) : (
                 <>
@@ -163,6 +172,11 @@ const Navigation = () => {
                       AI Insights
                     </Link>
                   </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/analytics" className="w-full cursor-pointer">
+                      Analytics
+                    </Link>
+                  </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
                     Logout
@@ -236,6 +250,17 @@ const Navigation = () => {
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   AI Insights
+                </Link>
+                <Link 
+                  to="/analytics" 
+                  className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+                    isActivePath('/analytics') 
+                      ? 'text-health-600 bg-health-50' 
+                      : 'text-gray-900 hover:text-health-600 hover:bg-gray-50'
+                  }`}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Analytics
                 </Link>
               </>
             ) : (

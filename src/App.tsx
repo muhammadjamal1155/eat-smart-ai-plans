@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { Toaster } from '@/components/ui/toaster';
+import ErrorBoundary from '@/components/ErrorBoundary';
 import Index from '@/pages/Index';
 import Dashboard from '@/pages/Dashboard';
 import MealPlans from '@/pages/MealPlans';
@@ -15,28 +16,30 @@ import '@/App.css';
 
 function App() {
   return (
-    <ThemeProvider defaultTheme="system" storageKey="nutriplan-theme">
-      <AuthProvider>
-        <Router>
-          <div className="App">
-            <a href="#main-content" className="skip-link">
-              Skip to main content
-            </a>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/meal-plans" element={<MealPlans />} />
-              <Route path="/insights" element={<Insights />} />
-              <Route path="/analytics" element={<Analytics />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-            <Toaster />
-          </div>
-        </Router>
-      </AuthProvider>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider defaultTheme="system" storageKey="nutriplan-theme">
+        <AuthProvider>
+          <Router>
+            <div className="App" id="main-content">
+              <a href="#main-content" className="skip-link">
+                Skip to main content
+              </a>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/meal-plans" element={<MealPlans />} />
+                <Route path="/insights" element={<Insights />} />
+                <Route path="/analytics" element={<Analytics />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+              <Toaster />
+            </div>
+          </Router>
+        </AuthProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 }
 

@@ -1,24 +1,25 @@
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
-import { Calendar, User, BarChart, ArrowUp, ArrowDown } from 'lucide-react';
+import React, { memo, useMemo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import NutritionChart from './NutritionChart';
 import QuickActions from './QuickActions';
+import NutritionTargets from './dashboard/NutritionTargets';
+import ProfileSummary from './dashboard/ProfileSummary';
+import RecommendedFoods from './dashboard/RecommendedFoods';
+import AchievementCard from './dashboard/AchievementCard';
+import ErrorBoundary from './ErrorBoundary';
 
-const DashboardSection = () => {
+const DashboardSection = memo(() => {
   const { user } = useAuth();
 
-  const nutritionTargets = [
+  const nutritionTargets = useMemo(() => [
     { name: 'Calories', current: 1680, target: 2000, unit: 'kcal', color: 'bg-blue-500' },
-    { name: 'Protein', current: 85, target: 120, unit: 'g', color: 'bg-health-500' },
+    { name: 'Protein', current: 85, target: 120, unit: 'g', color: 'bg-primary' },
     { name: 'Carbs', current: 180, target: 250, unit: 'g', color: 'bg-orange-500' },
     { name: 'Fats', current: 65, target: 80, unit: 'g', color: 'bg-purple-500' },
-  ];
+  ], []);
 
-  const weeklyData = [
+  const weeklyData = useMemo(() => [
     { day: 'Mon', calories: 1800, protein: 95 },
     { day: 'Tue', calories: 1650, protein: 88 },
     { day: 'Wed', calories: 1900, protein: 102 },
@@ -26,16 +27,16 @@ const DashboardSection = () => {
     { day: 'Fri', calories: 1680, protein: 85 },
     { day: 'Sat', calories: 1820, protein: 98 },
     { day: 'Sun', calories: 1720, protein: 89 },
-  ];
+  ], []);
 
-  const nutritionComparison = [
+  const nutritionComparison = useMemo(() => [
     { nutrient: 'Calories', current: 1680, target: 2000 },
     { nutrient: 'Protein', current: 85, target: 120 },
     { nutrient: 'Carbs', current: 180, target: 250 },
     { nutrient: 'Fats', current: 65, target: 80 },
-  ];
+  ], []);
 
-  const recommendedFoods = [
+  const recommendedFoods = useMemo(() => [
     {
       name: 'Grilled Salmon',
       image: 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?auto=format&fit=crop&w=300&q=80',
@@ -57,167 +58,69 @@ const DashboardSection = () => {
       protein: 20,
       benefits: ['Probiotics', 'Calcium']
     },
-  ];
+  ], []);
 
   return (
-    <section id="dashboard" className="py-20 bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center space-y-4 mb-16">
-          <h2 className="text-4xl font-bold text-gray-900">
-            Your Personal Dashboard
-          </h2>
-          <p className="text-xl text-gray-600">
-            Track your progress and get personalized recommendations
-          </p>
-        </div>
+    <ErrorBoundary>
+      <section id="dashboard" className="py-20 bg-background transition-colors duration-300">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center space-y-4 mb-16 animate-fade-in">
+            <h2 className="text-4xl font-bold text-foreground">
+              Your Personal Dashboard
+            </h2>
+            <p className="text-xl text-muted-foreground">
+              Track your progress and get personalized recommendations
+            </p>
+          </div>
 
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Left Column - Main Content */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Nutrition Targets */}
-            <Card className="shadow-lg border-0">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <BarChart className="w-5 h-5 text-health-600" />
-                  <span>Today's Nutrition Targets</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {nutritionTargets.map((target) => {
-                  const percentage = (target.current / target.target) * 100;
-                  return (
-                    <div key={target.name} className="space-y-2">
-                      <div className="flex justify-between items-center">
-                        <span className="font-medium text-gray-900">{target.name}</span>
-                        <span className="text-sm text-gray-600">
-                          {target.current}/{target.target} {target.unit}
-                        </span>
-                      </div>
-                      <Progress value={percentage} className="h-3" />
-                      <div className="flex justify-between text-xs text-gray-500">
-                        <span>{Math.round(percentage)}% complete</span>
-                        <span>{target.target - target.current} {target.unit} remaining</span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </CardContent>
-            </Card>
+          <div className="grid lg:grid-cols-3 gap-8">
+            {/* Left Column - Main Content */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Nutrition Targets */}
+              <NutritionTargets targets={nutritionTargets} />
 
-            {/* Charts */}
-            <div className="grid md:grid-cols-2 gap-6">
-              <NutritionChart 
-                type="line" 
-                data={weeklyData} 
-                title="Weekly Progress" 
-              />
-              <NutritionChart 
-                type="bar" 
-                data={nutritionComparison} 
-                title="Today vs Targets" 
-              />
+              {/* Charts */}
+              <div className="grid md:grid-cols-2 gap-6">
+                <ErrorBoundary fallback={<div className="p-4 text-center text-muted-foreground">Chart unavailable</div>}>
+                  <NutritionChart 
+                    type="line" 
+                    data={weeklyData} 
+                    title="Weekly Progress" 
+                  />
+                </ErrorBoundary>
+                <ErrorBoundary fallback={<div className="p-4 text-center text-muted-foreground">Chart unavailable</div>}>
+                  <NutritionChart 
+                    type="bar" 
+                    data={nutritionComparison} 
+                    title="Today vs Targets" 
+                  />
+                </ErrorBoundary>
+              </div>
+
+              {/* Recommended Foods */}
+              <RecommendedFoods foods={recommendedFoods} />
             </div>
 
-            {/* Recommended Foods */}
-            <Card className="shadow-lg border-0">
-              <CardHeader>
-                <CardTitle>AI Recommended Foods</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid md:grid-cols-3 gap-4">
-                  {recommendedFoods.map((food) => (
-                    <div key={food.name} className="bg-gray-50 rounded-lg p-4 card-hover">
-                      <img
-                        src={food.image}
-                        alt={food.name}
-                        className="w-full h-32 object-cover rounded-lg mb-3"
-                      />
-                      <h4 className="font-semibold text-gray-900 mb-2">{food.name}</h4>
-                      <div className="flex justify-between text-sm text-gray-600 mb-2">
-                        <span>{food.calories} cal</span>
-                        <span>{food.protein}g protein</span>
-                      </div>
-                      <div className="flex flex-wrap gap-1">
-                        {food.benefits.map((benefit) => (
-                          <Badge key={benefit} variant="secondary" className="text-xs">
-                            {benefit}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+            {/* Right Column - Sidebar */}
+            <div className="space-y-6">
+              {/* Profile Summary */}
+              <ProfileSummary user={user} />
 
-          {/* Right Column - Sidebar */}
-          <div className="space-y-6">
-            {/* Profile Summary */}
-            <Card className="shadow-lg border-0">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <User className="w-5 h-5 text-health-600" />
-                  <span>Profile Summary</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="text-center space-y-2">
-                  <div className="w-16 h-16 bg-health-100 rounded-full flex items-center justify-center mx-auto">
-                    <User className="w-8 h-8 text-health-600" />
-                  </div>
-                  <h3 className="font-semibold text-gray-900">{user?.name || 'Demo User'}</h3>
-                  <p className="text-sm text-gray-600">Goal: {user?.goal?.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Weight Loss'}</p>
-                </div>
-                
-                <div className="space-y-3 pt-4 border-t">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Current Weight</span>
-                    <span className="font-medium">{user?.weight || 70} kg</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Height</span>
-                    <span className="font-medium">{user?.height || 175} cm</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Age</span>
-                    <span className="font-medium">{user?.age || 28} years</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Progress</span>
-                    <div className="flex items-center space-x-1">
-                      <ArrowDown className="w-4 h-4 text-health-600" />
-                      <span className="font-medium text-health-600">2.5 kg</span>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+              {/* Quick Actions */}
+              <ErrorBoundary fallback={<div className="p-4 text-center text-muted-foreground">Quick actions unavailable</div>}>
+                <QuickActions />
+              </ErrorBoundary>
 
-            {/* Quick Actions */}
-            <QuickActions />
-
-            {/* Achievement Card */}
-            <Card className="shadow-lg border-0 bg-health-50">
-              <CardContent className="p-6 text-center space-y-3">
-                <div className="w-12 h-12 bg-health-500 rounded-full flex items-center justify-center mx-auto">
-                  <ArrowUp className="w-6 h-6 text-white" />
-                </div>
-                <h4 className="font-semibold text-health-900">Great Progress!</h4>
-                <p className="text-sm text-health-700">
-                  You're 70% closer to your goal this week. Keep it up!
-                </p>
-                <Button className="w-full btn-primary mt-3">
-                  <Calendar className="w-4 h-4 mr-2" />
-                  Plan Next Week
-                </Button>
-              </CardContent>
-            </Card>
+              {/* Achievement Card */}
+              <AchievementCard />
+            </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </ErrorBoundary>
   );
-};
+});
+
+DashboardSection.displayName = 'DashboardSection';
 
 export default DashboardSection;

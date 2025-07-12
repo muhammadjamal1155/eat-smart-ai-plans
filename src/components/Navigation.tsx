@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Utensils, User, LogOut, Menu, X } from 'lucide-react';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -44,14 +45,14 @@ const Navigation = () => {
   };
 
   return (
-    <nav className="bg-white shadow-lg fixed w-full z-50">
+    <nav className="bg-background/80 backdrop-blur-md shadow-soft border-b border-border fixed w-full z-50 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <div className="flex-shrink-0 flex items-center">
-              <Link to="/" className="flex items-center">
-                <Utensils className="h-8 w-8 text-health-600" />
-                <span className="ml-2 text-xl font-bold text-gray-900">NutriPlan</span>
+              <Link to="/" className="flex items-center interactive">
+                <Utensils className="h-8 w-8 text-primary" />
+                <span className="ml-2 text-xl font-bold text-foreground">NutriPlan</span>
               </Link>
             </div>
             <div className="hidden md:ml-6 md:flex md:space-x-8">
@@ -147,14 +148,15 @@ const Navigation = () => {
           </div>
 
           <div className="hidden md:flex items-center space-x-4">
+            <ThemeToggle />
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                  <Button variant="ghost" className="relative h-8 w-8 rounded-full interactive">
                     <User className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56" align="end" forceMount>
+                <DropdownMenuContent className="w-56 glass-effect shadow-medium" align="end" forceMount>
                   <DropdownMenuLabel>My Account</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
@@ -186,7 +188,7 @@ const Navigation = () => {
               </DropdownMenu>
             ) : (
               <>
-                <Link to="/" className="text-gray-900 hover:text-health-600 px-3 py-2 text-sm font-medium">
+                <Link to="/" className="text-foreground hover:text-primary px-3 py-2 text-sm font-medium interactive">
                   Login
                 </Link>
                 <Link to="/" className="btn-primary px-4 py-2 text-sm font-medium rounded-md">
@@ -200,7 +202,7 @@ const Navigation = () => {
             <button
               onClick={toggleMobileMenu}
               type="button"
-              className="bg-white inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-health-500"
+              className="bg-background inline-flex items-center justify-center p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ring interactive"
               aria-controls="mobile-menu"
               aria-expanded={isMobileMenuOpen}
             >

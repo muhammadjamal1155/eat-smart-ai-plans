@@ -14,13 +14,13 @@ const AuthSection = () => {
   }
 
   return (
-    <section id="auth" className="py-20 bg-gray-50">
+    <section id="auth" className="py-12 md:py-20 bg-muted/50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center space-y-4 mb-12">
-          <h2 className="text-4xl font-bold text-gray-900">
+        <div className="text-center space-y-4 mb-8 md:mb-12">
+          <h2 className="text-3xl sm:text-4xl font-bold text-foreground">
             {isLogin ? 'Sign In to Continue' : 'Start Your Journey'}
           </h2>
-          <p className="text-xl text-gray-600">
+          <p className="text-lg sm:text-xl text-muted-foreground">
             {isLogin 
               ? 'Access your personalized nutrition dashboard' 
               : 'Join thousands improving their health with AI guidance'

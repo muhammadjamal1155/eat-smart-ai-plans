@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Utensils, User, LogOut, Menu, X } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { useIsMobile } from '@/hooks/use-mobile';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,6 +18,7 @@ const Navigation = () => {
   const { user, logout } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const isMobile = useIsMobile();
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -198,11 +200,12 @@ const Navigation = () => {
             )}
           </div>
 
-          <div className="-mr-2 flex md:hidden">
+          <div className="-mr-2 flex md:hidden items-center space-x-2">
+            <ThemeToggle />
             <button
               onClick={toggleMobileMenu}
               type="button"
-              className="bg-background inline-flex items-center justify-center p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ring interactive"
+              className="bg-background inline-flex items-center justify-center p-3 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ring interactive touch-manipulation active:scale-95"
               aria-controls="mobile-menu"
               aria-expanded={isMobileMenuOpen}
             >
@@ -216,16 +219,16 @@ const Navigation = () => {
           </div>
         </div>
         
-        <div className={`${isMobileMenuOpen ? 'block' : 'hidden'} md:hidden`} id="mobile-menu">
-          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+        <div className={`${isMobileMenuOpen ? 'block animate-slide-in-top' : 'hidden'} md:hidden bg-background/95 backdrop-blur-lg border-t border-border`} id="mobile-menu">
+          <div className="px-2 pt-2 pb-3 space-y-2 sm:px-3">
             {user ? (
               <>
                 <Link 
                   to="/dashboard" 
-                  className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+                  className={`block px-4 py-4 rounded-lg text-base font-medium transition-all duration-200 touch-manipulation ${
                     isActivePath('/dashboard') 
-                      ? 'text-health-600 bg-health-50' 
-                      : 'text-gray-900 hover:text-health-600 hover:bg-gray-50'
+                      ? 'text-primary bg-primary/10 shadow-sm' 
+                      : 'text-foreground hover:text-primary hover:bg-accent active:scale-95'
                   }`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >

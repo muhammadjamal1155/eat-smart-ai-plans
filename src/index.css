@@ -204,6 +204,24 @@
     animation: float 3s ease-in-out infinite;
   }
 
+  /* Touch-friendly interactions */
+  .touch-manipulation {
+    touch-action: manipulation;
+  }
+
+  /* Improved focus states for mobile */
+  @media (hover: none) and (pointer: coarse) {
+    .interactive:focus {
+      transform: scale(0.98);
+      transition: transform 0.1s ease;
+    }
+    
+    .btn-primary:active,
+    .btn-secondary:active {
+      transform: scale(0.96);
+    }
+  }
+
   @keyframes float {
     0%, 100% { transform: translateY(0px); }
     50% { transform: translateY(-10px); }

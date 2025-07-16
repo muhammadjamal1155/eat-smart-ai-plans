@@ -1,87 +1,101 @@
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Plus, Camera, Target, TrendingUp } from 'lucide-react';
+import { memo } from 'react';
+import { Plus, Camera, Utensils, Target, Zap } from 'lucide-react';
+import { Button } from './ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { toast } from '@/hooks/use-toast';
 
-const QuickActions = () => {
-  const handleAddMeal = () => {
-    toast({
-      title: "Add Meal",
-      description: "Meal logging feature coming soon!",
-    });
-  };
+const QuickActions = memo(() => {
+  const isMobile = useIsMobile();
 
-  const handleScanFood = () => {
-    toast({
-      title: "Food Scanner",
-      description: "Camera food recognition coming soon!",
-    });
-  };
-
-  const handleSetGoal = () => {
-    toast({
-      title: "Goal Setting",
-      description: "Advanced goal setting coming soon!",
-    });
-  };
-
-  const handleViewTrends = () => {
-    toast({
-      title: "Nutrition Trends",
-      description: "Detailed analytics coming soon!",
-    });
-  };
-
-  const quickStats = [
-    { label: 'Streak', value: '7 days', color: 'bg-green-100 text-green-800' },
-    { label: 'This Week', value: '5/7 goals', color: 'bg-blue-100 text-blue-800' },
-    { label: 'Avg Calories', value: '1,850', color: 'bg-purple-100 text-purple-800' },
+  const actions = [
+    { 
+      icon: Plus, 
+      label: 'Log Meal', 
+      color: 'text-primary',
+      bgColor: 'bg-primary/10',
+      description: 'Add your latest meal',
+      action: () => toast({ title: "Add Meal", description: "Meal logging feature coming soon!" })
+    },
+    { 
+      icon: Camera, 
+      label: 'Scan Food', 
+      color: 'text-green-600',
+      bgColor: 'bg-green-50',
+      description: 'Take a photo to analyze',
+      action: () => toast({ title: "Food Scanner", description: "Camera food recognition coming soon!" })
+    },
+    { 
+      icon: Utensils, 
+      label: 'Meal Plan', 
+      color: 'text-orange-600',
+      bgColor: 'bg-orange-50',
+      description: 'View today\'s plan',
+      action: () => toast({ title: "Meal Plans", description: "Meal planning feature coming soon!" })
+    },
+    { 
+      icon: Target, 
+      label: 'Set Goal', 
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-50',
+      description: 'Update your targets',
+      action: () => toast({ title: "Goal Setting", description: "Advanced goal setting coming soon!" })
+    },
   ];
 
   return (
-    <Card className="shadow-lg border-0">
-      <CardHeader>
-        <CardTitle className="flex items-center space-x-2">
-          <TrendingUp className="w-5 h-5 text-health-600" />
-          <span>Quick Actions</span>
-        </CardTitle>
+    <Card className="glass-effect hover-scale">
+      <CardHeader className="pb-4">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-lg">Quick Actions</CardTitle>
+          <Zap className="h-5 w-5 text-primary" />
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="grid grid-cols-2 gap-3">
-          <Button onClick={handleAddMeal} className="btn-primary h-12">
-            <Plus className="w-4 h-4 mr-2" />
-            Add Meal
-          </Button>
-          <Button onClick={handleScanFood} variant="outline" className="h-12">
-            <Camera className="w-4 h-4 mr-2" />
-            Scan Food
-          </Button>
-          <Button onClick={handleSetGoal} variant="outline" className="h-12">
-            <Target className="w-4 h-4 mr-2" />
-            Set Goal
-          </Button>
-          <Button onClick={handleViewTrends} variant="outline" className="h-12">
-            <TrendingUp className="w-4 h-4 mr-2" />
-            Trends
-          </Button>
-        </div>
-
-        <div className="pt-4 border-t space-y-3">
-          <h4 className="font-medium text-gray-900">Weekly Stats</h4>
-          <div className="space-y-2">
-            {quickStats.map((stat) => (
-              <div key={stat.label} className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">{stat.label}</span>
-                <Badge className={stat.color}>{stat.value}</Badge>
-              </div>
+        {isMobile ? (
+          // Mobile: Horizontal scrollable actions
+          <div className="flex space-x-3 overflow-x-auto pb-2 -mx-2 px-2">
+            {actions.map((action, index) => (
+              <Button
+                key={index}
+                variant="outline"
+                onClick={action.action}
+                className={`flex-shrink-0 flex flex-col items-center justify-center h-20 w-20 rounded-xl ${action.bgColor} border-none touch-manipulation active:scale-95 transition-all duration-200`}
+              >
+                <action.icon className={`h-6 w-6 ${action.color} mb-1`} />
+                <span className="text-xs font-medium text-center leading-tight">
+                  {action.label}
+                </span>
+              </Button>
             ))}
           </div>
-        </div>
+        ) : (
+          // Desktop: Vertical list
+          <div className="space-y-3">
+            {actions.map((action, index) => (
+              <Button
+                key={index}
+                variant="outline"
+                onClick={action.action}
+                className={`w-full justify-start space-x-3 p-4 h-auto ${action.bgColor} border-none hover-scale`}
+              >
+                <div className={`p-2 rounded-lg ${action.bgColor}`}>
+                  <action.icon className={`h-5 w-5 ${action.color}`} />
+                </div>
+                <div className="text-left">
+                  <div className="font-medium">{action.label}</div>
+                  <div className="text-sm text-muted-foreground">{action.description}</div>
+                </div>
+              </Button>
+            ))}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
-};
+});
+
+QuickActions.displayName = 'QuickActions';
 
 export default QuickActions;

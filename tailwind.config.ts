@@ -131,6 +131,10 @@ export default {
 					'0%': { transform: 'translateX(0)' },
 					'100%': { transform: 'translateX(100%)' }
 				},
+				'slide-in-top': {
+					'0%': { transform: 'translateY(-10px)', opacity: '0' },
+					'100%': { transform: 'translateY(0)', opacity: '1' }
+				},
 				'pulse-green': {
 					'0%, 100%': { boxShadow: '0 0 0 0 rgba(34, 197, 94, 0.4)' },
 					'50%': { boxShadow: '0 0 0 10px rgba(34, 197, 94, 0)' }
@@ -163,6 +167,7 @@ export default {
 				'slide-up': 'slide-up 0.5s ease-out',
 				'slide-in-right': 'slide-in-right 0.3s ease-out',
 				'slide-out-right': 'slide-out-right 0.3s ease-out',
+				'slide-in-top': 'slide-in-top 0.3s ease-out',
 				'pulse-green': 'pulse-green 2s infinite',
 				'bounce-gentle': 'bounce-gentle 2s infinite',
 				'wiggle': 'wiggle 1s ease-in-out infinite',

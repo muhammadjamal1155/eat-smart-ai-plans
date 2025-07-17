@@ -7,108 +7,124 @@
 
 @layer base {
   :root {
-    --background: 255 255 255;
-    --foreground: 15 23 42;
+    --background: 248 250 252;
+    --foreground: 30 41 59;
 
     --card: 255 255 255;
-    --card-foreground: 15 23 42;
+    --card-foreground: 30 41 59;
 
     --popover: 255 255 255;
-    --popover-foreground: 15 23 42;
+    --popover-foreground: 30 41 59;
 
-    --primary: 34 197 94;
+    --primary: 59 130 246;
     --primary-foreground: 255 255 255;
 
-    --secondary: 248 250 252;
-    --secondary-foreground: 15 23 42;
+    --secondary: 236 254 255;
+    --secondary-foreground: 30 41 59;
 
-    --muted: 248 250 252;
+    --muted: 241 245 249;
     --muted-foreground: 100 116 139;
 
-    --accent: 240 253 244;
-    --accent-foreground: 15 23 42;
+    --accent: 255 237 213;
+    --accent-foreground: 154 52 18;
 
-    --destructive: 239 68 68;
+    --destructive: 220 38 38;
     --destructive-foreground: 255 255 255;
+
+    --success: 34 197 94;
+    --success-foreground: 255 255 255;
+
+    --warning: 245 158 11;
+    --warning-foreground: 255 255 255;
 
     --border: 226 232 240;
     --input: 226 232 240;
-    --ring: 34 197 94;
+    --ring: 59 130 246;
 
     --radius: 0.75rem;
 
     --sidebar-background: 255 255 255;
-    --sidebar-foreground: 15 23 42;
-    --sidebar-primary: 34 197 94;
+    --sidebar-foreground: 30 41 59;
+    --sidebar-primary: 59 130 246;
     --sidebar-primary-foreground: 255 255 255;
-    --sidebar-accent: 240 253 244;
-    --sidebar-accent-foreground: 15 23 42;
+    --sidebar-accent: 236 254 255;
+    --sidebar-accent-foreground: 30 41 59;
     --sidebar-border: 226 232 240;
-    --sidebar-ring: 34 197 94;
+    --sidebar-ring: 59 130 246;
 
     /* Theme transition */
     --transition-theme: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
     
     /* Enhanced gradients */
-    --gradient-primary: linear-gradient(135deg, 240 253 244, 220 252 231);
-    --gradient-hero: linear-gradient(135deg, 240 253 244 0%, 220 252 231 50%, 187 247 208 100%);
+    --gradient-primary: linear-gradient(135deg, 219 234 254, 147 197 253);
+    --gradient-hero: linear-gradient(135deg, 236 254 255 0%, 219 234 254 50%, 147 197 253 100%);
     --gradient-card: linear-gradient(145deg, 255 255 255, 248 250 252);
+    --gradient-accent: linear-gradient(135deg, 255 237 213, 254 215 170);
     
     /* Enhanced shadows */
-    --shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
-    --shadow-medium: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    --shadow-large: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    --shadow-glow: 0 0 20px rgba(34, 197, 94, 0.15);
+    --shadow-soft: 0 1px 3px rgba(59, 130, 246, 0.1), 0 1px 2px rgba(59, 130, 246, 0.06);
+    --shadow-medium: 0 4px 6px -1px rgba(59, 130, 246, 0.1), 0 2px 4px -1px rgba(59, 130, 246, 0.06);
+    --shadow-large: 0 10px 15px -3px rgba(59, 130, 246, 0.1), 0 4px 6px -2px rgba(59, 130, 246, 0.05);
+    --shadow-glow: 0 0 20px rgba(59, 130, 246, 0.15);
+    --shadow-warm: 0 4px 6px -1px rgba(245, 158, 11, 0.1), 0 2px 4px -1px rgba(245, 158, 11, 0.06);
   }
 
   .dark {
     --background: 15 23 42;
-    --foreground: 248 250 252;
+    --foreground: 241 245 249;
 
     --card: 30 41 59;
-    --card-foreground: 248 250 252;
+    --card-foreground: 241 245 249;
 
     --popover: 30 41 59;
-    --popover-foreground: 248 250 252;
+    --popover-foreground: 241 245 249;
 
-    --primary: 34 197 94;
+    --primary: 96 165 250;
     --primary-foreground: 15 23 42;
 
     --secondary: 51 65 85;
-    --secondary-foreground: 248 250 252;
+    --secondary-foreground: 241 245 249;
 
     --muted: 51 65 85;
     --muted-foreground: 148 163 184;
 
-    --accent: 21 128 61;
-    --accent-foreground: 248 250 252;
+    --accent: 194 120 3;
+    --accent-foreground: 255 255 255;
 
-    --destructive: 220 38 38;
-    --destructive-foreground: 248 250 252;
+    --destructive: 239 68 68;
+    --destructive-foreground: 241 245 249;
+
+    --success: 34 197 94;
+    --success-foreground: 15 23 42;
+
+    --warning: 245 158 11;
+    --warning-foreground: 15 23 42;
 
     --border: 51 65 85;
     --input: 51 65 85;
-    --ring: 34 197 94;
+    --ring: 96 165 250;
 
     --sidebar-background: 30 41 59;
-    --sidebar-foreground: 248 250 252;
-    --sidebar-primary: 34 197 94;
+    --sidebar-foreground: 241 245 249;
+    --sidebar-primary: 96 165 250;
     --sidebar-primary-foreground: 15 23 42;
-    --sidebar-accent: 21 128 61;
-    --sidebar-accent-foreground: 248 250 252;
+    --sidebar-accent: 51 65 85;
+    --sidebar-accent-foreground: 241 245 249;
     --sidebar-border: 51 65 85;
-    --sidebar-ring: 34 197 94;
+    --sidebar-ring: 96 165 250;
 
     /* Dark mode gradients */
-    --gradient-primary: linear-gradient(135deg, 21 128 61, 22 163 74);
+    --gradient-primary: linear-gradient(135deg, 30 58 138, 59 130 246);
     --gradient-hero: linear-gradient(135deg, 15 23 42 0%, 30 41 59 50%, 51 65 85 100%);
     --gradient-card: linear-gradient(145deg, 30 41 59, 51 65 85);
+    --gradient-accent: linear-gradient(135deg, 146 64 14, 194 120 3);
     
     /* Dark mode shadows */
-    --shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
-    --shadow-medium: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
-    --shadow-large: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
-    --shadow-glow: 0 0 20px rgba(34, 197, 94, 0.25);
+    --shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-medium: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+    --shadow-large: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.4);
+    --shadow-glow: 0 0 20px rgba(96, 165, 250, 0.25);
+    --shadow-warm: 0 4px 6px -1px rgba(245, 158, 11, 0.15), 0 2px 4px -1px rgba(245, 158, 11, 0.1);
   }
 }
 
@@ -159,11 +175,15 @@
   }
   
   .btn-primary {
-    @apply bg-primary hover:bg-primary/90 text-primary-foreground font-medium py-3 px-6 rounded-lg transition-all duration-200 hover:shadow-md focus:ring-2 focus:ring-ring focus:ring-offset-2;
+    @apply bg-primary hover:bg-primary/90 text-primary-foreground font-medium py-3 px-6 rounded-lg transition-all duration-200 hover:shadow-md focus:ring-2 focus:ring-ring focus:ring-offset-2 hover:scale-[1.02];
   }
   
   .btn-secondary {
-    @apply bg-secondary hover:bg-secondary/80 text-secondary-foreground border border-border font-medium py-3 px-6 rounded-lg transition-all duration-200 hover:shadow-md focus:ring-2 focus:ring-ring focus:ring-offset-2;
+    @apply bg-secondary hover:bg-secondary/80 text-secondary-foreground border border-border font-medium py-3 px-6 rounded-lg transition-all duration-200 hover:shadow-md focus:ring-2 focus:ring-ring focus:ring-offset-2 hover:scale-[1.02];
+  }
+
+  .btn-accent {
+    @apply bg-accent hover:bg-accent/90 text-accent-foreground font-medium py-3 px-6 rounded-lg transition-all duration-200 hover:shadow-warm focus:ring-2 focus:ring-warning focus:ring-offset-2 hover:scale-[1.02];
   }
 
   /* Enhanced component styles */

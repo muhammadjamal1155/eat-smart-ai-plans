@@ -76,8 +76,8 @@ const RegisterForm = ({ onSwitchToLogin }: { onSwitchToLogin: () => void }) => {
   return (
     <Card className="w-full max-w-md mx-auto">
       <CardHeader className="text-center">
-        <CardTitle className="text-2xl font-bold text-health-600">Join NutriGuide AI</CardTitle>
-        <p className="text-gray-600">Create your personalized nutrition journey</p>
+        <CardTitle className="text-2xl font-bold text-primary">Join NutriGuide AI</CardTitle>
+        <p className="text-muted-foreground">Create your personalized nutrition journey</p>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -185,7 +185,7 @@ const RegisterForm = ({ onSwitchToLogin }: { onSwitchToLogin: () => void }) => {
             </Select>
           </div>
 
-          <Button type="submit" className="w-full btn-primary" disabled={isLoading}>
+          <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? 'Creating Account...' : 'Create Account'}
           </Button>
 
@@ -193,7 +193,7 @@ const RegisterForm = ({ onSwitchToLogin }: { onSwitchToLogin: () => void }) => {
             <button
               type="button"
               onClick={onSwitchToLogin}
-              className="text-sm text-health-600 hover:underline"
+              className="text-sm text-primary hover:underline"
             >
               Already have an account? Sign in
             </button>

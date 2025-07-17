@@ -63,8 +63,8 @@ const LoginForm = ({ onSwitchToRegister }: { onSwitchToRegister: () => void }) =
   return (
     <Card className="w-full max-w-md mx-auto">
       <CardHeader className="text-center">
-        <CardTitle className="text-2xl font-bold text-health-600">Welcome Back</CardTitle>
-        <p className="text-gray-600">Sign in to continue your nutrition journey</p>
+        <CardTitle className="text-2xl font-bold text-primary">Welcome Back</CardTitle>
+        <p className="text-muted-foreground">Sign in to continue your nutrition journey</p>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -98,7 +98,7 @@ const LoginForm = ({ onSwitchToRegister }: { onSwitchToRegister: () => void }) =
             />
           </div>
 
-          <Button type="submit" className="w-full btn-primary" disabled={isLoading}>
+          <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? 'Signing In...' : 'Sign In'}
           </Button>
 
@@ -106,7 +106,7 @@ const LoginForm = ({ onSwitchToRegister }: { onSwitchToRegister: () => void }) =
             <button
               type="button"
               onClick={onSwitchToRegister}
-              className="text-sm text-health-600 hover:underline"
+              className="text-sm text-primary hover:underline"
             >
               Don't have an account? Create one
             </button>

@@ -90,8 +90,8 @@ const Navigation = () => {
                     to="/dashboard" 
                     className={`px-3 py-2 text-sm font-medium transition-colors ${
                       isActivePath('/dashboard') 
-                        ? 'text-health-600 border-b-2 border-health-600' 
-                        : 'text-gray-900 hover:text-health-600'
+                        ? 'text-primary border-b-2 border-primary' 
+                        : 'text-foreground hover:text-primary'
                     }`}
                   >
                     Dashboard
@@ -100,8 +100,8 @@ const Navigation = () => {
                     to="/meal-plans" 
                     className={`px-3 py-2 text-sm font-medium transition-colors ${
                       isActivePath('/meal-plans') 
-                        ? 'text-health-600 border-b-2 border-health-600' 
-                        : 'text-gray-900 hover:text-health-600'
+                        ? 'text-primary border-b-2 border-primary' 
+                        : 'text-foreground hover:text-primary'
                     }`}
                   >
                     Meal Plans
@@ -110,8 +110,8 @@ const Navigation = () => {
                     to="/insights" 
                     className={`px-3 py-2 text-sm font-medium transition-colors ${
                       isActivePath('/insights') 
-                        ? 'text-health-600 border-b-2 border-health-600' 
-                        : 'text-gray-900 hover:text-health-600'
+                        ? 'text-primary border-b-2 border-primary' 
+                        : 'text-foreground hover:text-primary'
                     }`}
                   >
                     AI Insights
@@ -120,8 +120,8 @@ const Navigation = () => {
                     to="/analytics" 
                     className={`px-3 py-2 text-sm font-medium transition-colors ${
                       isActivePath('/analytics') 
-                        ? 'text-health-600 border-b-2 border-health-600' 
-                        : 'text-gray-900 hover:text-health-600'
+                        ? 'text-primary border-b-2 border-primary' 
+                        : 'text-foreground hover:text-primary'
                     }`}
                   >
                     Analytics
@@ -132,21 +132,21 @@ const Navigation = () => {
                   <Link 
                     to="/" 
                     onClick={() => handleHashScroll('#dashboard')}
-                    className="text-gray-900 hover:text-health-600 px-3 py-2 text-sm font-medium"
+                    className="text-foreground hover:text-primary px-3 py-2 text-sm font-medium transition-colors"
                   >
                     Features
                   </Link>
                   <Link 
                     to="/" 
                     onClick={() => handleHashScroll('#meal-plans')}
-                    className="text-gray-900 hover:text-health-600 px-3 py-2 text-sm font-medium"
+                    className="text-foreground hover:text-primary px-3 py-2 text-sm font-medium transition-colors"
                   >
                     Meal Plans
                   </Link>
                   <Link 
                     to="/" 
                     onClick={() => handleHashScroll('#insights')}
-                    className="text-gray-900 hover:text-health-600 px-3 py-2 text-sm font-medium"
+                    className="text-foreground hover:text-primary px-3 py-2 text-sm font-medium transition-colors"
                   >
                     AI Insights
                   </Link>
@@ -156,8 +156,8 @@ const Navigation = () => {
                 to="/about" 
                 className={`px-3 py-2 text-sm font-medium transition-colors ${
                   isActivePath('/about') 
-                    ? 'text-health-600 border-b-2 border-health-600' 
-                    : 'text-gray-900 hover:text-health-600'
+                    ? 'text-primary border-b-2 border-primary' 
+                    : 'text-foreground hover:text-primary'
                 }`}
               >
                 About
@@ -166,8 +166,8 @@ const Navigation = () => {
                 to="/contact" 
                 className={`px-3 py-2 text-sm font-medium transition-colors ${
                   isActivePath('/contact') 
-                    ? 'text-health-600 border-b-2 border-health-600' 
-                    : 'text-gray-900 hover:text-health-600'
+                    ? 'text-primary border-b-2 border-primary' 
+                    : 'text-foreground hover:text-primary'
                 }`}
               >
                 Contact
@@ -262,10 +262,10 @@ const Navigation = () => {
                 </Link>
                 <Link 
                   to="/meal-plans" 
-                  className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+                  className={`block px-4 py-4 rounded-lg text-base font-medium transition-all duration-200 touch-manipulation ${
                     isActivePath('/meal-plans') 
-                      ? 'text-health-600 bg-health-50' 
-                      : 'text-gray-900 hover:text-health-600 hover:bg-gray-50'
+                      ? 'text-primary bg-primary/10 shadow-sm' 
+                      : 'text-foreground hover:text-primary hover:bg-accent active:scale-95'
                   }`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
@@ -273,10 +273,10 @@ const Navigation = () => {
                 </Link>
                 <Link 
                   to="/insights" 
-                  className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+                  className={`block px-4 py-4 rounded-lg text-base font-medium transition-all duration-200 touch-manipulation ${
                     isActivePath('/insights') 
-                      ? 'text-health-600 bg-health-50' 
-                      : 'text-gray-900 hover:text-health-600 hover:bg-gray-50'
+                      ? 'text-primary bg-primary/10 shadow-sm' 
+                      : 'text-foreground hover:text-primary hover:bg-accent active:scale-95'
                   }`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
@@ -284,10 +284,10 @@ const Navigation = () => {
                 </Link>
                 <Link 
                   to="/analytics" 
-                  className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+                  className={`block px-4 py-4 rounded-lg text-base font-medium transition-all duration-200 touch-manipulation ${
                     isActivePath('/analytics') 
-                      ? 'text-health-600 bg-health-50' 
-                      : 'text-gray-900 hover:text-health-600 hover:bg-gray-50'
+                      ? 'text-primary bg-primary/10 shadow-sm' 
+                      : 'text-foreground hover:text-primary hover:bg-accent active:scale-95'
                   }`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
@@ -302,7 +302,7 @@ const Navigation = () => {
                     handleHashScroll('#dashboard');
                     setIsMobileMenuOpen(false);
                   }}
-                  className="text-gray-900 hover:text-health-600 hover:bg-gray-50 block px-3 py-2 rounded-md text-base font-medium"
+                  className="block px-4 py-4 rounded-lg text-base font-medium transition-all duration-200 touch-manipulation text-foreground hover:text-primary hover:bg-accent active:scale-95"
                 >
                   Features
                 </Link>
@@ -312,7 +312,7 @@ const Navigation = () => {
                     handleHashScroll('#meal-plans');
                     setIsMobileMenuOpen(false);
                   }}
-                  className="text-gray-900 hover:text-health-600 hover:bg-gray-50 block px-3 py-2 rounded-md text-base font-medium"
+                  className="block px-4 py-4 rounded-lg text-base font-medium transition-all duration-200 touch-manipulation text-foreground hover:text-primary hover:bg-accent active:scale-95"
                 >
                   Meal Plans
                 </Link>
@@ -322,7 +322,7 @@ const Navigation = () => {
                     handleHashScroll('#insights');
                     setIsMobileMenuOpen(false);
                   }}
-                  className="text-gray-900 hover:text-health-600 hover:bg-gray-50 block px-3 py-2 rounded-md text-base font-medium"
+                  className="block px-4 py-4 rounded-lg text-base font-medium transition-all duration-200 touch-manipulation text-foreground hover:text-primary hover:bg-accent active:scale-95"
                 >
                   AI Insights
                 </Link>
@@ -330,10 +330,10 @@ const Navigation = () => {
             )}
             <Link 
               to="/about" 
-              className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+              className={`block px-4 py-4 rounded-lg text-base font-medium transition-all duration-200 touch-manipulation ${
                 isActivePath('/about') 
-                  ? 'text-health-600 bg-health-50' 
-                  : 'text-gray-900 hover:text-health-600 hover:bg-gray-50'
+                  ? 'text-primary bg-primary/10 shadow-sm' 
+                  : 'text-foreground hover:text-primary hover:bg-accent active:scale-95'
               }`}
               onClick={() => setIsMobileMenuOpen(false)}
             >
@@ -341,10 +341,10 @@ const Navigation = () => {
             </Link>
             <Link 
               to="/contact" 
-              className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+              className={`block px-4 py-4 rounded-lg text-base font-medium transition-all duration-200 touch-manipulation ${
                 isActivePath('/contact') 
-                  ? 'text-health-600 bg-health-50' 
-                  : 'text-gray-900 hover:text-health-600 hover:bg-gray-50'
+                  ? 'text-primary bg-primary/10 shadow-sm' 
+                  : 'text-foreground hover:text-primary hover:bg-accent active:scale-95'
               }`}
               onClick={() => setIsMobileMenuOpen(false)}
             >
@@ -352,32 +352,32 @@ const Navigation = () => {
             </Link>
           </div>
           {user ? (
-            <div className="pt-4 pb-3 border-t border-gray-200">
+            <div className="pt-4 pb-3 border-t border-border">
               <div className="mt-3 px-2 space-y-1">
                 <button
                   onClick={() => {
                     handleLogout();
                     setIsMobileMenuOpen(false);
                   }}
-                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-900 hover:text-health-600 hover:bg-gray-50 w-full text-left"
+                  className="block px-4 py-4 rounded-lg text-base font-medium transition-all duration-200 touch-manipulation text-foreground hover:text-primary hover:bg-accent active:scale-95 w-full text-left"
                 >
                   Logout
                 </button>
               </div>
             </div>
           ) : (
-            <div className="pt-4 pb-3 border-t border-gray-200">
+            <div className="pt-4 pb-3 border-t border-border">
               <div className="mt-3 px-2 space-y-1">
                 <Link
                   to="/"
-                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-900 hover:text-health-600 hover:bg-gray-50"
+                  className="block px-4 py-4 rounded-lg text-base font-medium transition-all duration-200 touch-manipulation text-foreground hover:text-primary hover:bg-accent active:scale-95"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Login
                 </Link>
                 <Link
                   to="/"
-                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-900 hover:text-health-600 hover:bg-gray-50"
+                  className="block px-4 py-4 rounded-lg text-base font-medium transition-all duration-200 touch-manipulation btn-primary"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Register

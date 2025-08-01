@@ -226,7 +226,7 @@ const Navigation = () => {
             )}
           </div>
 
-          <div className="-mr-2 flex md:hidden items-center space-x-2">
+          <div className="flex md:hidden items-center space-x-3 mr-2">
             <ThemeToggle />
             <button
               onClick={toggleMobileMenu}

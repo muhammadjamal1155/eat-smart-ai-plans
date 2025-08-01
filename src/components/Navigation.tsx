@@ -71,7 +71,7 @@ const Navigation = () => {
   };
 
   return (
-    <nav className={`bg-background/80 backdrop-blur-md shadow-soft border-b border-border fixed w-full z-50 transition-all duration-300 ${
+    <nav className={`bg-background/80 backdrop-blur-md shadow-soft border-b border-border fixed top-0 w-full z-50 transition-all duration-300 ${
       isVisible ? 'translate-y-0' : '-translate-y-full'
     }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

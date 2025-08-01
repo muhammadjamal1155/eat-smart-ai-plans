@@ -74,7 +74,7 @@ const Navigation = () => {
     <nav className={`bg-background/80 backdrop-blur-md shadow-soft border-b border-border fixed top-0 w-full z-50 transition-all duration-300 ${
       isVisible ? 'translate-y-0' : '-translate-y-full'
     }`}>
-      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+      <div className="container mx-auto px-4">
         <div className="flex justify-between h-16 items-center">
           <div className="flex items-center">
             <div className="flex-shrink-0 flex items-center">

@@ -125,7 +125,7 @@ const ContactSection = () => {
                   <Mail className="w-5 h-5 text-health-600" />
                   <div>
                     <div className="font-medium text-gray-900">Email</div>
-                    <div className="text-gray-600">support@nutriguide.ai</div>
+                    <div className="text-gray-600">muhammadjamal8698320@gmail.com</div>
                   </div>
                 </div>
                 
@@ -133,7 +133,7 @@ const ContactSection = () => {
                   <Phone className="w-5 h-5 text-health-600" />
                   <div>
                     <div className="font-medium text-gray-900">Phone</div>
-                    <div className="text-gray-600">+1 (555) 123-4567</div>
+                    <div className="text-gray-600">+923225307540</div>
                   </div>
                 </div>
                 
@@ -141,7 +141,7 @@ const ContactSection = () => {
                   <Contact className="w-5 h-5 text-health-600" />
                   <div>
                     <div className="font-medium text-gray-900">Address</div>
-                    <div className="text-gray-600">123 Health Street<br />San Francisco, CA 94105</div>
+                    <div className="text-gray-600">Lahore City<br />Pakistan</div>
                   </div>
                 </div>
               </CardContent>

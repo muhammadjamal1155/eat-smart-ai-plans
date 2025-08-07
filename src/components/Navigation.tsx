@@ -235,14 +235,22 @@ const Navigation = () => {
                     <User className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-40 glass-effect shadow-medium" align="end" forceMount>
+                <DropdownMenuContent className="w-40 bg-background border border-border shadow-medium z-50" align="end" forceMount>
                   <DropdownMenuItem asChild>
-                    <Link to="/" className="w-full cursor-pointer">
+                    <Link 
+                      to="/" 
+                      className="w-full cursor-pointer"
+                      onClick={() => handleHashScroll('#auth')}
+                    >
                       Login
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link to="/" className="w-full cursor-pointer">
+                    <Link 
+                      to="/" 
+                      className="w-full cursor-pointer"
+                      onClick={() => handleHashScroll('#auth')}
+                    >
                       Register
                     </Link>
                   </DropdownMenuItem>

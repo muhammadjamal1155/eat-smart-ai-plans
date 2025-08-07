@@ -228,6 +228,27 @@ const Navigation = () => {
 
           <div className="flex lg:hidden items-center space-x-3 mr-2">
             <ThemeToggle />
+            {!user && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-8 w-8 rounded-full interactive">
+                    <User className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-40 glass-effect shadow-medium" align="end" forceMount>
+                  <DropdownMenuItem asChild>
+                    <Link to="/" className="w-full cursor-pointer">
+                      Login
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/" className="w-full cursor-pointer">
+                      Register
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
             <button
               onClick={toggleMobileMenu}
               type="button"

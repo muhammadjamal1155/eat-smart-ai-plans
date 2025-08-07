@@ -83,7 +83,7 @@ const Navigation = () => {
                 <span className="ml-2 text-xl font-bold text-foreground">NutriPlan</span>
               </Link>
             </div>
-            <div className="hidden md:ml-6 md:flex md:space-x-8">
+            <div className="hidden lg:ml-6 lg:flex lg:space-x-8">
               {user ? (
                 <>
                   <Link 
@@ -175,7 +175,7 @@ const Navigation = () => {
             </div>
           </div>
 
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden lg:flex items-center space-x-4">
             <ThemeToggle />
             {user ? (
               <DropdownMenu>
@@ -226,7 +226,7 @@ const Navigation = () => {
             )}
           </div>
 
-          <div className="flex md:hidden items-center space-x-3 mr-2">
+          <div className="flex lg:hidden items-center space-x-3 mr-2">
             <ThemeToggle />
             <button
               onClick={toggleMobileMenu}
@@ -245,7 +245,7 @@ const Navigation = () => {
           </div>
         </div>
         
-        <div className={`${isMobileMenuOpen ? 'block animate-slide-in-top' : 'hidden'} md:hidden bg-background/95 backdrop-blur-lg border-t border-border`} id="mobile-menu">
+        <div className={`${isMobileMenuOpen ? 'block animate-slide-in-top' : 'hidden'} lg:hidden bg-background/95 backdrop-blur-lg border-t border-border`} id="mobile-menu">
           <div className="px-2 pt-2 pb-3 space-y-2 sm:px-3">
             {user ? (
               <>

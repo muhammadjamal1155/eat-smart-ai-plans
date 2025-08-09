@@ -143,7 +143,7 @@ const Navigation = () => {
                 <>
                   <Link 
                     to="/" 
-                    onClick={() => handleHashScroll('#dashboard')}
+                    onClick={() => handleHashScroll('#features')}
                     className="text-foreground hover:text-primary px-3 py-2 text-sm font-medium transition-colors"
                   >
                     Features
@@ -332,7 +332,7 @@ const Navigation = () => {
                 <Link 
                   to="/" 
                   onClick={() => {
-                    handleHashScroll('#dashboard');
+                    handleHashScroll('#features');
                     setIsMobileMenuOpen(false);
                   }}
                   className="block px-4 py-4 rounded-lg text-base font-medium transition-all duration-200 touch-manipulation text-foreground hover:text-primary hover:bg-accent active:scale-95"

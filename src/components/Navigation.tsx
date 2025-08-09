@@ -44,6 +44,18 @@ const Navigation = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [lastScrollY]);
 
+  // Smoothly scroll to hash anchors after navigation
+  useEffect(() => {
+    if (location.pathname === '/' && location.hash) {
+      const id = decodeURIComponent(location.hash);
+      const el = document.querySelector(id);
+      if (el) {
+        // Defer to ensure the section is rendered before scrolling
+        setTimeout(() => el.scrollIntoView({ behavior: 'smooth' }), 0);
+      }
+    }
+  }, [location]);
+
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
@@ -216,10 +228,10 @@ const Navigation = () => {
               </DropdownMenu>
             ) : (
               <>
-                <Link to="/" className="text-foreground hover:text-primary px-3 py-2 text-sm font-medium interactive">
+                <Link to="/#auth" className="text-foreground hover:text-primary px-3 py-2 text-sm font-medium interactive">
                   Login
                 </Link>
-                <Link to="/" className="btn-primary px-4 py-2 text-sm font-medium rounded-md">
+                <Link to="/#auth" className="btn-primary px-4 py-2 text-sm font-medium rounded-md">
                   Register
                 </Link>
               </>
@@ -237,20 +249,12 @@ const Navigation = () => {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-40 bg-background border border-border shadow-medium z-50" align="end" forceMount>
                   <DropdownMenuItem asChild>
-                    <Link 
-                      to="/" 
-                      className="w-full cursor-pointer"
-                      onClick={() => handleHashScroll('#auth')}
-                    >
+                    <Link to="/#auth" className="w-full cursor-pointer">
                       Login
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link 
-                      to="/" 
-                      className="w-full cursor-pointer"
-                      onClick={() => handleHashScroll('#auth')}
-                    >
+                    <Link to="/#auth" className="w-full cursor-pointer">
                       Register
                     </Link>
                   </DropdownMenuItem>
@@ -398,14 +402,14 @@ const Navigation = () => {
             <div className="pt-4 pb-3 border-t border-border">
               <div className="mt-3 px-2 space-y-1">
                 <Link
-                  to="/"
+                  to="/#auth"
                   className="block px-4 py-4 rounded-lg text-base font-medium transition-all duration-200 touch-manipulation text-foreground hover:text-primary hover:bg-accent active:scale-95"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Login
                 </Link>
                 <Link
-                  to="/"
+                  to="/#auth"
                   className="block px-4 py-4 rounded-lg text-base font-medium transition-all duration-200 touch-manipulation btn-primary"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >

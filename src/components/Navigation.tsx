@@ -228,10 +228,10 @@ const Navigation = () => {
               </DropdownMenu>
             ) : (
               <>
-                <Link to="/#auth" className="text-foreground hover:text-primary px-3 py-2 text-sm font-medium interactive">
+                <Link to="/login" className="text-foreground hover:text-primary px-3 py-2 text-sm font-medium interactive">
                   Login
                 </Link>
-                <Link to="/#auth" className="btn-primary px-4 py-2 text-sm font-medium rounded-md">
+                <Link to="/register" className="btn-primary px-4 py-2 text-sm font-medium rounded-md">
                   Register
                 </Link>
               </>
@@ -249,12 +249,12 @@ const Navigation = () => {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-40 bg-background border border-border shadow-medium z-50" align="end" forceMount>
                   <DropdownMenuItem asChild>
-                    <Link to="/#auth" className="w-full cursor-pointer">
+                    <Link to="/login" className="w-full cursor-pointer">
                       Login
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link to="/#auth" className="w-full cursor-pointer">
+                    <Link to="/register" className="w-full cursor-pointer">
                       Register
                     </Link>
                   </DropdownMenuItem>
@@ -402,14 +402,14 @@ const Navigation = () => {
             <div className="pt-4 pb-3 border-t border-border">
               <div className="mt-3 px-2 space-y-1">
                 <Link
-                  to="/#auth"
+                  to="/login"
                   className="block px-4 py-4 rounded-lg text-base font-medium transition-all duration-200 touch-manipulation text-foreground hover:text-primary hover:bg-accent active:scale-95"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Login
                 </Link>
                 <Link
-                  to="/#auth"
+                  to="/register"
                   className="block px-4 py-4 rounded-lg text-base font-medium transition-all duration-200 touch-manipulation btn-primary"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >

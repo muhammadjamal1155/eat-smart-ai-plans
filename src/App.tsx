@@ -11,10 +11,12 @@ import Insights from '@/pages/Insights';
 import Analytics from '@/pages/Analytics';
 import About from '@/pages/About';
 import Contact from '@/pages/Contact';
+import Account from '@/pages/Account';
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
 import NotFound from '@/pages/NotFound';
 import '@/App.css';
+import ProtectedRoute from '@/components/ProtectedRoute';
 
 function App() {
   return (
@@ -28,10 +30,11 @@ function App() {
               </a>
               <Routes>
                 <Route path="/" element={<Index />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/meal-plans" element={<MealPlans />} />
-                <Route path="/insights" element={<Insights />} />
-                <Route path="/analytics" element={<Analytics />} />
+                <Route path="/account" element={<ProtectedRoute><Account /></ProtectedRoute>} />
+                <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+                <Route path="/meal-plans" element={<ProtectedRoute><MealPlans /></ProtectedRoute>} />
+                <Route path="/insights" element={<ProtectedRoute><Insights /></ProtectedRoute>} />
+                <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
                 <Route path="/about" element={<About />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/login" element={<Login />} />

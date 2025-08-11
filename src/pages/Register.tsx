@@ -1,11 +1,12 @@
 
 import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import RegisterForm from '@/components/RegisterForm';
+import { useAuth } from '@/contexts/AuthContext';
 
-const Register = () => { const navigate = useNavigate();
+const Register = () => { const navigate = useNavigate(); const location = useLocation();
   useEffect(() => {
     document.title = 'Register | NutriPlan';
     const desc = 'Create your NutriPlan account to build meal plans and track nutrition goals.';
@@ -25,7 +26,14 @@ const Register = () => { const navigate = useNavigate();
     }
     canonical.setAttribute('href', `${window.location.origin}/register`);
   }, []);
-
+  const { isAuthenticated } = useAuth();
+  useEffect(() => {
+    if (isAuthenticated) {
+      const state = location.state as { from?: { pathname: string } } | null;
+      const redirectTo = state?.from?.pathname || '/account';
+      navigate(redirectTo, { replace: true });
+    }
+  }, [isAuthenticated, navigate, location]);
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Navigation />

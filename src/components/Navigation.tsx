@@ -142,21 +142,21 @@ const Navigation = () => {
               ) : (
                 <>
                   <Link 
-                    to="/" 
+                    to="/#features" 
                     onClick={() => handleHashScroll('#features')}
                     className="text-foreground hover:text-primary px-3 py-2 text-sm font-medium transition-colors"
                   >
                     Features
                   </Link>
                   <Link 
-                    to="/" 
+                    to="/#meal-plans" 
                     onClick={() => handleHashScroll('#meal-plans')}
                     className="text-foreground hover:text-primary px-3 py-2 text-sm font-medium transition-colors"
                   >
                     Meal Plans
                   </Link>
                   <Link 
-                    to="/" 
+                    to="/#insights" 
                     onClick={() => handleHashScroll('#insights')}
                     className="text-foreground hover:text-primary px-3 py-2 text-sm font-medium transition-colors"
                   >
@@ -330,7 +330,7 @@ const Navigation = () => {
             ) : (
               <>
                 <Link 
-                  to="/" 
+                  to="/#features" 
                   onClick={() => {
                     handleHashScroll('#features');
                     setIsMobileMenuOpen(false);
@@ -340,7 +340,7 @@ const Navigation = () => {
                   Features
                 </Link>
                 <Link 
-                  to="/" 
+                  to="/#meal-plans" 
                   onClick={() => {
                     handleHashScroll('#meal-plans');
                     setIsMobileMenuOpen(false);
@@ -350,7 +350,7 @@ const Navigation = () => {
                   Meal Plans
                 </Link>
                 <Link 
-                  to="/" 
+                  to="/#insights" 
                   onClick={() => {
                     handleHashScroll('#insights');
                     setIsMobileMenuOpen(false);

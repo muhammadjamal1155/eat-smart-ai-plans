@@ -10,7 +10,7 @@ const Footer = () => {
     product: [
       { name: 'Features', href: '/', hash: '#features' },
       { name: 'Meal Plans', href: '/meal-plans', hash: null },
-      { name: 'Analytics', href: '/insights', hash: null },
+      { name: 'Analytics', href: '/analytics', hash: null },
       { name: 'Mobile App', href: '#', hash: null },
     ],
     company: [
@@ -53,7 +53,7 @@ const Footer = () => {
       return (
         <Link
           key={link.name}
-          to={link.href}
+          to={`${link.href}${link.hash}`}
           onClick={() => handleLinkClick(link.href, link.hash)}
           className="text-gray-400 hover:text-white transition-colors duration-200"
         >

@@ -92,7 +92,7 @@ const Navigation = () => {
             <div className="flex-shrink-0 flex items-center">
               <Link to="/" className="flex items-center interactive">
                 <Utensils className="h-8 w-8 text-primary" />
-                <span className="ml-2 text-xl font-bold text-foreground">NutriPlan</span>
+                <span className="ml-2 text-xl font-bold text-foreground">NutriGuide AI</span>
               </Link>
             </div>
             <div className="hidden lg:ml-6 lg:flex lg:space-x-8">
@@ -196,9 +196,14 @@ const Navigation = () => {
                     <User className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56 glass-effect shadow-medium" align="end" forceMount>
+                <DropdownMenuContent className="w-56 bg-background border border-border shadow-medium z-50" align="end" forceMount>
                   <DropdownMenuLabel>My Account</DropdownMenuLabel>
                   <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link to="/account" className="w-full cursor-pointer">
+                      Account Settings
+                    </Link>
+                  </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link to="/dashboard" className="w-full cursor-pointer">
                       Dashboard
@@ -384,9 +389,16 @@ const Navigation = () => {
               Contact
             </Link>
           </div>
-          {user ? (
+           {user ? (
             <div className="pt-4 pb-3 border-t border-border">
               <div className="mt-3 px-2 space-y-1">
+                <Link
+                  to="/account"
+                  className="block px-4 py-4 rounded-lg text-base font-medium transition-all duration-200 touch-manipulation text-foreground hover:text-primary hover:bg-accent active:scale-95"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Account Settings
+                </Link>
                 <button
                   onClick={() => {
                     handleLogout();

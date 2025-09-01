@@ -5,7 +5,7 @@ import Footer from '@/components/Footer';
 
 const MealPlans = () => {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen w-full overflow-x-hidden">
       <Navigation />
       <MealPlanSection />
       <Footer />

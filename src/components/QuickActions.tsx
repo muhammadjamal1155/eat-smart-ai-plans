@@ -54,16 +54,16 @@ const QuickActions = memo(() => {
       </CardHeader>
       <CardContent className="space-y-4">
         {isMobile ? (
-          // Mobile: Horizontal scrollable actions
-          <div className="flex space-x-3 overflow-x-auto pb-2 -mx-2 px-2">
+          // Mobile: Grid layout for better space usage
+          <div className="grid grid-cols-2 gap-3">
             {actions.map((action, index) => (
               <Button
                 key={index}
                 variant="outline"
                 onClick={action.action}
-                className={`flex-shrink-0 flex flex-col items-center justify-center h-20 w-20 rounded-xl ${action.bgColor} border-none touch-manipulation active:scale-95 transition-all duration-200`}
+                className={`flex flex-col items-center justify-center h-20 rounded-xl ${action.bgColor} border-none touch-manipulation active:scale-95 transition-all duration-200`}
               >
-                <action.icon className={`h-6 w-6 ${action.color} mb-1`} />
+                <action.icon className={`h-5 w-5 ${action.color} mb-1`} />
                 <span className="text-xs font-medium text-center leading-tight">
                   {action.label}
                 </span>

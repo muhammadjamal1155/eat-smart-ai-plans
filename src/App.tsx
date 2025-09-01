@@ -24,7 +24,7 @@ function App() {
       <ThemeProvider defaultTheme="system" storageKey="nutriplan-theme">
         <AuthProvider>
           <Router>
-            <div className="App" id="main-content">
+            <div className="App w-full overflow-x-hidden" id="main-content">
               <a href="#main-content" className="skip-link">
                 Skip to main content
               </a>

@@ -31,7 +31,7 @@ const FeaturesSection = () => {
   ];
 
   return (
-    <section id="features" className="scroll-mt-24 md:scroll-mt-28 py-20 bg-white">
+    <section id="features" className="scroll-mt-24 md:scroll-mt-28 py-20 bg-white w-full overflow-x-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center space-y-4 mb-16">
           <h2 className="text-4xl font-bold text-gray-900">

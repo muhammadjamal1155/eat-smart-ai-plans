@@ -11,7 +11,7 @@ const HeroSection = () => {
   };
 
   return (
-    <section id="home" className="hero-gradient min-h-screen flex items-center justify-center pt-16">
+    <section id="home" className="hero-gradient min-h-screen flex items-center justify-center pt-16 w-full overflow-x-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
           {/* Left Content */}
@@ -54,14 +54,14 @@ const HeroSection = () => {
           </div>
 
           {/* Right Content - Hero Image */}
-          <div className="relative animate-scale-in order-1 lg:order-2">
-            <div className="relative">
+          <div className="relative overflow-hidden">
+            <div className="relative animate-scale-in">
               <img
                 src="https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?auto=format&fit=crop&w=800&q=80"
                 alt="Healthy Food Bowl"
                 className="rounded-2xl shadow-large w-full h-64 sm:h-80 lg:h-96 object-cover float-animation"
               />
-              <div className="absolute -bottom-4 -left-4 sm:-bottom-6 sm:-left-6 bg-card rounded-xl p-3 sm:p-4 shadow-glow animate-pulse-green border border-border">
+              <div className="absolute -bottom-2 -left-2 sm:-bottom-4 sm:-left-4 bg-card rounded-xl p-3 sm:p-4 shadow-glow animate-pulse-green border border-border max-w-[calc(100%-1rem)]">
                 <div className="flex items-center space-x-2 sm:space-x-3">
                   <div className="w-10 h-10 sm:w-12 sm:h-12 bg-accent rounded-full flex items-center justify-center">
                     <span className="text-primary font-bold text-sm sm:text-base">AI</span>

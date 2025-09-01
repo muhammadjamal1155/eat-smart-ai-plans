@@ -36,7 +36,7 @@ const AboutSection = () => {
   ];
 
   return (
-    <section id="about" className="py-20 bg-gray-50">
+    <section id="about" className="py-20 bg-gray-50 w-full overflow-x-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center space-y-4 mb-16">
           <h2 className="text-4xl font-bold text-gray-900">
@@ -82,7 +82,7 @@ const AboutSection = () => {
               alt="Scientific Research"
               className="rounded-2xl shadow-2xl w-full h-96 object-cover"
             />
-            <div className="absolute -bottom-6 -left-6 bg-white rounded-xl p-4 shadow-lg">
+            <div className="absolute -bottom-4 -left-4 bg-white rounded-xl p-4 shadow-lg max-w-[calc(100%-2rem)]">
               <div className="text-center space-y-1">
                 <div className="text-2xl font-bold text-health-600">99.2%</div>
                 <div className="text-sm text-gray-600">Accuracy Rate</div>

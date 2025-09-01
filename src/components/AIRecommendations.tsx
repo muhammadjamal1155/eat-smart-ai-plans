@@ -102,10 +102,10 @@ const AIRecommendations = () => {
 
   const getImpactColor = (impact: string) => {
     switch (impact) {
-      case 'high': return 'bg-red-100 text-red-700 border-red-200';
-      case 'medium': return 'bg-yellow-100 text-yellow-700 border-yellow-200';
-      case 'low': return 'bg-green-100 text-green-700 border-green-200';
-      default: return 'bg-gray-100 text-gray-700 border-gray-200';
+      case 'high': return 'bg-destructive/10 text-destructive border-destructive/20';
+      case 'medium': return 'bg-warning/10 text-warning border-warning/20';
+      case 'low': return 'bg-success/10 text-success border-success/20';
+      default: return 'bg-muted text-muted-foreground border-border';
     }
   };
 
@@ -140,23 +140,26 @@ const AIRecommendations = () => {
       </CardHeader>
       <CardContent className="space-y-4">
         {recommendations.map((rec) => (
-          <div key={rec.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
-            <div className="flex justify-between items-start mb-3">
-              <div className="flex items-center space-x-2">
-                {getTypeIcon(rec.type)}
-                <h4 className="font-semibold text-gray-900">{rec.title}</h4>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Badge variant="outline" className={getImpactColor(rec.impact)}>
-                  {rec.impact} impact
+          <div key={rec.id} className="border rounded-lg p-3 hover:shadow-md transition-shadow">
+            <div className="space-y-3">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex items-center space-x-2 min-w-0 flex-1">
+                  {getTypeIcon(rec.type)}
+                  <h4 className="font-semibold text-foreground text-sm truncate">{rec.title}</h4>
+                </div>
+                <Badge variant="outline" className={`${getImpactColor(rec.impact)} text-xs whitespace-nowrap`}>
+                  {rec.impact}
                 </Badge>
+              </div>
+              
+              <div className="flex justify-end">
                 <Badge variant="secondary" className="text-xs">
                   {rec.category}
                 </Badge>
               </div>
             </div>
             
-            <p className="text-gray-600 text-sm mb-3">{rec.description}</p>
+            <p className="text-muted-foreground text-sm mb-3 mt-3">{rec.description}</p>
             
             <Button 
               size="sm" 

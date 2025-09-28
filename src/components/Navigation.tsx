@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/hooks/use-auth';
 import { Utensils, User, LogOut, Menu, X } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { useIsMobile } from '@/hooks/use-mobile';

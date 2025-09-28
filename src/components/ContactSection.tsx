@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
-import { Contact, Mail, MessageSquare, Phone } from 'lucide-react';
+import { Contact, Mail, MessageSquare, Phone, Facebook, Twitter, Instagram, Linkedin } from 'lucide-react';
 
 const ContactSection = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -27,10 +26,10 @@ const ContactSection = () => {
   };
 
   const socialLinks = [
-    { name: 'Facebook', icon: '📘', url: '#' },
-    { name: 'Twitter', icon: '🐦', url: '#' },
-    { name: 'Instagram', icon: '📷', url: '#' },
-    { name: 'LinkedIn', icon: '💼', url: '#' },
+    { name: 'Facebook', icon: Facebook, url: '#' },
+    { name: 'Twitter', icon: Twitter, url: '#' },
+    { name: 'Instagram', icon: Instagram, url: '#' },
+    { name: 'LinkedIn', icon: Linkedin, url: '#' },
   ];
 
   return (
@@ -152,13 +151,16 @@ const ContactSection = () => {
                 <h4 className="font-semibold text-gray-900 mb-4">Follow Us</h4>
                 <div className="grid grid-cols-2 gap-3">
                   {socialLinks.map((social) => (
-                    <button
+                    <a
                       key={social.name}
+                      href={social.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="flex items-center space-x-2 p-3 bg-white rounded-lg hover:bg-gray-50 transition-colors duration-200"
                     >
-                      <span className="text-xl">{social.icon}</span>
+                      <social.icon className="w-5 h-5 text-gray-700" />
                       <span className="text-sm font-medium text-gray-700">{social.name}</span>
-                    </button>
+                    </a>
                   ))}
                 </div>
               </CardContent>

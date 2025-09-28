@@ -94,7 +94,7 @@ const NutritionReports = () => {
         </div>
       </div>
 
-      <Tabs value={selectedPeriod} onValueChange={(value) => setSelectedPeriod(value as any)}>
+      <Tabs value={selectedPeriod} onValueChange={(value) => setSelectedPeriod(value as 'week' | 'month' | 'quarter')}>
         <TabsList>
           <TabsTrigger value="week">This Week</TabsTrigger>
           <TabsTrigger value="month">This Month</TabsTrigger>

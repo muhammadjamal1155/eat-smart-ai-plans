@@ -108,7 +108,7 @@ const ProgressTrends = () => {
         </Button>
       </div>
 
-      <Tabs value={selectedMetric} onValueChange={(value) => setSelectedMetric(value as any)}>
+      <Tabs value={selectedMetric} onValueChange={(value) => setSelectedMetric(value as 'weight' | 'calories' | 'macros')}>
         <TabsList>
           <TabsTrigger value="weight">Weight & Body Composition</TabsTrigger>
           <TabsTrigger value="calories">Calories & Energy</TabsTrigger>

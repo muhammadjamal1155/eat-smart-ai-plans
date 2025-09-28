@@ -1,6 +1,6 @@
 
 import React, { memo, useMemo } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/hooks/use-auth';
 import NutritionChart from './NutritionChart';
 import QuickActions from './QuickActions';
 import NutritionTargets from './dashboard/NutritionTargets';

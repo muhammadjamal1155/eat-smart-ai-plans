@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/hooks/use-auth';
 import RegisterForm from './RegisterForm';
 import LoginForm from './LoginForm';
 

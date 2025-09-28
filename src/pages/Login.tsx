@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import LoginForm from '@/components/LoginForm';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/hooks/use-auth';
 
 const Login = () => { const navigate = useNavigate(); const location = useLocation();
   useEffect(() => {

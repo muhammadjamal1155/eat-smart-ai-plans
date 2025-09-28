@@ -2,7 +2,7 @@
 import { useEffect } from 'react';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/hooks/use-auth';
 import ProfileSummary from '@/components/dashboard/ProfileSummary';
 
 const Account = () => {

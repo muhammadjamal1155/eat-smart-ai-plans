@@ -11,19 +11,19 @@ const Footer = () => {
       { name: 'Features', href: '/', hash: '#features' },
       { name: 'Meal Plans', href: '/meal-plans', hash: null },
       { name: 'Analytics', href: '/analytics', hash: null },
-      { name: 'Mobile App', href: '#', hash: null },
+      { name: 'Mobile App', href: '/mobile-app', hash: null },
     ],
     company: [
       { name: 'About Us', href: '/about', hash: null },
-      { name: 'Careers', href: '#', hash: null },
-      { name: 'Press', href: '#', hash: null },
-      { name: 'Blog', href: '#', hash: null },
+      { name: 'Careers', href: '/careers', hash: null },
+      { name: 'Press', href: '/press', hash: null },
+      { name: 'Blog', href: '/blog', hash: null },
     ],
     support: [
-      { name: 'Help Center', href: '#', hash: null },
+      { name: 'Help Center', href: '/help-center', hash: null },
       { name: 'Contact Us', href: '/contact', hash: null },
-      { name: 'Privacy Policy', href: '#', hash: null },
-      { name: 'Terms of Service', href: '#', hash: null },
+      { name: 'Privacy Policy', href: '/privacy-policy', hash: null },
+      { name: 'Terms of Service', href: '/terms-of-service', hash: null },
     ],
   };
 

@@ -9,7 +9,7 @@ interface ErrorInfo {
 export const useErrorBoundary = () => {
   const [error, setError] = useState<ErrorInfo | null>(null);
 
-  const captureError = useCallback((error: Error, errorInfo?: any) => {
+  const captureError = useCallback((error: Error, errorInfo?: unknown) => {
     const errorData: ErrorInfo = {
       message: error.message,
       stack: error.stack,

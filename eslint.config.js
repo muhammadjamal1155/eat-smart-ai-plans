@@ -24,6 +24,13 @@ export default tseslint.config(
         { allowConstantExport: true },
       ],
       "@typescript-eslint/no-unused-vars": "off",
+      "@typescript-eslint/no-unused-expressions": "off",
+    },
+  },
+  {
+    files: ["src/components/ui/**/*.tsx", "src/components/ThemeProvider.tsx", "src/contexts/AuthContext.tsx"],
+    rules: {
+      "react-refresh/only-export-components": "off",
     },
   }
 );

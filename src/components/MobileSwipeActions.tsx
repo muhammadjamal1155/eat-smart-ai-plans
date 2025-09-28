@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Trash2, Edit3, Star } from 'lucide-react';
 
 interface SwipeAction {
@@ -27,12 +27,12 @@ export const MobileSwipeActions = ({
   const currentX = useRef(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const handleTouchStart = (e: TouchEvent) => {
+  const handleTouchStart = useCallback((e: TouchEvent) => {
     startX.current = e.touches[0].clientX;
     setIsSwipping(true);
-  };
+  }, []);
 
-  const handleTouchMove = (e: TouchEvent) => {
+  const handleTouchMove = useCallback((e: TouchEvent) => {
     if (!isSwipping) return;
     
     currentX.current = e.touches[0].clientX;
@@ -43,9 +43,9 @@ export const MobileSwipeActions = ({
     const limitedDistance = Math.max(-maxDistance, Math.min(maxDistance, distance));
     
     setSwipeDistance(limitedDistance);
-  };
+  }, [isSwipping]);
 
-  const handleTouchEnd = () => {
+  const handleTouchEnd = useCallback(() => {
     const threshold = 30;
     
     if (Math.abs(swipeDistance) > threshold) {
@@ -60,7 +60,7 @@ export const MobileSwipeActions = ({
     // Reset swipe
     setSwipeDistance(0);
     setIsSwipping(false);
-  };
+  }, [swipeDistance, leftActions, rightActions]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -75,7 +75,7 @@ export const MobileSwipeActions = ({
       container.removeEventListener('touchmove', handleTouchMove);
       container.removeEventListener('touchend', handleTouchEnd);
     };
-  }, [isSwipping, swipeDistance]);
+  }, [handleTouchStart, handleTouchMove, handleTouchEnd]);
 
   return (
     <div 

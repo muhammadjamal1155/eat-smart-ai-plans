@@ -4,7 +4,7 @@ import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tool
 
 interface NutritionChartProps {
   type: 'line' | 'bar';
-  data: any[];
+  data: Record<string, unknown>[];
   title: string;
 }
 

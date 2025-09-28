@@ -1,12 +1,25 @@
 
 import { Button } from '@/components/ui/button';
 import { ArrowDown } from 'lucide-react';
+import { useAuth } from '@/hooks/use-auth';
+import { useNavigate } from 'react-router-dom';
 
 const HeroSection = () => {
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+
   const scrollToNext = () => {
     const element = document.querySelector('#features');
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const handleStartJourney = () => {
+    if (isAuthenticated) {
+      navigate('/nutrition-form');
+    } else {
+      navigate('/login', { state: { from: '/nutrition-form' } });
     }
   };
 
@@ -29,7 +42,7 @@ const HeroSection = () => {
             </div>
             
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button size="lg" className="btn-primary text-lg px-8 py-4 interactive touch-manipulation active:scale-95 w-full sm:w-auto">
+              <Button size="lg" className="btn-primary text-lg px-8 py-4 interactive touch-manipulation active:scale-95 w-full sm:w-auto" onClick={handleStartJourney}>
                 Start Your Journey
               </Button>
               <Button size="lg" variant="outline" className="btn-secondary text-lg px-8 py-4 interactive touch-manipulation active:scale-95 w-full sm:w-auto">

@@ -3,6 +3,8 @@ import { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { ThemeProvider } from '@/components/ThemeProvider';
+
+import Chatbot from '@/components/Chatbot';
 import { Toaster } from '@/components/ui/toaster';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import ProtectedRoute from '@/components/ProtectedRoute';
@@ -26,6 +28,7 @@ const Blog = lazy(() => import('@/pages/Blog'));
 const HelpCenter = lazy(() => import('@/pages/HelpCenter'));
 const PrivacyPolicy = lazy(() => import('@/pages/PrivacyPolicy'));
 const TermsOfService = lazy(() => import('@/pages/TermsOfService'));
+const NutritionForm = lazy(() => import('@/pages/NutritionForm'));
 
 function App() {
   return (
@@ -56,10 +59,12 @@ function App() {
                   <Route path="/help-center" element={<HelpCenter />} />
                   <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                   <Route path="/terms-of-service" element={<TermsOfService />} />
+                  <Route path="/nutrition-form" element={<ProtectedRoute><NutritionForm /></ProtectedRoute>} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </Suspense>
               <Toaster />
+              <Chatbot />
             </div>
           </Router>
         </AuthProvider>

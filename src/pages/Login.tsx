@@ -30,7 +30,7 @@ const Login = () => { const navigate = useNavigate(); const location = useLocati
   useEffect(() => {
     if (isAuthenticated) {
       const state = location.state as { from?: { pathname: string } } | null;
-      const redirectTo = state?.from?.pathname || '/account';
+      const redirectTo = (typeof state?.from === 'string' ? state.from : state?.from?.pathname) || '/account';
       navigate(redirectTo, { replace: true });
     }
   }, [isAuthenticated, navigate, location]);

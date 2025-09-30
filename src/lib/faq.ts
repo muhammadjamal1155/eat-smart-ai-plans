@@ -27,8 +27,8 @@ export const faqs: FAQ[] = [
     keywords: ["track", "progress", "dashboard", "analytics"],
   },
   {
-    question: "What if I don\'t like a suggested meal?",
+    question: "What if I don't like a suggested meal?",
     answer: "In your meal plan, you can click on any meal to see alternatives or search for a replacement. Our AI will suggest other meals that fit your nutrition targets.",
-    keywords: ["replace", "change meal", "don\'t like", "alternative"],
+    keywords: ["replace", "change meal", "don't like", "alternative"],
   },
 ];

@@ -25,12 +25,13 @@ interface Meal {
 interface MealSearchDialogProps {
   onSelectMeal: (meal: Meal) => void;
   mealType: 'breakfast' | 'lunch' | 'dinner';
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
-const MealSearchDialog = ({ onSelectMeal, mealType }: MealSearchDialogProps) => {
+const MealSearchDialog = ({ onSelectMeal, mealType, isOpen, onOpenChange }: MealSearchDialogProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('all');
-  const [isOpen, setIsOpen] = useState(false);
 
   const sampleMeals: Meal[] = [
     {
@@ -100,7 +101,7 @@ const MealSearchDialog = ({ onSelectMeal, mealType }: MealSearchDialogProps) => 
 
   const handleSelectMeal = (meal: Meal) => {
     onSelectMeal(meal);
-    setIsOpen(false);
+    onOpenChange(false);
     toast({
       title: "Meal Added",
       description: `${meal.name} has been added to your ${mealType} plan.`,
@@ -108,13 +109,7 @@ const MealSearchDialog = ({ onSelectMeal, mealType }: MealSearchDialogProps) => 
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="sm">
-          <Search className="w-4 h-4 mr-2" />
-          Browse Meals
-        </Button>
-      </DialogTrigger>
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden">
         <DialogHeader>
           <DialogTitle>Choose {mealType} meal</DialogTitle>

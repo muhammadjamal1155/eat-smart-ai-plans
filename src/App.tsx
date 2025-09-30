@@ -29,6 +29,7 @@ const HelpCenter = lazy(() => import('@/pages/HelpCenter'));
 const PrivacyPolicy = lazy(() => import('@/pages/PrivacyPolicy'));
 const TermsOfService = lazy(() => import('@/pages/TermsOfService'));
 const NutritionForm = lazy(() => import('@/pages/NutritionForm'));
+const Reminders = lazy(() => import('@/pages/Reminders'));
 
 function App() {
   return (
@@ -60,6 +61,7 @@ function App() {
                   <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                   <Route path="/terms-of-service" element={<TermsOfService />} />
                   <Route path="/nutrition-form" element={<ProtectedRoute><NutritionForm /></ProtectedRoute>} />
+                  <Route path="/reminders" element={<ProtectedRoute><Reminders /></ProtectedRoute>} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </Suspense>

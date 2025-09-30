@@ -1,13 +1,28 @@
-
-import { useState } from 'react';
+import { useState, useRef, useMemo, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Calendar, Download, Shuffle, ShoppingCart } from 'lucide-react';
+import {
+  Flame, Brain, Fish, Leaf, Search, Printer, Trash2,
+  Save, Share2, Calendar, MoreVertical, ShoppingCart,
+  Loader2, Download, Shuffle, Plus
+} from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import MealPlanCard from './MealPlanCard';
+import MealSearchDialog from './MealSearchDialog';
 import { toast } from '@/hooks/use-toast';
+import {
+  DndContext, DragOverlay, useDraggable, useDroppable,
+  closestCorners, KeyboardSensor, PointerSensor,
+  useSensor, useSensors, DragStartEvent, DragEndEvent
+} from '@dnd-kit/core';
+import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
+// ---------------- Interfaces ----------------
 interface Meal {
   id: string;
   name: string;
@@ -28,44 +43,83 @@ interface DayMeals {
   dinner: Meal | null;
 }
 
+// ---------------- Days ----------------
+const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+// ---------------- Drag Components ----------------
+function DraggableMeal({ meal }: { meal: Meal }) {
+  const { attributes, listeners, setNodeRef, transform } = useDraggable({
+    id: meal.id,
+    data: { meal },
+  });
+  const style = {
+    transform: transform ? `translate(${transform.x}px, ${transform.y}px)` : undefined,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} {...listeners} {...attributes} className="cursor-grab shadow-lg scale-105 rounded-lg overflow-hidden">
+      <MealPlanCard mealType="" meal={meal} onMealChange={() => { }} />
+    </div>
+  );
+}
+
+function DroppableMealSlot({ id, children }: { id: string; children: React.ReactNode }) {
+  const { setNodeRef, isOver } = useDroppable({ id });
+  return (
+    <div ref={setNodeRef} className={`min-h-[150px] border-2 rounded-lg p-2 flex items-center justify-center transition-colors duration-200 ${isOver ? 'border-primary' : 'border-dashed border-gray-300'}`}>
+      {children}
+    </div>
+  );
+}
+
+// ---------------- Initial State ----------------
+const initialWeekMeals: Record<string, DayMeals> = daysOfWeek.reduce((acc, day) => {
+  acc[day] = { breakfast: null, lunch: null, dinner: null };
+  return acc;
+}, {} as Record<string, DayMeals>);
+
+// ---------------- Component ----------------
 const MealPlanSection = () => {
-  const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-  
-  const [weekMeals, setWeekMeals] = useState<Record<string, DayMeals>>({
-    Monday: {
-      breakfast: {
-        id: '1',
-        name: 'Greek Yogurt Parfait',
-        image: 'https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=300&q=80',
-        calories: 320,
-        protein: 20,
-        carbs: 35,
-        fats: 8,
-        cookTime: 5,
-        servings: 1,
-        tags: ['healthy', 'quick', 'vegetarian'],
-        ingredients: ['Greek yogurt', 'Berries', 'Granola', 'Honey']
-      },
-      lunch: null,
-      dinner: null
-    },
-    Tuesday: { breakfast: null, lunch: null, dinner: null },
-    Wednesday: { breakfast: null, lunch: null, dinner: null },
-    Thursday: { breakfast: null, lunch: null, dinner: null },
-    Friday: { breakfast: null, lunch: null, dinner: null },
-    Saturday: { breakfast: null, lunch: null, dinner: null },
-    Sunday: { breakfast: null, lunch: null, dinner: null }
+  const [weekMeals, setWeekMeals] = useState<Record<string, DayMeals>>(() => {
+    try {
+      const saved = localStorage.getItem('weekMeals');
+      return saved ? JSON.parse(saved) : initialWeekMeals;
+    } catch {
+      return initialWeekMeals;
+    }
   });
 
-  const handleMealChange = (day: string, mealType: 'breakfast' | 'lunch' | 'dinner', meal: Meal | null) => {
-    setWeekMeals(prev => ({
-      ...prev,
-      [day]: {
-        ...prev[day],
-        [mealType]: meal
-      }
-    }));
+  const [isBrowseMealsOpen, setIsBrowseMealsOpen] = useState(false);
+  const [activeMealSlot, setActiveMealSlot] = useState<{ day: string; mealType: keyof DayMeals } | null>(null);
+
+  const handleOpenBrowseMeals = (day: string, mealType: keyof DayMeals) => {
+    setActiveMealSlot({ day, mealType });
+    setIsBrowseMealsOpen(true);
   };
+
+  // Save meals to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('weekMeals', JSON.stringify(weekMeals));
+  }, [weekMeals]);
+
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredMeals = useMemo(() => {
+    if (!searchQuery) return weekMeals;
+    const lowercasedQuery = searchQuery.toLowerCase();
+    const filtered = { ...weekMeals };
+
+    for (const day in filtered) {
+      const dayMeals = filtered[day as keyof typeof filtered];
+      for (const mealType in dayMeals) {
+        const meal = dayMeals[mealType as keyof typeof dayMeals];
+        if (meal && !meal.name.toLowerCase().includes(lowercasedQuery)) {
+          (filtered[day as keyof typeof filtered])[mealType as keyof DayMeals] = null;
+        }
+      }
+    }
+    return filtered;
+  }, [searchQuery, weekMeals]);
 
   const calculateDailySummary = (dayMeals: DayMeals) => {
     const meals = [dayMeals.breakfast, dayMeals.lunch, dayMeals.dinner].filter(Boolean) as Meal[];
@@ -80,165 +134,232 @@ const MealPlanSection = () => {
     );
   };
 
+  // ---------------- Shopping List ----------------
+  const handleGenerateShoppingList = () => {
+    const ingredients: string[] = [];
+
+    Object.values(weekMeals).forEach(day => {
+      ['breakfast', 'lunch', 'dinner'].forEach(type => {
+        const meal = day[type as keyof DayMeals];
+        if (meal) {
+          ingredients.push(...meal.ingredients);
+        }
+      });
+    });
+
+    if (ingredients.length === 0) {
+      toast({
+        title: "No Meals Selected",
+        description: "Add meals to generate a shopping list.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: "Shopping List Generated",
+      description: `You have ${ingredients.length} items in your shopping list.`,
+    });
+
+    console.log("Shopping List:", ingredients);
+  };
+
+  // ---------------- PDF Download ----------------
+  const [isDownloading, setIsDownloading] = useState(false);
+  const mealPlanRef = useRef<HTMLDivElement>(null);
+
   const handleDownloadPlan = () => {
+    if (!mealPlanRef.current) return;
+
+    setIsDownloading(true);
     toast({
       title: "Download Started",
       description: "Your meal plan PDF is being generated...",
     });
-  };
 
-  const handleGenerateNewPlan = () => {
-    toast({
-      title: "New Plan Generated",
-      description: "AI has created a new personalized meal plan for you!",
+    html2canvas(mealPlanRef.current, { scale: 2 }).then((canvas) => {
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.save('meal-plan.pdf');
+      setIsDownloading(false);
     });
   };
 
-  const handleGenerateShoppingList = () => {
-    toast({
-      title: "Shopping List Ready",
-      description: "Your grocery list has been generated based on your meal plan.",
-    });
+  // ---------------- Share ----------------
+  const handleSharePlan = async () => {
+    if (!mealPlanRef.current) return;
+
+    try {
+      const canvas = await html2canvas(mealPlanRef.current, { scale: 2 });
+      canvas.toBlob(async (blob) => {
+        if (blob && navigator.share) {
+          const file = new File([blob], 'meal-plan.png', { type: 'image/png' });
+          await navigator.share({
+            title: 'My Meal Plan',
+            text: 'Check out my weekly meal plan from Eat Smart!',
+            files: [file],
+          });
+          toast({
+            title: "Plan Shared",
+            description: "Your meal plan has been shared successfully!",
+          });
+        } else {
+          toast({
+            title: "Share Not Supported",
+            description: "Web Share API is not supported in your browser.",
+            variant: "destructive",
+          });
+        }
+      }, 'image/png');
+    } catch (error) {
+      toast({
+        title: "Error Sharing Plan",
+        description: "Could not share the meal plan. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
+  // ---------------- Drag Logic ----------------
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  const [activeId, setActiveId] = useState<string | null>(null);
+
+  const findContainer = (id: string) => {
+    if (id in weekMeals) return id;
+    for (const day in weekMeals) {
+      for (const mealType in weekMeals[day]) {
+        if (weekMeals[day][mealType as keyof DayMeals]?.id === id) {
+          return `${day}-${mealType}`;
+        }
+      }
+    }
+    return null;
+  };
+
+  const handleDragStart = (event: DragStartEvent) => setActiveId(event.active.id as string);
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over) return;
+
+    const activeContainer = findContainer(active.id);
+    const overContainer = findContainer(over.id);
+    if (!activeContainer || !overContainer || activeContainer === overContainer) return;
+
+    const [fromDay, fromMealType] = activeContainer.split('-');
+    const [toDay, toMealType] = overContainer.split('-');
+
+    setWeekMeals(prev => {
+      const newWeek = { ...prev };
+      const draggedMeal = newWeek[fromDay][fromMealType as keyof DayMeals];
+      newWeek[fromDay] = { ...newWeek[fromDay], [fromMealType]: null };
+      newWeek[toDay] = { ...newWeek[toDay], [toMealType]: draggedMeal };
+      return newWeek;
+    });
+
+    setActiveId(null);
+  };
+  const handleDragCancel = () => setActiveId(null);
+  const activeMeal = activeId ? Object.values(weekMeals).flatMap(day => Object.values(day)).find(meal => meal?.id === activeId) : null;
+
+  const handleMealChange = (day: string, mealType: keyof DayMeals, newMeal: Meal | null) => {
+    setWeekMeals(prevWeekMeals => ({
+      ...prevWeekMeals,
+      [day]: {
+        ...prevWeekMeals[day],
+        [mealType]: newMeal,
+      },
+    }));
+  };
+
+  const handleBrowseMealSelect = (meal: Meal) => {
+    if (activeMealSlot) {
+      handleMealChange(activeMealSlot.day, activeMealSlot.mealType, meal);
+      setActiveMealSlot(null);
+    }
+    setIsBrowseMealsOpen(false);
+  };
+
+  // ---------------- Render ----------------
   return (
-    <section id="meal-plans" className="scroll-mt-24 md:scroll-mt-28 py-20 bg-gray-50 w-full overflow-x-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center space-y-4 mb-16">
-          <h2 className="text-4xl font-bold text-gray-900">
-            Your Personalized Meal Plans
-          </h2>
-          <p className="text-xl text-gray-600">
-            AI-generated meal plans tailored to your goals and preferences
-          </p>
-        </div>
+    <section
+      id="meal-plans"
+      className="scroll-mt-24 md:scroll-mt-28 py-20 bg-gray-50 w-full overflow-x-hidden animate-fade-in"
+      ref={mealPlanRef}
+    >
+      <div className="container mx-auto">
+        <Card>
+          <CardHeader>
+            <CardTitle>Weekly Meal Plan</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex gap-2 mb-4">
+              <Input
+                placeholder="Search meals..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <Button onClick={handleGenerateShoppingList}>
+                <ShoppingCart className="mr-2 h-4 w-4" /> Shopping List
+              </Button>
+              <Button onClick={handleDownloadPlan} disabled={isDownloading}>
+                {isDownloading ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : <Download className="mr-2 h-4 w-4" />}
+                Download
+              </Button>
+              <Button onClick={handleSharePlan}>
+                <Share2 className="mr-2 h-4 w-4" /> Share
+              </Button>
+            </div>
 
-        <div className="grid lg:grid-cols-4 gap-8">
-          <div className="lg:col-span-3">
-            <Card className="shadow-2xl border-0">
-              <CardHeader className="bg-health-500 text-white rounded-t-lg">
-                <div className="flex justify-between items-center">
-                  <CardTitle className="flex items-center space-x-2">
-                    <Calendar className="w-5 h-5" />
-                    <span>This Week's Meal Plan</span>
-                  </CardTitle>
-                  <div className="flex gap-2">
-                    <Button variant="secondary" size="sm" onClick={handleGenerateShoppingList}>
-                      <ShoppingCart className="w-4 h-4 mr-2" />
-                      Shopping List
-                    </Button>
-                    <Button variant="secondary" size="sm" onClick={handleDownloadPlan}>
-                      <Download className="w-4 h-4 mr-2" />
-                      Download PDF
-                    </Button>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="p-6">
-                <Tabs defaultValue="Monday" className="w-full">
-                  <TabsList className="grid grid-cols-7 mb-6">
-                    {days.map((day) => (
-                      <TabsTrigger key={day} value={day} className="text-xs">
-                        {day.slice(0, 3)}
-                      </TabsTrigger>
+            {daysOfWeek.map((day) => {
+              const summary = calculateDailySummary(filteredMeals[day]);
+              return (
+                <div key={day} className="mb-6">
+                  <h3 className="font-semibold text-lg mb-2">{day}</h3>
+                  <div className="grid grid-cols-3 gap-4">
+                    {['breakfast', 'lunch', 'dinner'].map((mealType) => (
+                      <DroppableMealSlot key={mealType} id={`${day}-${mealType}`}>
+                        {filteredMeals[day]?.[mealType as keyof DayMeals] ? (
+                          <MealPlanCard
+                            mealType={mealType}
+                            meal={filteredMeals[day][mealType as keyof DayMeals]!}
+                            onMealChange={(newMeal) => handleMealChange(day, mealType as keyof DayMeals, newMeal)}
+                          />
+                        ) : (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleOpenBrowseMeals(day, mealType as keyof DayMeals)}
+                            className="w-full h-full flex flex-col items-center justify-center text-gray-500 hover:text-primary"
+                          >
+                            <Plus className="w-5 h-5 mb-1" />
+                            Add {mealType}
+                          </Button>
+                        )}
+                      </DroppableMealSlot>
                     ))}
-                  </TabsList>
-
-                  {days.map((day) => {
-                    const dayMeals = weekMeals[day];
-                    const summary = calculateDailySummary(dayMeals);
-                    
-                    return (
-                      <TabsContent key={day} value={day} className="space-y-6">
-                        <div className="grid md:grid-cols-3 gap-6">
-                          <MealPlanCard
-                            mealType="breakfast"
-                            meal={dayMeals.breakfast}
-                            onMealChange={(meal) => handleMealChange(day, 'breakfast', meal)}
-                          />
-                          <MealPlanCard
-                            mealType="lunch"
-                            meal={dayMeals.lunch}
-                            onMealChange={(meal) => handleMealChange(day, 'lunch', meal)}
-                          />
-                          <MealPlanCard
-                            mealType="dinner"
-                            meal={dayMeals.dinner}
-                            onMealChange={(meal) => handleMealChange(day, 'dinner', meal)}
-                          />
-                        </div>
-                        
-                        <div className="bg-health-50 rounded-lg p-4">
-                          <h4 className="font-semibold text-gray-900 mb-2">Daily Summary</h4>
-                          <div className="grid grid-cols-4 gap-4 text-center">
-                            <div>
-                              <div className="text-lg font-bold text-health-600">{summary.calories}</div>
-                              <div className="text-xs text-gray-600">Total Calories</div>
-                            </div>
-                            <div>
-                              <div className="text-lg font-bold text-health-600">{summary.protein}g</div>
-                              <div className="text-xs text-gray-600">Protein</div>
-                            </div>
-                            <div>
-                              <div className="text-lg font-bold text-health-600">{summary.carbs}g</div>
-                              <div className="text-xs text-gray-600">Carbs</div>
-                            </div>
-                            <div>
-                              <div className="text-lg font-bold text-health-600">{summary.fats}g</div>
-                              <div className="text-xs text-gray-600">Fats</div>
-                            </div>
-                          </div>
-                        </div>
-                      </TabsContent>
-                    );
-                  })}
-                </Tabs>
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="space-y-6">
-            <Card className="shadow-lg border-0">
-              <CardHeader>
-                <CardTitle className="text-lg">Weekly Goals</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Calorie Target</span>
-                    <span className="font-medium">8,050 kcal</span>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Protein Goal</span>
-                    <span className="font-medium">462g</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Fiber Target</span>
-                    <span className="font-medium">175g</span>
+                  <div className="mt-2 text-sm text-gray-600">
+                    Calories: {summary.calories} | Protein: {summary.protein}g | Carbs: {summary.carbs}g | Fats: {summary.fats}g
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-
-            <Card className="shadow-lg border-0 bg-blue-50">
-              <CardContent className="p-6 space-y-3">
-                <h4 className="font-semibold text-blue-900">Meal Prep Tips</h4>
-                <ul className="text-sm text-blue-800 space-y-1">
-                  <li>• Prep quinoa in batches</li>
-                  <li>• Pre-cut vegetables Sunday</li>
-                  <li>• Marinate proteins overnight</li>
-                  <li>• Use glass containers for storage</li>
-                </ul>
-              </CardContent>
-            </Card>
-
-            <Button className="w-full btn-primary" onClick={handleGenerateNewPlan}>
-              <Shuffle className="w-4 h-4 mr-2" />
-              Generate New Plan
-            </Button>
-          </div>
-        </div>
+              );
+            })}
+          </CardContent>
+        </Card>
       </div>
+      <MealSearchDialog
+        isOpen={isBrowseMealsOpen}
+        onOpenChange={setIsBrowseMealsOpen}
+        onSelectMeal={handleBrowseMealSelect}
+        mealType={activeMealSlot?.mealType || 'breakfast'}
+      />
     </section>
   );
 };

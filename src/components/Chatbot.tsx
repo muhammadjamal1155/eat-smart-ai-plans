@@ -37,7 +37,7 @@ export default function Chatbot() {
     setMessages((prev) => [...prev, userMessage]);
 
     const lowerCaseInput = text.toLowerCase();
-    let botResponse: Message = {
+    const botResponse: Message = {
       sender: 'bot',
       text: "I'm sorry, I can't answer that yet. Please try asking another question or contact our support team.",
     };

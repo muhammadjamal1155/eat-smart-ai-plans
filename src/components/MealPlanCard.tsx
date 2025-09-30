@@ -61,7 +61,7 @@ const MealPlanCard = ({ mealType, meal, onMealChange }: MealPlanCardProps) => {
   }
 
   return (
-    <Card className="h-full hover:shadow-lg transition-shadow">
+    <Card className="h-full group hover:scale-[1.02] transition-transform duration-200 ease-out animate-in fade-in slide-in-from-bottom-2">
       <CardContent className="p-4 h-full">
         <div className="space-y-3">
           <div className="flex justify-between items-center">

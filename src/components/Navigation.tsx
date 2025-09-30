@@ -162,6 +162,16 @@ const Navigation = () => {
                   >
                     AI Insights
                   </Link>
+                  <Link 
+                    to="/help-center" 
+                    className={`px-3 py-2 text-sm font-medium transition-colors ${
+                      isActivePath('/help-center') 
+                        ? 'text-primary border-b-2 border-primary' 
+                        : 'text-foreground hover:text-primary'
+                    }`}
+                  >
+                    Help Center
+                  </Link>
                 </>
               )}
               <Link 
@@ -205,6 +215,11 @@ const Navigation = () => {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
+                    <Link to="/profile" className="w-full cursor-pointer">
+                      Profile
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
                     <Link to="/dashboard" className="w-full cursor-pointer">
                       Dashboard
                     </Link>
@@ -222,6 +237,11 @@ const Navigation = () => {
                   <DropdownMenuItem asChild>
                     <Link to="/analytics" className="w-full cursor-pointer">
                       Analytics
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/settings" className="w-full cursor-pointer">
+                      Settings
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
@@ -377,18 +397,28 @@ const Navigation = () => {
             >
               About
             </Link>
-            <Link 
-              to="/contact" 
-              className={`block px-4 py-4 rounded-lg text-base font-medium transition-all duration-200 touch-manipulation ${
-                isActivePath('/contact') 
-                  ? 'text-primary bg-primary/10 shadow-sm' 
-                  : 'text-foreground hover:text-primary hover:bg-accent active:scale-95'
-              }`}
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Contact
-            </Link>
-          </div>
+                            <Link 
+                              to="/contact" 
+                              className={`block px-4 py-4 rounded-lg text-base font-medium transition-all duration-200 touch-manipulation ${
+                                isActivePath('/contact') 
+                                  ? 'text-primary bg-primary/10 shadow-sm' 
+                                  : 'text-foreground hover:text-primary hover:bg-accent active:scale-95'
+                              }`}
+                              onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                              Contact
+                            </Link>
+                            <Link 
+                              to="/help-center" 
+                              className={`block px-4 py-4 rounded-lg text-base font-medium transition-all duration-200 touch-manipulation ${
+                                isActivePath('/help-center') 
+                                  ? 'text-primary bg-primary/10 shadow-sm' 
+                                  : 'text-foreground hover:text-primary hover:bg-accent active:scale-95'
+                              }`}
+                              onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                              Help Center
+                            </Link>          </div>
            {user ? (
             <div className="pt-4 pb-3 border-t border-border">
               <div className="mt-3 px-2 space-y-1">
@@ -398,6 +428,20 @@ const Navigation = () => {
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Account Settings
+                </Link>
+                <Link
+                  to="/profile"
+                  className="block px-4 py-4 rounded-lg text-base font-medium transition-all duration-200 touch-manipulation text-foreground hover:text-primary hover:bg-accent active:scale-95"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Profile
+                </Link>
+                <Link
+                  to="/settings"
+                  className="block px-4 py-4 rounded-lg text-base font-medium transition-all duration-200 touch-manipulation text-foreground hover:text-primary hover:bg-accent active:scale-95"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Settings
                 </Link>
                 <button
                   onClick={() => {

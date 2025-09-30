@@ -11,19 +11,48 @@ import { Mail, Lock } from 'lucide-react';
 const LoginForm = ({ onSwitchToRegister }: { onSwitchToRegister: () => void }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newEmail = e.target.value;
+    setEmail(newEmail);
+    if (!newEmail.includes('@') || !newEmail.includes('.')) {
+      setEmailError('Please enter a valid email address.');
+    } else {
+      setEmailError('');
+    }
+  };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newPassword = e.target.value;
+    setPassword(newPassword);
+    if (newPassword.length < 6) {
+      setPasswordError('Password must be at least 6 characters long.');
+    } else {
+      setPasswordError('');
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    if (!email || !password) {
-      toast({
-        title: "Error",
-        description: "Please fill in all fields.",
-        variant: "destructive"
-      });
+    // Re-validate on submit to catch any missed errors
+    if (!email.includes('@') || !email.includes('.')) {
+      setEmailError('Please enter a valid email address.');
+      setIsLoading(false);
+      return;
+    }
+    if (password.length < 6) {
+      setPasswordError('Password must be at least 6 characters long.');
+      setIsLoading(false);
+      return;
+    }
+
+    if (emailError || passwordError) {
       setIsLoading(false);
       return;
     }
@@ -77,10 +106,12 @@ const LoginForm = ({ onSwitchToRegister }: { onSwitchToRegister: () => void }) =
               id="email"
               type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={handleEmailChange}
               placeholder="Enter your email"
               required
+              className={emailError ? 'border-destructive' : ''}
             />
+            {emailError && <p className="text-sm text-destructive">{emailError}</p>}
           </div>
 
           <div className="space-y-2">
@@ -92,13 +123,15 @@ const LoginForm = ({ onSwitchToRegister }: { onSwitchToRegister: () => void }) =
               id="password"
               type="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={handlePasswordChange}
               placeholder="Enter your password"
               required
+              className={passwordError ? 'border-destructive' : ''}
             />
+            {passwordError && <p className="text-sm text-destructive">{passwordError}</p>}
           </div>
 
-          <Button type="submit" className="w-full" disabled={isLoading}>
+          <Button type="submit" className="w-full" disabled={isLoading || emailError !== '' || passwordError !== ''}>
             {isLoading ? 'Signing In...' : 'Sign In'}
           </Button>
 

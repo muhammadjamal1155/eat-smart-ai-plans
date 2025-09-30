@@ -94,10 +94,36 @@ const AIRecommendations = () => {
   };
 
   const handleRecommendationAction = (recommendation: Recommendation) => {
-    toast({
-      title: "Action Started",
-      description: `Working on: ${recommendation.title}`,
-    });
+    switch (recommendation.actionText) {
+      case 'View Protein-Rich Meals':
+      case 'Find High-Fiber Foods':
+        toast({
+          title: "Redirecting to Meal Plans",
+          description: `Searching for ${recommendation.actionText.toLowerCase().replace('view ', '').replace('find ', '')}...`,
+        });
+        window.location.href = '/meal-plans'; // Navigate to meal plans page
+        break;
+      case 'Create Prep Plan':
+        toast({
+          title: "Redirecting to Meal Plans",
+          description: "Start building your prep plan!",
+        });
+        window.location.href = '/meal-plans'; // Navigate to meal plans page
+        break;
+      case 'Set Reminders':
+        toast({
+          title: "Navigating to Reminders",
+          description: "Reminder functionality is coming soon!",
+        });
+        window.location.href = '/reminders';
+        break;
+      default:
+        toast({
+          title: "Action Started",
+          description: `Working on: ${recommendation.title}`,
+        });
+        break;
+    }
   };
 
   const getImpactColor = (impact: string) => {

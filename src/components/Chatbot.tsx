@@ -1,152 +1,154 @@
+"use client";
 
-
-import { useState, useRef, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { MessageSquare, Send, X } from 'lucide-react';
-import { faqs, FAQ } from '@/lib/faq';
+import { useState, useRef, useEffect } from "react";
+import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { MessageCircle, Send, X } from "lucide-react";
 
 interface Message {
+  role: "user" | "bot";
   text: string;
-  sender: 'user' | 'bot';
 }
 
-const initialMessages: Message[] = [
-  { sender: 'bot', text: "Hello! I'm the Eat Smart AI assistant. How can I help you today?" },
+const faqs = [
+  { question: "What is my average calorie intake?" },
+  { question: "How much protein do I consume weekly?" },
+  { question: "Show me my water intake this month" },
+  { question: "How many workout days do I have this quarter?" },
+  { question: "What are my personalised meal plans?" },
+  { question: "Give me a nutrition report for today" },
+  { question: "Compare my diet progress this month vs last month" },
 ];
 
 export default function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<Message[]>(initialMessages);
-  const [inputValue, setInputValue] = useState('');
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState("");
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (scrollAreaRef.current) {
-      scrollAreaRef.current.scrollTo({ top: scrollAreaRef.current.scrollHeight, behavior: 'smooth' });
+  // Clear chat when closing
+  const toggleChat = () => {
+    if (isOpen) {
+      setMessages([]);
     }
+    setIsOpen(!isOpen);
+  };
+
+  // Auto-scroll to bottom
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const sendMessage = (text: string) => {
-    if (text.trim() === '') return;
+  const handleSend = (text?: string) => {
+    const userMessage = text || input.trim();
+    if (!userMessage) return;
 
-    const userMessage: Message = { sender: 'user', text };
-    setMessages((prev) => [...prev, userMessage]);
-
-    const lowerCaseInput = text.toLowerCase();
-    const botResponse: Message = {
-      sender: 'bot',
-      text: "I'm sorry, I can't answer that yet. Please try asking another question or contact our support team.",
-    };
-
-    let bestMatch: { faq: FAQ; score: number } | null = null;
-
-    faqs.forEach((faq) => {
-      let score = 0;
-      faq.keywords.forEach((keyword) => {
-        if (lowerCaseInput.includes(keyword)) {
-          score++;
-        }
-      });
-      if (score > 0 && (!bestMatch || score > bestMatch.score)) {
-        bestMatch = { faq, score };
-      }
-    });
-
-    if (bestMatch) {
-      botResponse.text = bestMatch.faq.answer;
-    }
+    setMessages((prev) => [...prev, { role: "user", text: userMessage }]);
+    setInput("");
 
     setTimeout(() => {
-      setMessages((prev) => [...prev, botResponse]);
-    }, 1000);
-
-    setInputValue('');
-  };
-
-  const handleSendMessage = () => {
-    sendMessage(inputValue);
-  };
-
-  const handleOpenChange = (open: boolean) => {
-    setIsOpen(open);
-    if (!open) {
-      setTimeout(() => {
-        setMessages(initialMessages);
-      }, 200);
-    }
+      setMessages((prev) => [
+        ...prev,
+        { role: "bot", text: `Here’s the answer for: "${userMessage}"` },
+      ]);
+    }, 800);
   };
 
   return (
-    <Popover open={isOpen} onOpenChange={handleOpenChange}>
-      <PopoverTrigger asChild>
-        <Button
-          className="fixed bottom-6 right-6 w-16 h-16 rounded-full shadow-lg z-50"
-          size="icon"
+    <div className="fixed bottom-4 right-4 z-50">
+      {/* Chat Toggle Button */}
+      <motion.button
+        onClick={toggleChat}
+        className="bg-blue-600 text-white p-3 rounded-full shadow-lg relative"
+        animate={{ opacity: [1, 0.5, 1] }}
+        transition={{ duration: 1.5, repeat: Infinity }}
+      >
+        {isOpen ? <X size={22} /> : <MessageCircle size={22} />}
+      </motion.button>
+
+      {/* Chat Window */}
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 30 }}
+          className="absolute bottom-16 right-0 w-80 md:w-96"
         >
-          <MessageSquare className="w-8 h-8" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-80 md:w-96 mr-4 p-0" sideOffset={10}>
-        <Card className="flex flex-col h-[400px] overflow-hidden">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Support Chat</CardTitle>
-            <Button variant="ghost" size="icon" onClick={() => handleOpenChange(false)}>
-              <X className="h-4 w-4" />
-            </Button>
-          </CardHeader>
-          <CardContent className="flex-grow p-0 min-h-0">
-            <ScrollArea className="h-full p-4" ref={scrollAreaRef}>
-              <div className="space-y-4">
-                {messages.map((message, index) => (
-                  <div
-                    key={index}
-                    className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-                    <div
-                      className={`max-w-[80%] p-3 rounded-lg break-words ${message.sender === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'
-                        }`}>
-                      {message.text}
+          <Card className="flex flex-col h-[500px] shadow-xl border rounded-2xl">
+            {/* Header */}
+            <div className="bg-blue-600 text-white p-3 rounded-t-2xl font-semibold">
+              NutriGuide AI Assistant
+            </div>
+
+            {/* Messages */}
+            <ScrollArea className="flex-1 p-3 space-y-3">
+              {messages.length === 0 && (
+                <div className="text-gray-500 text-sm mb-3">
+                  👋 Hi! I’m your NutriGuide AI. Ask me about your nutrition,
+                  workouts, or progress.
+                </div>
+              )}
+
+              {messages.map((msg, i) => (
+                <div
+                  key={i}
+                  className={`p-2 max-w-[85%] rounded-xl ${
+                    msg.role === "user"
+                      ? "ml-auto bg-blue-100 text-blue-900"
+                      : "mr-auto bg-gray-100 text-gray-800"
+                  }`}
+                >
+                  {msg.text}
+                </div>
+              ))}
+
+              {/* Default Suggested Questions */}
+              {messages.length === 0 && (
+                <div className="space-y-2 pt-4">
+                  <p className="text-sm text-gray-500">
+                    Try asking one of these:
+                  </p>
+                  <ScrollArea className="max-h-32 pr-2">
+                    <div className="space-y-2">
+                      {faqs.map((faq, i) => (
+                        <Button
+                          key={i}
+                          variant="outline"
+                          size="sm"
+                          className="w-full text-left justify-start whitespace-normal"
+                          onClick={() => handleSend(faq.question)}
+                        >
+                          {faq.question}
+                        </Button>
+                      ))}
                     </div>
-                  </div>
-                ))}
-                {messages.length === 1 && (
-                  <div className="space-y-2 pt-4">
-                    <p className="text-sm text-muted-foreground">Or try one of these questions:</p>
-                    {faqs.slice(0, 3).map((faq) => (
-                      <Button
-                        key={faq.question}
-                        variant="outline"
-                        size="sm"
-                        className="w-full text-left justify-start h-auto whitespace-normal"
-                        onClick={() => sendMessage(faq.question)}
-                      >
-                        {faq.question}
-                      </Button>
-                    ))}
-                  </div>
-                )}
-              </div>
+                  </ScrollArea>
+                </div>
+              )}
+              <div ref={messagesEndRef} />
             </ScrollArea>
-          </CardContent>
-          <CardFooter className="p-4 border-t">
-            <div className="flex w-full items-center space-x-2">
+
+            {/* Input Box */}
+            <div className="flex items-center gap-2 border-t p-3">
               <Input
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                placeholder="Ask a question..."
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Type your question..."
+                onKeyDown={(e) => e.key === "Enter" && handleSend()}
               />
-              <Button onClick={handleSendMessage} size="icon">
-                <Send className="h-4 w-4" />
+              <Button
+                onClick={() => handleSend()}
+                className="bg-blue-600 text-white"
+              >
+                <Send size={18} />
               </Button>
             </div>
-          </CardFooter>
-        </Card>
-      </PopoverContent>
-    </Popover>
+          </Card>
+        </motion.div>
+      )}
+    </div>
   );
 }
-

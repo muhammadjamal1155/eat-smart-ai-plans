@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import Navigation from '@/components/Navigation';
+import Footer from '@/components/Footer';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -203,28 +205,27 @@ const Profile = () => {
     }
   };
 
-  if (!user) {
-    return (
-      <div className="mx-auto flex h-[70vh] max-w-3xl flex-col items-center justify-center gap-6 px-4 text-center">
-        <h1 className="text-3xl font-semibold tracking-tight">Let’s personalise your nutrition</h1>
-        <p className="max-w-xl text-muted-foreground">
-          Sign in to unlock tailored meal plans, calorie targets, and real-time coaching across your
-          NutriGuide account.
-        </p>
-        <div className="flex items-center gap-4">
-          <Button asChild size="lg">
-            <Link to="/login">Sign in</Link>
-          </Button>
-          <Button asChild size="lg" variant="outline">
-            <Link to="/register">Create account</Link>
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:py-14">
+    <div className="min-h-screen w-full overflow-x-hidden">
+      <Navigation />
+      <main className="mx-auto max-w-6xl px-4 pt-28 pb-12 sm:px-6 lg:pt-32 lg:pb-16">
+        {!user ? (
+          <div className="mx-auto flex h-[60vh] max-w-3xl flex-col items-center justify-center gap-6 text-center">
+            <h1 className="text-3xl font-semibold tracking-tight">Let’s personalise your nutrition</h1>
+            <p className="max-w-xl text-muted-foreground">
+              Sign in to unlock tailored meal plans, calorie targets, and real-time coaching across your NutriGuide account.
+            </p>
+            <div className="flex items-center gap-4">
+              <Button asChild size="lg">
+                <Link to="/login">Sign in</Link>
+              </Button>
+              <Button asChild size="lg" variant="outline">
+                <Link to="/register">Create account</Link>
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <>
       <header className="flex flex-col gap-6 rounded-2xl border border-border bg-card/50 p-6 shadow-sm backdrop-blur md:flex-row md:items-center md:justify-between">
         <div className="flex items-center gap-4">
           <Avatar className="h-16 w-16 border border-primary/20">
@@ -614,6 +615,10 @@ const Profile = () => {
           </Card>
         </TabsContent>
       </Tabs>
+          </>
+        )}
+      </main>
+      <Footer />
     </div>
   );
 };

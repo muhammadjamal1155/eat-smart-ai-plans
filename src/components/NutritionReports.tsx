@@ -1,12 +1,15 @@
 import { useState, useRef, useEffect } from "react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Download, Award, Loader2 } from "lucide-react";
+import {
+  Download,
+  Award,
+  Flame,
+  Droplet,
+  Moon,
+  Dumbbell,
+} from "lucide-react";
+import { Loader2 } from "lucide-react";
 import {
   ResponsiveContainer,
   BarChart,
@@ -308,38 +311,90 @@ const NutritionReports = () => {
       ) : (
         <>
           {/* Summary */}
-          <div className="grid md:grid-cols-4 gap-4 mb-6">
-            <Card>
-              <CardContent className="p-4">
-                <p className="text-sm text-gray-600">Avg Calories</p>
-                <p className="text-2xl font-bold">{reportData.summary.avgCalories}</p>
-                <p className="text-xs text-gray-500">Target: {reportData.summary.targetCalories}</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4">
-                <p className="text-sm text-gray-600">Avg Protein</p>
-                <p className="text-2xl font-bold">{reportData.summary.avgProtein}g</p>
-                <p className="text-xs text-gray-500">Target: {reportData.summary.targetProtein}g</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4">
-                <p className="text-sm text-gray-600">Water Intake</p>
-                <p className="text-2xl font-bold">{reportData.summary.waterIntake}%</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4 flex justify-between">
-                <div>
-                  <p className="text-sm text-gray-600">Workout Days</p>
-                  <p className="text-2xl font-bold">
-                    {reportData.summary.workoutDays}/{reportData.summary.targetWorkouts}
-                  </p>
-                </div>
-                <Award className="w-6 h-6 text-green-600" />
-              </CardContent>
-            </Card>
+          <div className="grid gap-4 mb-6 md:grid-cols-2 lg:grid-cols-4">
+            {[
+              {
+                key: "avgCalories",
+                label: "Avg Calories",
+                icon: Flame,
+                formatter: (value: number) => value.toLocaleString(),
+                targetKey: "targetCalories",
+                targetSuffix: "",
+              },
+              {
+                key: "avgProtein",
+                label: "Avg Protein",
+                formatter: (value: number) => `${value}g`,
+                targetKey: "targetProtein",
+                targetSuffix: "g",
+              },
+              {
+                key: "avgCarbs",
+                label: "Avg Carbs",
+                formatter: (value: number) => `${value}g`,
+                targetKey: "targetCarbs",
+                targetSuffix: "g",
+              },
+              {
+                key: "avgFats",
+                label: "Avg Fats",
+                formatter: (value: number) => `${value}g`,
+                targetKey: "targetFats",
+                targetSuffix: "g",
+              },
+              {
+                key: "waterIntake",
+                label: "Hydration",
+                icon: Droplet,
+                formatter: (value: number) => `${value}%`,
+              },
+              {
+                key: "sleepQuality",
+                label: "Sleep Quality",
+                icon: Moon,
+                formatter: (value: number) => `${value}%`,
+              },
+              {
+                key: "workoutDays",
+                label: "Workout Days",
+                icon: Dumbbell,
+                formatter: (_: number, summary: any) =>
+                  `${summary.workoutDays ?? 0}/${summary.targetWorkouts ?? "—"}`,
+              },
+            ]
+              .filter((item) => reportData.summary?.[item.key] !== undefined)
+              .map((item) => {
+                const IconComponent = item.icon ?? Award;
+                const rawValue = reportData.summary[item.key];
+                const displayValue = item.formatter
+                  ? item.formatter(rawValue, reportData.summary)
+                  : rawValue;
+                const targetValue =
+                  item.targetKey && reportData.summary[item.targetKey] !== undefined
+                    ? `${reportData.summary[item.targetKey]}${item.targetSuffix ?? ""}`
+                    : null;
+
+                return (
+                  <Card key={item.key} className="glass-panel shadow-soft">
+                    <CardContent className="p-4 flex items-start justify-between gap-4">
+                      <div>
+                        <p className="text-sm text-muted-foreground">{item.label}</p>
+                        <p className="text-2xl font-bold text-foreground mt-1">{displayValue}</p>
+                        {targetValue && (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Target: {targetValue}
+                          </p>
+                        )}
+                      </div>
+                      {item.icon && (
+                        <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-forest-100 text-forest-600 dark:bg-forest-900/50 dark:text-forest-100">
+                          <IconComponent className="h-5 w-5" />
+                        </span>
+                      )}
+                    </CardContent>
+                  </Card>
+                );
+              })}
           </div>
 
           {/* Charts */}
@@ -353,10 +408,17 @@ const NutritionReports = () => {
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={reportData.dailyBreakdown}>
                       <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="day" />
+                      <XAxis
+                        dataKey="day"
+                        tick={{ fill: 'currentColor', fontSize: 12 }}
+                        tickMargin={8}
+                        tickLine={false}
+                        axisLine={false}
+                        padding={{ left: 16, right: 16 }}
+                      />
                       <YAxis />
                       <Tooltip content={<CustomTooltip />} />
-                      <Bar dataKey="score" fill="#10B981" />
+                      <Bar dataKey="score" fill="#10B981" barSize={40} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>

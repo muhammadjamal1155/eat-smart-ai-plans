@@ -174,7 +174,14 @@ const ProgressTrends = () => {
                 <ResponsiveContainer width="100%" height={300}>
                   <LineChart data={weightTrend}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" />
+                    <XAxis
+                      dataKey="date"
+                      tick={{ fill: 'currentColor', fontSize: 12 }}
+                      tickMargin={8}
+                      tickLine={false}
+                      axisLine={false}
+                      padding={{ left: 16, right: 16 }}
+                    />
                     <YAxis />
                     <Tooltip content={<CustomTooltip />} />
                     <Legend />
@@ -197,7 +204,14 @@ const ProgressTrends = () => {
                 <ResponsiveContainer width="100%" height={300}>
                   <AreaChart data={caloriesTrend}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" />
+                    <XAxis
+                      dataKey="date"
+                      tick={{ fill: 'currentColor', fontSize: 12 }}
+                      tickMargin={8}
+                      tickLine={false}
+                      axisLine={false}
+                      padding={{ left: 16, right: 16 }}
+                    />
                     <YAxis />
                     <Tooltip content={<CustomTooltip />} />
                     <Legend />
@@ -219,7 +233,14 @@ const ProgressTrends = () => {
                 <ResponsiveContainer width="100%" height={300}>
                   <LineChart data={macrosTrend}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" />
+                    <XAxis
+                      dataKey="date"
+                      tick={{ fill: 'currentColor', fontSize: 12 }}
+                      tickMargin={8}
+                      tickLine={false}
+                      axisLine={false}
+                      padding={{ left: 16, right: 16 }}
+                    />
                     <YAxis />
                     <Tooltip content={<CustomTooltip />} />
                     <Legend />

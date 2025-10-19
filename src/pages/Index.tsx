@@ -1,15 +1,10 @@
-
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import Navigation from '@/components/Navigation';
 import HeroSection from '@/components/HeroSection';
-import FeaturesSection from '@/components/FeaturesSection';
-
-
-import MealPlanSection from '@/components/MealPlanSection';
-import InsightsSection from '@/components/InsightsSection';
-import AboutSection from '@/components/AboutSection';
-import ContactSection from '@/components/ContactSection';
+import LandingHighlights from '@/components/LandingHighlights';
+import LandingPreview from '@/components/LandingPreview';
+import LandingCTA from '@/components/LandingCTA';
 import Footer from '@/components/Footer';
 
 const Index = () => {
@@ -30,13 +25,9 @@ const Index = () => {
     <div className="min-h-screen w-full overflow-x-hidden">
       <Navigation />
       <HeroSection />
-      <FeaturesSection />
-      
-
-      <MealPlanSection />
-      <InsightsSection />
-      <AboutSection />
-      <ContactSection />
+      <LandingHighlights />
+      <LandingPreview />
+      <LandingCTA />
       <Footer />
     </div>
   );

@@ -20,14 +20,8 @@ const AnalyticsDashboard = () => {
           </p>
         </div>
 
-        <DashboardSummary />
-
-        <Tabs defaultValue="coach" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 mb-8 bg-background/70 border border-border/60 backdrop-blur-sm">
-            <TabsTrigger value="coach" className="flex items-center gap-2">
-              <Brain className="w-4 h-4" />
-              AI Coach
-            </TabsTrigger>
+        <Tabs defaultValue="reports" className="w-full">
+          <TabsList className="grid w-full grid-cols-3 mb-8">
             <TabsTrigger value="reports" className="flex items-center gap-2">
               <BarChart className="w-4 h-4" />
               Nutrition Reports

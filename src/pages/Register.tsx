@@ -35,7 +35,7 @@ const Register = () => { const navigate = useNavigate(); const location = useLoc
     }
   }, [isAuthenticated, navigate, location]);
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen text-foreground">
       <Navigation />
       <main className="pt-20">
         <section className="py-12 md:py-20">

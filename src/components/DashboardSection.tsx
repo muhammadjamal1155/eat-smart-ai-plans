@@ -62,7 +62,7 @@ const DashboardSection = memo(() => {
 
   return (
     <ErrorBoundary>
-      <section id="dashboard" className="scroll-mt-24 md:scroll-mt-28 py-20 bg-background transition-colors duration-300 w-full overflow-x-hidden">
+      <section id="dashboard" className="scroll-mt-24 md:scroll-mt-28 py-20 relative transition-colors duration-300 w-full overflow-x-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center space-y-4 mb-16 animate-fade-in">
             <h2 className="text-4xl font-bold text-foreground">

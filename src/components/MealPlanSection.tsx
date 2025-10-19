@@ -66,7 +66,11 @@ function DraggableMeal({ meal }: { meal: Meal }) {
 function DroppableMealSlot({ id, children }: { id: string; children: React.ReactNode }) {
   const { setNodeRef, isOver } = useDroppable({ id });
   return (
-    <div ref={setNodeRef} className={`min-h-[150px] border-2 rounded-lg p-2 flex items-center justify-center transition-colors duration-200 ${isOver ? 'border-primary' : 'border-dashed border-gray-300'}`}>
+    <div
+      ref={setNodeRef}
+      className={`min-h-[150px] rounded-lg p-2 flex items-center justify-center transition-colors duration-200 border-2 
+      ${isOver ? 'border-primary bg-forest-100/40 dark:bg-forest-900/20' : 'border-dashed border-border/70 bg-background/60 dark:bg-background/40'}`}
+    >
       {children}
     </div>
   );
@@ -290,11 +294,11 @@ const MealPlanSection = () => {
   return (
     <section
       id="meal-plans"
-      className="scroll-mt-24 md:scroll-mt-28 py-20 bg-gray-50 w-full overflow-x-hidden animate-fade-in"
+      className="scroll-mt-24 md:scroll-mt-28 py-20 relative w-full overflow-x-hidden animate-fade-in"
       ref={mealPlanRef}
     >
       <div className="container mx-auto">
-        <Card>
+        <Card className="glass-panel shadow-large">
           <CardHeader>
             <CardTitle>Weekly Meal Plan</CardTitle>
           </CardHeader>
@@ -336,7 +340,7 @@ const MealPlanSection = () => {
                             variant="outline"
                             size="sm"
                             onClick={() => handleOpenBrowseMeals(day, mealType as keyof DayMeals)}
-                            className="w-full h-full flex flex-col items-center justify-center text-gray-500 hover:text-primary"
+                            className="w-full h-full flex flex-col items-center justify-center text-muted-foreground hover:text-primary"
                           >
                             <Plus className="w-5 h-5 mb-1" />
                             Add {mealType}
@@ -345,7 +349,7 @@ const MealPlanSection = () => {
                       </DroppableMealSlot>
                     ))}
                   </div>
-                  <div className="mt-2 text-sm text-gray-600">
+                  <div className="mt-2 text-sm text-muted-foreground">
                     Calories: {summary.calories} | Protein: {summary.protein}g | Carbs: {summary.carbs}g | Fats: {summary.fats}g
                   </div>
                 </div>

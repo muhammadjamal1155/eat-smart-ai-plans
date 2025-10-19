@@ -33,13 +33,13 @@ const ContactSection = () => {
   ];
 
   return (
-    <section id="contact" className="py-20 bg-white w-full overflow-x-hidden animate-fade-in">
+    <section id="contact" className="py-20 relative w-full overflow-x-hidden animate-fade-in">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center space-y-4 mb-16">
-          <h2 className="text-4xl font-bold text-gray-900">
+          <h2 className="text-4xl font-bold text-foreground">
             Get in Touch
           </h2>
-          <p className="text-xl text-gray-600">
+          <p className="text-xl text-muted-foreground">
             Have questions or feedback? We'd love to hear from you!
           </p>
         </div>
@@ -47,10 +47,10 @@ const ContactSection = () => {
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Contact Form */}
           <div className="lg:col-span-2">
-            <Card className="shadow-2xl border-0">
+            <Card className="glass-panel shadow-large">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
-                  <MessageSquare className="w-5 h-5 text-health-600" />
+                  <MessageSquare className="w-5 h-5 text-forest-500" />
                   <span>Send us a Message</span>
                 </CardTitle>
               </CardHeader>
@@ -112,43 +112,43 @@ const ContactSection = () => {
 
           {/* Contact Info & Social */}
           <div className="space-y-6">
-            <Card className="shadow-lg border-0">
+            <Card className="glass-panel shadow-medium">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
-                  <Contact className="w-5 h-5 text-health-600" />
+                  <Contact className="w-5 h-5 text-forest-500" />
                   <span>Contact Information</span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center space-x-3">
-                  <Mail className="w-5 h-5 text-health-600" />
+                  <Mail className="w-5 h-5 text-forest-500" />
                   <div>
-                    <div className="font-medium text-gray-900">Email</div>
-                    <div className="text-gray-600">muhammadjamal8698320@gmail.com</div>
+                    <div className="font-medium text-foreground">Email</div>
+                    <div className="text-muted-foreground">muhammadjamal8698320@gmail.com</div>
                   </div>
                 </div>
                 
                 <div className="flex items-center space-x-3">
-                  <Phone className="w-5 h-5 text-health-600" />
+                  <Phone className="w-5 h-5 text-forest-500" />
                   <div>
-                    <div className="font-medium text-gray-900">Phone</div>
-                    <div className="text-gray-600">+923225307540</div>
+                    <div className="font-medium text-foreground">Phone</div>
+                    <div className="text-muted-foreground">+923225307540</div>
                   </div>
                 </div>
                 
                 <div className="flex items-center space-x-3">
-                  <Contact className="w-5 h-5 text-health-600" />
+                  <Contact className="w-5 h-5 text-forest-500" />
                   <div>
-                    <div className="font-medium text-gray-900">Address</div>
-                    <div className="text-gray-600">Lahore City<br />Pakistan</div>
+                    <div className="font-medium text-foreground">Address</div>
+                    <div className="text-muted-foreground">Lahore City<br />Pakistan</div>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="shadow-lg border-0 bg-health-50">
+            <Card className="glass-panel shadow-medium">
               <CardContent className="p-6">
-                <h4 className="font-semibold text-gray-900 mb-4">Follow Us</h4>
+                <h4 className="font-semibold text-foreground mb-4">Follow Us</h4>
                 <div className="grid grid-cols-2 gap-3">
                   {socialLinks.map((social) => (
                     <a
@@ -156,23 +156,23 @@ const ContactSection = () => {
                       href={social.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center space-x-2 p-3 bg-white rounded-lg hover:bg-gray-50 transition-colors duration-200"
+                      className="flex items-center space-x-2 p-3 rounded-lg bg-background/70 dark:bg-background/40 border border-border/60 hover:bg-forest-100/60 dark:hover:bg-forest-900/30 transition-colors duration-200"
                     >
-                      <social.icon className="w-5 h-5 text-gray-700" />
-                      <span className="text-sm font-medium text-gray-700">{social.name}</span>
+                      <social.icon className="w-5 h-5 text-forest-500" />
+                      <span className="text-sm font-medium text-foreground">{social.name}</span>
                     </a>
                   ))}
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="shadow-lg border-0 bg-blue-50">
+            <Card className="glass-panel shadow-medium">
               <CardContent className="p-6 text-center space-y-3">
-                <h4 className="font-semibold text-blue-900">Need Immediate Help?</h4>
-                <p className="text-sm text-blue-800">
+                <h4 className="font-semibold text-foreground">Need Immediate Help?</h4>
+                <p className="text-sm text-muted-foreground">
                   Check out our comprehensive FAQ section or browse our knowledge base for instant answers.
                 </p>
-                <Button variant="outline" className="w-full text-blue-600 border-blue-200 hover:bg-blue-100">
+                <Button variant="outline" className="w-full border-border/60 text-forest-500 hover:bg-forest-100/60 dark:hover:bg-forest-900/30">
                   Visit Help Center
                 </Button>
               </CardContent>

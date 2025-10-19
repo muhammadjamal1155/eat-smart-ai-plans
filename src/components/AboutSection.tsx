@@ -36,36 +36,36 @@ const AboutSection = () => {
   ];
 
   return (
-    <section id="about" className="py-20 bg-gray-50 w-full overflow-x-hidden animate-fade-in">
+    <section id="about" className="py-20 relative w-full overflow-x-hidden animate-fade-in">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center space-y-4 mb-16">
-          <h2 className="text-4xl font-bold text-gray-900">
+          <h2 className="text-4xl font-bold text-foreground">
             About NutriGuide AI
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
             Revolutionizing nutrition guidance through artificial intelligence and evidence-based science
           </p>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-12 items-center mb-16">
           <div className="space-y-6">
-            <h3 className="text-3xl font-bold text-gray-900">
+            <h3 className="text-3xl font-bold text-foreground">
               The Science Behind NutriGuide AI
             </h3>
-            <p className="text-lg text-gray-600 leading-relaxed">
+            <p className="text-lg text-muted-foreground leading-relaxed">
               NutriGuide AI combines cutting-edge artificial intelligence with decades of nutritional research 
               to provide personalized diet recommendations that actually work. Our system analyzes your unique 
               metabolic profile, dietary preferences, and lifestyle factors to create meal plans that are not 
               only effective but also sustainable.
             </p>
-            <p className="text-lg text-gray-600 leading-relaxed">
+            <p className="text-lg text-muted-foreground leading-relaxed">
               Unlike generic diet plans, our AI continuously learns from your progress, adapting recommendations 
               in real-time to ensure you stay on track towards your health goals. Every suggestion is backed by 
               peer-reviewed research and validated nutritional science.
             </p>
             
             <div className="space-y-3">
-              <h4 className="text-xl font-semibold text-gray-900">Data Sources:</h4>
+              <h4 className="text-xl font-semibold text-foreground">Data Sources:</h4>
               <div className="flex flex-wrap gap-2">
                 {dataSources.map((source) => (
                   <Badge key={source} variant="secondary" className="text-sm py-1 px-3">
@@ -82,10 +82,10 @@ const AboutSection = () => {
               alt="Scientific Research"
               className="rounded-2xl shadow-2xl w-full h-96 object-cover"
             />
-            <div className="absolute -bottom-4 -left-4 bg-white rounded-xl p-4 shadow-lg max-w-[calc(100%-2rem)]">
+            <div className="absolute -bottom-4 -left-4 glass-panel rounded-xl p-4 max-w-[calc(100%-2rem)]">
               <div className="text-center space-y-1">
-                <div className="text-2xl font-bold text-health-600">99.2%</div>
-                <div className="text-sm text-gray-600">Accuracy Rate</div>
+                <div className="text-2xl font-bold text-forest-500">99.2%</div>
+                <div className="text-sm text-muted-foreground">Accuracy Rate</div>
               </div>
             </div>
           </div>
@@ -96,76 +96,76 @@ const AboutSection = () => {
           {features.map((feature, index) => (
             <Card 
               key={feature.title} 
-              className={`card-hover border-0 shadow-lg animate-fade-in`}
+              className={`card-hover glass-panel animate-fade-in`}
               style={{ animationDelay: `${index * 0.1}s` }}
             >
               <CardContent className="p-6 text-center space-y-4">
-                <div className="w-16 h-16 bg-health-100 text-health-600 rounded-2xl flex items-center justify-center mx-auto">
+                <div className="w-16 h-16 bg-forest-100 text-forest-600 rounded-2xl flex items-center justify-center mx-auto">
                   <feature.icon className="w-8 h-8" />
                 </div>
-                <h4 className="text-xl font-semibold text-gray-900">{feature.title}</h4>
-                <p className="text-gray-600 leading-relaxed">{feature.description}</p>
+                <h4 className="text-xl font-semibold text-foreground">{feature.title}</h4>
+                <p className="text-muted-foreground leading-relaxed">{feature.description}</p>
               </CardContent>
             </Card>
           ))}
         </div>
 
         {/* Methodology Section */}
-        <Card className="shadow-2xl border-0 bg-gradient-to-r from-health-50 to-blue-50">
+        <Card className="glass-panel shadow-large bg-gradient-to-r from-forest-100/70 via-forest-200/50 to-forest-300/40">
           <CardContent className="p-8">
             <div className="grid lg:grid-cols-2 gap-8 items-center">
               <div className="space-y-6">
-                <h3 className="text-3xl font-bold text-gray-900">Our Methodology</h3>
+                <h3 className="text-3xl font-bold text-foreground">Our Methodology</h3>
                 <div className="space-y-4">
                   <div className="flex items-start space-x-3">
-                    <div className="w-8 h-8 bg-health-500 rounded-full flex items-center justify-center text-white font-bold text-sm">1</div>
+                    <div className="w-8 h-8 bg-forest-500 rounded-full flex items-center justify-center text-white font-bold text-sm">1</div>
                     <div>
-                      <h4 className="font-semibold text-gray-900">Data Collection</h4>
-                      <p className="text-gray-600">Comprehensive analysis of your health profile, goals, and preferences.</p>
+                      <h4 className="font-semibold text-foreground">Data Collection</h4>
+                      <p className="text-muted-foreground">Comprehensive analysis of your health profile, goals, and preferences.</p>
                     </div>
                   </div>
                   <div className="flex items-start space-x-3">
-                    <div className="w-8 h-8 bg-health-500 rounded-full flex items-center justify-center text-white font-bold text-sm">2</div>
+                    <div className="w-8 h-8 bg-forest-500 rounded-full flex items-center justify-center text-white font-bold text-sm">2</div>
                     <div>
-                      <h4 className="font-semibold text-gray-900">AI Processing</h4>
-                      <p className="text-gray-600">Machine learning algorithms process thousands of nutritional variables.</p>
+                      <h4 className="font-semibold text-foreground">AI Processing</h4>
+                      <p className="text-muted-foreground">Machine learning algorithms process thousands of nutritional variables.</p>
                     </div>
                   </div>
                   <div className="flex items-start space-x-3">
-                    <div className="w-8 h-8 bg-health-500 rounded-full flex items-center justify-center text-white font-bold text-sm">3</div>
+                    <div className="w-8 h-8 bg-forest-500 rounded-full flex items-center justify-center text-white font-bold text-sm">3</div>
                     <div>
-                      <h4 className="font-semibold text-gray-900">Personalization</h4>
-                      <p className="text-gray-600">Custom meal plans generated based on your unique metabolic profile.</p>
+                      <h4 className="font-semibold text-foreground">Personalization</h4>
+                      <p className="text-muted-foreground">Custom meal plans generated based on your unique metabolic profile.</p>
                     </div>
                   </div>
                   <div className="flex items-start space-x-3">
-                    <div className="w-8 h-8 bg-health-500 rounded-full flex items-center justify-center text-white font-bold text-sm">4</div>
+                    <div className="w-8 h-8 bg-forest-500 rounded-full flex items-center justify-center text-white font-bold text-sm">4</div>
                     <div>
-                      <h4 className="font-semibold text-gray-900">Continuous Optimization</h4>
-                      <p className="text-gray-600">Real-time adjustments based on your progress and feedback.</p>
+                      <h4 className="font-semibold text-foreground">Continuous Optimization</h4>
+                      <p className="text-muted-foreground">Real-time adjustments based on your progress and feedback.</p>
                     </div>
                   </div>
                 </div>
               </div>
               
-              <div className="bg-white rounded-xl p-6 shadow-lg">
-                <h4 className="text-xl font-semibold text-gray-900 mb-4">Key Statistics</h4>
+              <div className="glass-panel rounded-xl p-6">
+                <h4 className="text-xl font-semibold text-foreground mb-4">Key Statistics</h4>
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Users Served</span>
-                    <span className="font-bold text-health-600">10,000+</span>
+                    <span className="text-muted-foreground">Users Served</span>
+                    <span className="font-bold text-forest-500">10,000+</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Success Rate</span>
-                    <span className="font-bold text-health-600">94%</span>
+                    <span className="text-muted-foreground">Success Rate</span>
+                    <span className="font-bold text-forest-500">94%</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Avg. Weight Loss</span>
-                    <span className="font-bold text-health-600">8.5 kg</span>
+                    <span className="text-muted-foreground">Avg. Weight Loss</span>
+                    <span className="font-bold text-forest-500">8.5 kg</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Data Points Analyzed</span>
-                    <span className="font-bold text-health-600">500K+</span>
+                    <span className="text-muted-foreground">Data Points Analyzed</span>
+                    <span className="font-bold text-forest-500">500K+</span>
                   </div>
                 </div>
               </div>

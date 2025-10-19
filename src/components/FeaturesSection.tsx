@@ -31,13 +31,16 @@ const FeaturesSection = () => {
   ];
 
   return (
-    <section id="features" className="scroll-mt-24 md:scroll-mt-28 py-20 bg-white w-full overflow-x-hidden animate-fade-in">
+    <section
+      id="features"
+      className="scroll-mt-24 md:scroll-mt-28 py-20 relative w-full overflow-x-hidden animate-fade-in"
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center space-y-4 mb-16">
-          <h2 className="text-4xl font-bold text-gray-900">
+          <h2 className="text-4xl font-bold text-foreground">
             Why Choose NutriGuide AI?
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
             Our advanced AI technology combined with nutritional science delivers 
             personalized solutions that adapt to your changing needs.
           </p>
@@ -47,15 +50,15 @@ const FeaturesSection = () => {
           {features.map((feature, index) => (
             <Card 
               key={feature.title} 
-              className={`card-hover border-0 shadow-lg animate-fade-in`}
+              className={`card-hover glass-panel animate-fade-in`}
               style={{ animationDelay: `${index * 0.1}s` }}
             >
               <CardContent className="p-6 text-center space-y-4">
                 <div className={`w-16 h-16 ${feature.color} rounded-2xl flex items-center justify-center mx-auto`}>
                   <feature.icon className="w-8 h-8" />
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900">{feature.title}</h3>
-                <p className="text-gray-600 leading-relaxed">{feature.description}</p>
+                <h3 className="text-xl font-semibold text-foreground">{feature.title}</h3>
+                <p className="text-muted-foreground leading-relaxed">{feature.description}</p>
               </CardContent>
             </Card>
           ))}

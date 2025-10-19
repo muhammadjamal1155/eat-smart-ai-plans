@@ -128,10 +128,14 @@ const AIRecommendations = () => {
 
   const getImpactColor = (impact: string) => {
     switch (impact) {
-      case 'high': return 'bg-destructive/10 text-destructive border-destructive/20';
-      case 'medium': return 'bg-warning/10 text-warning border-warning/20';
-      case 'low': return 'bg-success/10 text-success border-success/20';
-      default: return 'bg-muted text-muted-foreground border-border';
+      case 'high':
+        return 'bg-destructive/15 text-destructive border-destructive/30';
+      case 'medium':
+        return 'bg-warning/15 text-warning border-warning/30';
+      case 'low':
+        return 'bg-success/15 text-success border-success/30';
+      default:
+        return 'bg-muted text-muted-foreground border-border';
     }
   };
 
@@ -146,11 +150,11 @@ const AIRecommendations = () => {
   };
 
   return (
-    <Card className="shadow-lg border-0">
-      <CardHeader>
+    <Card className="shadow-lg border border-border/60 bg-card/95 backdrop-blur-sm transition-colors">
+      <CardHeader className="border-b border-border/70 pb-4">
         <div className="flex justify-between items-center">
           <CardTitle className="flex items-center space-x-2">
-            <Brain className="w-5 h-5 text-health-600" />
+            <Brain className="w-5 h-5 text-forest-500" />
             <span>AI Recommendations</span>
           </CardTitle>
           <Button 
@@ -166,20 +170,29 @@ const AIRecommendations = () => {
       </CardHeader>
       <CardContent className="space-y-4">
         {recommendations.map((rec) => (
-          <div key={rec.id} className="border rounded-lg p-3 hover:shadow-md transition-shadow">
+          <div
+            key={rec.id}
+            className="border border-border/70 rounded-lg bg-background/60 dark:bg-background/40 p-3 hover:shadow-md transition-all"
+          >
             <div className="space-y-3">
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-center space-x-2 min-w-0 flex-1">
                   {getTypeIcon(rec.type)}
                   <h4 className="font-semibold text-foreground text-sm truncate">{rec.title}</h4>
                 </div>
-                <Badge variant="outline" className={`${getImpactColor(rec.impact)} text-xs whitespace-nowrap`}>
+                <Badge
+                  variant="outline"
+                  className={`${getImpactColor(rec.impact)} text-xs whitespace-nowrap backdrop-blur-sm`}
+                >
                   {rec.impact}
                 </Badge>
               </div>
               
               <div className="flex justify-end">
-                <Badge variant="secondary" className="text-xs">
+                <Badge
+                  variant="secondary"
+                  className="text-xs bg-forest-100 text-forest-700 dark:bg-forest-900/60 dark:text-forest-100 border border-border/60"
+                >
                   {rec.category}
                 </Badge>
               </div>
@@ -190,8 +203,8 @@ const AIRecommendations = () => {
             <Button 
               size="sm" 
               variant="outline"
+              className="w-full border-border/70 hover:bg-forest-100/60 dark:hover:bg-forest-900/30"
               onClick={() => handleRecommendationAction(rec)}
-              className="w-full"
             >
               {rec.actionText}
             </Button>

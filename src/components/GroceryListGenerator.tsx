@@ -93,11 +93,11 @@ const GroceryListGenerator = () => {
   };
 
   return (
-    <Card className="shadow-lg border-0">
-      <CardHeader>
+    <Card className="shadow-lg border border-border/60 bg-card/95 backdrop-blur-sm transition-colors">
+      <CardHeader className="border-b border-border/70 pb-4">
         <div className="flex justify-between items-center">
           <CardTitle className="flex items-center space-x-2">
-            <ShoppingCart className="w-5 h-5 text-health-600" />
+            <ShoppingCart className="w-5 h-5 text-forest-500" />
             <span>Smart Grocery List</span>
           </CardTitle>
           <div className="flex gap-2">
@@ -116,14 +116,14 @@ const GroceryListGenerator = () => {
             </Button>
           </div>
         </div>
-        <div className="flex justify-between text-sm text-gray-600">
+        <div className="flex justify-between text-sm text-muted-foreground">
           <span>{completedCount} of {totalCount} items completed</span>
           {completedCount > 0 && (
             <Button 
               onClick={clearCompleted}
               size="sm"
               variant="ghost"
-              className="text-red-600 hover:text-red-700"
+              className="text-destructive hover:text-destructive/80"
             >
               <Trash2 className="w-3 h-3 mr-1" />
               Clear Completed
@@ -133,12 +133,12 @@ const GroceryListGenerator = () => {
       </CardHeader>
       <CardContent>
         <Tabs value={selectedCategory} onValueChange={setSelectedCategory}>
-          <TabsList className="grid grid-cols-6 mb-6">
+          <TabsList className="grid grid-cols-6 mb-6 bg-background/60 dark:bg-background/40 border border-border/70">
             {categories.map((category) => (
               <TabsTrigger key={category} value={category} className="text-xs">
                 {category}
                 {category !== 'All' && (
-                  <Badge variant="secondary" className="ml-1 text-xs">
+                  <Badge variant="secondary" className="ml-1 text-xs border border-border/60">
                     {getCategoryCount(category)}
                   </Badge>
                 )}
@@ -149,31 +149,34 @@ const GroceryListGenerator = () => {
           {categories.map((category) => (
             <TabsContent key={category} value={category} className="space-y-3">
               {filteredItems.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
+                <div className="text-center py-8 text-muted-foreground">
                   <ShoppingCart className="w-12 h-12 mx-auto mb-2 opacity-50" />
                   <p>No items in this category</p>
                 </div>
               ) : (
                 filteredItems.map((item) => (
-                  <div key={item.id} className="flex items-center justify-between p-3 border rounded-lg hover:shadow-sm transition-shadow">
+                  <div
+                    key={item.id}
+                    className="flex items-center justify-between p-3 border border-border/70 rounded-lg bg-background/60 dark:bg-background/40 hover:shadow-sm transition-all"
+                  >
                     <div className="flex items-center space-x-3">
                       <Checkbox
                         checked={item.checked}
                         onCheckedChange={() => toggleItem(item.id)}
                       />
-                      <div className={`flex-1 ${item.checked ? 'line-through text-gray-500' : ''}`}>
+                      <div className={`flex-1 ${item.checked ? 'line-through text-muted-foreground/70' : ''}`}>
                         <div className="flex items-center space-x-2">
                           <span className="font-medium">{item.name}</span>
-                          <Badge variant="outline" className="text-xs">
+                          <Badge variant="outline" className="text-xs border-border/60">
                             {item.category}
                           </Badge>
                           {item.source === 'meal-plan' && (
-                            <Badge variant="secondary" className="text-xs">
+                            <Badge variant="secondary" className="text-xs border border-border/60">
                               From Plan
                             </Badge>
                           )}
                         </div>
-                        <div className="text-sm text-gray-600">
+                        <div className="text-sm text-muted-foreground">
                           {item.quantity} {item.unit}
                         </div>
                       </div>
@@ -182,7 +185,7 @@ const GroceryListGenerator = () => {
                       onClick={() => removeItem(item.id)}
                       size="sm"
                       variant="ghost"
-                      className="text-red-500 hover:text-red-700"
+                      className="text-destructive hover:text-destructive/80"
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>

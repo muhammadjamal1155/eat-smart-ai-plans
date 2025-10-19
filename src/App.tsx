@@ -30,6 +30,7 @@ const PrivacyPolicy = lazy(() => import('@/pages/PrivacyPolicy'));
 const TermsOfService = lazy(() => import('@/pages/TermsOfService'));
 const NutritionForm = lazy(() => import('@/pages/NutritionForm'));
 const Reminders = lazy(() => import('@/pages/Reminders'));
+const Profile = lazy(() => import('@/pages/Profile'));
 
 function App() {
   return (
@@ -37,7 +38,7 @@ function App() {
       <ThemeProvider defaultTheme="system" storageKey="nutriplan-theme">
         <AuthProvider>
           <Router>
-            <div className="App w-full overflow-x-hidden" id="main-content">
+            <div className="App page-surface w-full overflow-x-hidden" id="main-content">
               <a href="#main-content" className="skip-link">
                 Skip to main content
               </a>
@@ -49,6 +50,7 @@ function App() {
                   <Route path="/meal-plans" element={<ProtectedRoute><MealPlans /></ProtectedRoute>} />
                   <Route path="/insights" element={<ProtectedRoute><Insights /></ProtectedRoute>} />
                   <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
+                  <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
                   <Route path="/about" element={<About />} />
                   <Route path="/contact" element={<Contact />} />
                   <Route path="/login" element={<Login />} />

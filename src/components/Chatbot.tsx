@@ -1,35 +1,32 @@
-"use client";
-
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MessageCircle, Send, X } from "lucide-react";
+import { faqs as helpCenterFaqs } from "@/lib/faq";
 
 interface Message {
   role: "user" | "bot";
   text: string;
+  sourceQuestion?: string;
 }
 
-const faqs = [
-  { question: "What is my average calorie intake?" },
-  { question: "How much protein do I consume weekly?" },
-  { question: "Show me my water intake this month" },
-  { question: "How many workout days do I have this quarter?" },
-  { question: "What are my personalised meal plans?" },
-  { question: "Give me a nutrition report for today" },
-  { question: "Compare my diet progress this month vs last month" },
-];
+const normalize = (value: string) =>
+  value
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 
 export default function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const suggestedFaqs = useMemo(() => helpCenterFaqs.slice(0, 6), []);
 
-  // Clear chat when closing
   const toggleChat = () => {
     if (isOpen) {
       setMessages([]);
@@ -37,29 +34,66 @@ export default function Chatbot() {
     setIsOpen(!isOpen);
   };
 
-  // Auto-scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  const findFaqAnswer = (query: string) => {
+    const normalizedQuery = normalize(query);
+    if (!normalizedQuery) return null;
+
+    return (
+      helpCenterFaqs.find((faq) => {
+        const questionMatch =
+          normalize(faq.question).includes(normalizedQuery) ||
+          normalizedQuery.includes(normalize(faq.question));
+
+        const keywordMatch = faq.keywords?.some((keyword) =>
+          normalizedQuery.includes(normalize(keyword))
+        );
+
+        return questionMatch || keywordMatch;
+      }) || null
+    );
+  };
 
   const handleSend = (text?: string) => {
     const userMessage = text || input.trim();
     if (!userMessage) return;
 
-    setMessages((prev) => [...prev, { role: "user", text: userMessage }]);
-    setInput("");
+    const faqMatch = findFaqAnswer(userMessage);
 
-    setTimeout(() => {
-      setMessages((prev) => [
-        ...prev,
-        { role: "bot", text: `Here’s the answer for: "${userMessage}"` },
-      ]);
-    }, 800);
+    setMessages((prev) => [
+      ...prev,
+      { role: "user", text: userMessage },
+      faqMatch
+        ? { role: "bot", text: faqMatch.answer, sourceQuestion: faqMatch.question }
+        : {
+            role: "bot",
+            text: "I couldn't find an exact match for that. Try rephrasing your question or visit the Help Center for more topics.",
+          },
+    ]);
+    setInput("");
+  };
+
+  const renderBotMessage = (message: Message) => {
+    if (message.role !== "bot") return message.text;
+
+    return (
+      <div className="space-y-2">
+        {message.sourceQuestion && (
+          <p className="text-xs font-semibold text-blue-600">FAQ: {message.sourceQuestion}</p>
+        )}
+        <p>{message.text}</p>
+        <p className="text-[11px] text-muted-foreground">
+          Looking for more? Visit the Help Center for all FAQs.
+        </p>
+      </div>
+    );
   };
 
   return (
     <div className="fixed bottom-4 right-4 z-50">
-      {/* Chat Toggle Button */}
       <motion.button
         onClick={toggleChat}
         className="bg-blue-600 text-white p-3 rounded-full shadow-lg relative"
@@ -69,7 +103,6 @@ export default function Chatbot() {
         {isOpen ? <X size={22} /> : <MessageCircle size={22} />}
       </motion.button>
 
-      {/* Chat Window */}
       {isOpen && (
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -78,42 +111,32 @@ export default function Chatbot() {
           className="absolute bottom-16 right-0 w-80 md:w-96"
         >
           <Card className="flex flex-col h-[500px] shadow-xl border rounded-2xl">
-            {/* Header */}
             <div className="bg-blue-600 text-white p-3 rounded-t-2xl font-semibold">
-              NutriGuide AI Assistant
+              NutriGuide Help Assistant
             </div>
 
-            {/* Messages */}
             <ScrollArea className="flex-1 p-3 space-y-3">
               {messages.length === 0 && (
-                <div className="text-gray-500 text-sm mb-3">
-                  👋 Hi! I’m your NutriGuide AI. Ask me about your nutrition,
-                  workouts, or progress.
+                <div className="text-muted-foreground text-sm mb-3">
+                  Hi! I'm NutriGuide's helper. Ask about common topics or pick an FAQ shortcut below.
                 </div>
               )}
 
               {messages.map((msg, i) => (
                 <div
                   key={i}
-                  className={`p-2 max-w-[85%] rounded-xl ${
-                    msg.role === "user"
-                      ? "ml-auto bg-blue-100 text-blue-900"
-                      : "mr-auto bg-gray-100 text-gray-800"
-                  }`}
+                  className={`p-2 max-w-[85%] rounded-xl ${msg.role === "user" ? "ml-auto bg-blue-100 text-blue-900" : "mr-auto bg-gray-100 text-gray-800"}`} 
                 >
-                  {msg.text}
+                  {msg.role === "bot" ? renderBotMessage(msg) : msg.text}
                 </div>
               ))}
 
-              {/* Default Suggested Questions */}
               {messages.length === 0 && (
                 <div className="space-y-2 pt-4">
-                  <p className="text-sm text-gray-500">
-                    Try asking one of these:
-                  </p>
+                  <p className="text-sm text-muted-foreground">Popular questions:</p>
                   <ScrollArea className="max-h-32 pr-2">
                     <div className="space-y-2">
-                      {faqs.map((faq, i) => (
+                      {suggestedFaqs.map((faq, i) => (
                         <Button
                           key={i}
                           variant="outline"
@@ -131,7 +154,6 @@ export default function Chatbot() {
               <div ref={messagesEndRef} />
             </ScrollArea>
 
-            {/* Input Box */}
             <div className="flex items-center gap-2 border-t p-3">
               <Input
                 value={input}
@@ -139,10 +161,7 @@ export default function Chatbot() {
                 placeholder="Type your question..."
                 onKeyDown={(e) => e.key === "Enter" && handleSend()}
               />
-              <Button
-                onClick={() => handleSend()}
-                className="bg-blue-600 text-white"
-              >
+              <Button onClick={() => handleSend()} className="bg-blue-600 text-white">
                 <Send size={18} />
               </Button>
             </div>

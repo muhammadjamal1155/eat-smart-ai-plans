@@ -8,6 +8,8 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
+import { toast } from "@/hooks/use-toast";
+import RecommendationResults from "@/components/RecommendationResults";
 
 const steps = [
   { id: 1, title: "Personal Details" },
@@ -35,6 +37,9 @@ export default function NutritionForm() {
     sleepDuration: "",
     medicalConditions: "",
   });
+  const [recommendations, setRecommendations] = useState<any>(null);
+  const [showResults, setShowResults] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
 
@@ -63,13 +68,59 @@ export default function NutritionForm() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Add backend API call here to submit form data.
-    // The backend will need to handle unit conversions for height and weight.
-    console.log("Form submitted:", formData);
-    navigate("/?scroll_to=meal-plans");
+    setIsLoading(true);
+
+    try {
+      // Prepare data for backend (convert units if necessary)
+      // For now assuming backend takes kg and cm
+      const payload = {
+        age: formData.age,
+        weight: formData.weight, // Add unit conversion logic if needed
+        height: formData.height, // Add unit conversion logic if needed
+        gender: formData.gender,
+        goal: formData.goal,
+        activity_level: formData.activityLevel,
+        diet_type: formData.dietType,
+        allergies: formData.foodAllergies ? formData.foodAllergies.split(',') : []
+      };
+
+      const response = await fetch('http://localhost:5000/recommend', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch recommendations');
+      }
+
+      const data = await response.json();
+      setRecommendations(data);
+      setShowResults(true);
+      toast({
+        title: "Plan Generated!",
+        description: "Here is your personalized meal plan.",
+      });
+
+    } catch (error) {
+      console.error("Error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to generate plan. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+  if (showResults && recommendations) {
+    return <RecommendationResults data={recommendations} onBack={() => setShowResults(false)} />;
+  }
 
   const progress = (currentStep / steps.length) * 100;
 
@@ -262,8 +313,8 @@ export default function NutritionForm() {
                 </Button>
               )}
               {currentStep === steps.length && (
-                <Button type="submit" className="ml-auto">
-                  Submit and See Meal Plan
+                <Button type="submit" className="ml-auto" disabled={isLoading}>
+                  {isLoading ? "Generating Plan..." : "Submit and See Meal Plan"}
                 </Button>
               )}
             </div>

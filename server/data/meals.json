@@ -1,0 +1,129 @@
+[
+    {
+        "id": "1",
+        "name": "Greek Yogurt Parfait",
+        "image": "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8eW9ndXJ0JTIwcGFyZmFpdHxlbnwwfHwwfHx8MA%3D%3D",
+        "calories": 320,
+        "protein": 20,
+        "carbs": 35,
+        "fats": 8,
+        "tags": [
+            "healthy",
+            "quick",
+            "vegetarian",
+            "breakfast"
+        ],
+        "time": "5 min"
+    },
+    {
+        "id": "2",
+        "name": "Avocado Toast with Egg",
+        "image": "https://images.unsplash.com/photo-1525351484163-7529414395d8?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8YXZvY2FkbyUyMHRvYXN0fGVufDB8fDB8fHww",
+        "calories": 280,
+        "protein": 12,
+        "carbs": 30,
+        "fats": 16,
+        "tags": [
+            "healthy",
+            "vegetarian",
+            "quick",
+            "breakfast"
+        ],
+        "time": "10 min"
+    },
+    {
+        "id": "3",
+        "name": "Quinoa Power Bowl",
+        "image": "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cXVpbm9hJTIwYm93bHxlbnwwfHwwfHx8MA%3D%3D",
+        "calories": 450,
+        "protein": 18,
+        "carbs": 52,
+        "fats": 16,
+        "tags": [
+            "healthy",
+            "vegan",
+            "gluten-free",
+            "lunch"
+        ],
+        "time": "25 min"
+    },
+    {
+        "id": "4",
+        "name": "Grilled Salmon with Asparagus",
+        "image": "https://images.unsplash.com/photo-1467003909585-2f8a7270028d?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8Z3JpbGxlZCUyMHNhbG1vbnxlbnwwfHwwfHx8MA%3D%3D",
+        "calories": 380,
+        "protein": 28,
+        "carbs": 5,
+        "fats": 18,
+        "tags": [
+            "protein-rich",
+            "healthy",
+            "keto-friendly",
+            "dinner"
+        ],
+        "time": "20 min"
+    },
+    {
+        "id": "5",
+        "name": "Chicken Breast Salad",
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8Y2hpY2tlbiUyMHNhbGFkfGVufDB8fDB8fHww",
+        "calories": 350,
+        "protein": 30,
+        "carbs": 10,
+        "fats": 12,
+        "tags": [
+            "protein-rich",
+            "low-carb",
+            "healthy",
+            "lunch"
+        ],
+        "time": "15 min"
+    },
+    {
+        "id": "6",
+        "name": "Oatmeal with Berries",
+        "image": "https://images.unsplash.com/photo-1517673132405-a56a62b18caf?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8b2F0bWVhbHxlbnwwfHwwfHx8MA%3D%3D",
+        "calories": 300,
+        "protein": 8,
+        "carbs": 50,
+        "fats": 6,
+        "tags": [
+            "healthy",
+            "vegan",
+            "breakfast",
+            "high-fiber"
+        ],
+        "time": "10 min"
+    },
+    {
+        "id": "7",
+        "name": "Beef Stir-Fry",
+        "image": "https://images.unsplash.com/photo-1512058564366-18510be2db19?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8YmVlZiUyMHN0aXIlMjBmcnl8ZW58MHx8MHx8fDA%3D",
+        "calories": 500,
+        "protein": 35,
+        "carbs": 20,
+        "fats": 25,
+        "tags": [
+            "protein-rich",
+            "dinner",
+            "high-protein"
+        ],
+        "time": "30 min"
+    },
+    {
+        "id": "8",
+        "name": "Lentil Soup",
+        "image": "https://images.unsplash.com/photo-1547592166-23acbe346499?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bGVudGlsJTIwc291cHxlbnwwfHwwfHx8MA%3D%3D",
+        "calories": 250,
+        "protein": 15,
+        "carbs": 40,
+        "fats": 5,
+        "tags": [
+            "vegan",
+            "healthy",
+            "lunch",
+            "dinner"
+        ],
+        "time": "40 min"
+    }
+]

@@ -91,19 +91,29 @@ class RecommendationEngine:
             return {"error": "Data not loaded"}
 
         try:
+            # Check for required fields
+            required_fields = ['age', 'weight', 'height', 'gender', 'goal', 'activity_level']
+            missing_fields = [field for field in required_fields if not user_data.get(field)]
+            
+            if missing_fields:
+                formatted_fields = ", ".join(missing_fields).replace("_", " ")
+                return {"error": f"We need your {formatted_fields} to create your perfect meal plan! 🥗"}
+
             # Helper to safely parse numbers
-            def safe_get(key, default, type_func):
+            def safe_get(key, type_func):
                 val = user_data.get(key)
-                if val is None or val == "":
-                    return default
                 try:
                     return type_func(val)
                 except (ValueError, TypeError):
-                    return default
+                    return None
 
-            age = safe_get('age', 25, int)
-            weight = safe_get('weight', 70.0, float)
-            height = safe_get('height', 170.0, float)
+            age = safe_get('age', int)
+            weight = safe_get('weight', float)
+            height = safe_get('height', float)
+            
+            if age is None or weight is None or height is None:
+                 return {"error": "Invalid numeric values for age, weight, or height"}
+
             gender = user_data.get('gender', 'male')
             goal = user_data.get('goal', 'maintenance')
             activity_level = user_data.get('activity_level', 'sedentary')

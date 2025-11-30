@@ -27,10 +27,13 @@ def reproduce():
             }
         },
         {
-            "name": "User Case (Corrected Units)",
+            "name": "Empty Payload Test",
+            "payload": {}
+        },
+        {
+            "name": "Missing Fields Test",
             "payload": {
-                "age": "30", "weight": "60", "height": "152.4", "gender": "female",
-                "goal": "weight-gain", "activity_level": "lightly-active", "diet_type": "vegan", "allergies": []
+                "age": "30", "gender": "male"
             }
         }
     ]
@@ -42,12 +45,13 @@ def reproduce():
             print("Status Code:", response.status_code)
             if response.status_code == 200:
                 data = response.json()
-                print(f"Target Calories: {data.get('target_calories')}")
                 print(f"Meals Found: {len(data.get('meals', []))}")
-                if data.get('meals'):
-                    print("First meal:", data['meals'][0]['name'])
             else:
                 print("Response Text:", response.text)
+                try:
+                    print("Error JSON:", response.json())
+                except:
+                    pass
         except Exception as e:
             print("Error:", e)
 

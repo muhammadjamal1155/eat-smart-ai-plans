@@ -104,7 +104,8 @@ export default function NutritionForm() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch recommendations');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to fetch recommendations');
       }
 
       const data = await response.json();
@@ -115,12 +116,12 @@ export default function NutritionForm() {
         description: "Here is your personalized meal plan.",
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error:", error);
       toast({
-        title: "Error",
-        description: "Failed to generate plan. Please try again.",
-        variant: "destructive"
+        title: "Almost there! 👋",
+        description: error.message || "We couldn't generate your plan just yet. Please check your details.",
+        className: "bg-primary text-primary-foreground"
       });
     } finally {
       setIsLoading(false);
@@ -247,11 +248,14 @@ export default function NutritionForm() {
                       <SelectValue placeholder="Select diet type" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="none">None</SelectItem>
+                      <SelectItem value="none">Any</SelectItem>
                       <SelectItem value="vegetarian">Vegetarian</SelectItem>
                       <SelectItem value="vegan">Vegan</SelectItem>
-                      <SelectItem value="keto">Keto</SelectItem>
-                      <SelectItem value="paleo">Paleo</SelectItem>
+                      <SelectItem value="gluten-free">Gluten-Free</SelectItem>
+                      <SelectItem value="low-carb">Low-Carb</SelectItem>
+                      <SelectItem value="low-fat">Low-Fat</SelectItem>
+                      <SelectItem value="high-protein">High-Protein</SelectItem>
+                      <SelectItem value="egg-free">Egg-Free</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

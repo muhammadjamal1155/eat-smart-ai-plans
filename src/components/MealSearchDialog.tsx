@@ -41,10 +41,42 @@ const MealSearchDialog = ({ onSelectMeal, mealType, isOpen, onOpenChange }: Meal
     const fetchMeals = async () => {
       setIsLoading(true);
       try {
-        const response = await fetch(`http://localhost:5000/meals?query=${searchTerm}`);
-        if (response.ok) {
-          const data = await response.json();
-          setMeals(data);
+        if (selectedFilter === 'recommended') {
+          const userProfileStr = localStorage.getItem('userProfile');
+          if (userProfileStr) {
+            const userProfile = JSON.parse(userProfileStr);
+            const response = await fetch('http://localhost:5000/recommend', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                age: userProfile.age,
+                weight: userProfile.weight, // Ensure units are handled if needed, assuming kg from form
+                height: userProfile.height, // Assuming cm
+                gender: userProfile.gender,
+                goal: userProfile.goal,
+                activity_level: userProfile.activityLevel,
+                diet_type: userProfile.dietType,
+                allergies: userProfile.foodAllergies ? userProfile.foodAllergies.split(',') : []
+              }),
+            });
+            if (response.ok) {
+              const data = await response.json();
+              setMeals(data.meals || []);
+            }
+          } else {
+            setMeals([]); // No profile, no recommendations
+            toast({
+              title: "Profile Missing",
+              description: "Please fill out the Nutrition Form to get recommendations.",
+              variant: "destructive"
+            });
+          }
+        } else {
+          const response = await fetch(`http://localhost:5000/meals?query=${searchTerm}`);
+          if (response.ok) {
+            const data = await response.json();
+            setMeals(data);
+          }
         }
       } catch (error) {
         console.error("Error fetching meals:", error);
@@ -60,9 +92,10 @@ const MealSearchDialog = ({ onSelectMeal, mealType, isOpen, onOpenChange }: Meal
     }, 500);
 
     return () => clearTimeout(debounce);
-  }, [searchTerm, isOpen]);
+  }, [searchTerm, isOpen, selectedFilter]);
 
   const filteredMeals = meals.filter(meal => {
+    if (selectedFilter === 'recommended') return true; // Already filtered by backend
     const matchesFilter = selectedFilter === 'all' || meal.tags.some(tag => tag.toLowerCase().includes(selectedFilter));
     return matchesFilter;
   });
@@ -105,7 +138,7 @@ const MealSearchDialog = ({ onSelectMeal, mealType, isOpen, onOpenChange }: Meal
               />
             </div>
             <div className="flex gap-2 overflow-x-auto pb-2">
-              {['all', 'healthy', 'quick', 'protein', 'vegan', 'gluten-free'].map((filter) => (
+              {['all', 'recommended', 'healthy', 'quick', 'protein', 'vegan', 'gluten-free'].map((filter) => (
                 <Button
                   key={filter}
                   variant={selectedFilter === filter ? "default" : "outline"}
@@ -124,7 +157,11 @@ const MealSearchDialog = ({ onSelectMeal, mealType, isOpen, onOpenChange }: Meal
             {isLoading ? (
               <div className="col-span-2 text-center py-8 text-muted-foreground">Loading meals...</div>
             ) : filteredMeals.length === 0 ? (
-              <div className="col-span-2 text-center py-8 text-muted-foreground">No meals found. Try a different search.</div>
+              <div className="col-span-2 text-center py-8 text-muted-foreground">
+                {selectedFilter === 'recommended'
+                  ? "No recommendations found. Please complete your nutrition profile first."
+                  : "No meals found. Try a different search."}
+              </div>
             ) : (
               filteredMeals.map((meal) => (
                 <Card key={meal.id} className="cursor-pointer hover:shadow-lg transition-shadow">
@@ -135,7 +172,16 @@ const MealSearchDialog = ({ onSelectMeal, mealType, isOpen, onOpenChange }: Meal
                         alt={meal.name}
                         className="w-20 h-20 object-cover rounded-lg bg-secondary/20"
                         onError={(e) => {
-                          e.currentTarget.src = "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&q=80";
+                          const fallbackImages = [
+                            'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=300&q=80',
+                            'https://images.unsplash.com/photo-1467003909585-2f8a72700288?auto=format&fit=crop&w=300&q=80',
+                            'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=300&q=80',
+                            'https://images.unsplash.com/photo-1473093295043-cdd812d0e601?auto=format&fit=crop&w=300&q=80',
+                            'https://images.unsplash.com/photo-1490474418585-ba9bad8fd0ea?auto=format&fit=crop&w=300&q=80',
+                            'https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=300&q=80',
+                          ];
+                          const index = meal.name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % fallbackImages.length;
+                          e.currentTarget.src = fallbackImages[index];
                         }}
                       />
                       <div className="flex-1 space-y-2">

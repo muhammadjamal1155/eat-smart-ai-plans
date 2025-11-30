@@ -1,5 +1,6 @@
 
-import { memo, useState } from 'react';
+import { memo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Plus, Camera, Utensils, Target, Zap } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
@@ -10,30 +11,31 @@ import { toast } from '@/hooks/use-toast';
 
 const QuickActions = memo(() => {
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
   const actions = [
-    { 
-      icon: Camera, 
-      label: 'Scan Food', 
-      color: 'text-green-600',
-      bgColor: 'bg-green-50',
+    {
+      icon: Camera,
+      label: 'Scan Food',
+      color: 'text-primary',
+      bgColor: 'bg-primary/10',
       description: 'Take a photo to analyze',
       action: () => toast({ title: "Food Scanner", description: "Camera food recognition coming soon!" })
     },
-    { 
-      icon: Utensils, 
-      label: 'Meal Plan', 
-      color: 'text-orange-600',
-      bgColor: 'bg-orange-50',
+    {
+      icon: Utensils,
+      label: 'Meal Plan',
+      color: 'text-primary',
+      bgColor: 'bg-primary/10',
       description: 'View today\'s plan',
-      action: () => window.location.href = '#meal-plans'
+      action: () => navigate('/meal-plans')
     },
-    { 
-      icon: Target, 
-      label: 'Set Goal', 
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
+    {
+      icon: Target,
+      label: 'Set Goal',
+      color: 'text-primary',
+      bgColor: 'bg-primary/10',
       description: 'Update your targets',
-      action: () => window.location.href = '/nutrition-form'
+      action: () => navigate('/nutrition-form')
     },
   ];
 
@@ -72,13 +74,13 @@ const QuickActions = memo(() => {
                   key={index}
                   variant="outline"
                   onClick={action.action}
-                  className={`w-full justify-start space-x-3 p-4 h-auto ${action.bgColor} border-none hover-scale`}
+                  className="w-full justify-start space-x-3 p-4 h-auto bg-card hover:bg-accent border-border hover-scale"
                 >
                   <div className={`p-2 rounded-lg ${action.bgColor}`}>
                     <action.icon className={`h-5 w-5 ${action.color}`} />
                   </div>
                   <div className="text-left">
-                    <div className="font-medium">{action.label}</div>
+                    <div className="font-medium text-foreground">{action.label}</div>
                     <div className="text-sm text-muted-foreground">{action.description}</div>
                   </div>
                 </Button>

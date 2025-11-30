@@ -83,7 +83,7 @@ const Footer = () => {
               <div className="w-8 h-8 bg-health-500 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-sm">N</span>
               </div>
-              <span className="font-poppins font-bold text-xl">NutriGuide AI</span>
+              <span className="font-poppins font-bold text-xl">NutriPlan</span>
             </Link>
             <p className="text-gray-400 leading-relaxed">
               Empowering healthier lives through personalized nutrition guidance powered by artificial intelligence.
@@ -139,7 +139,7 @@ const Footer = () => {
 
         <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
           <div className="text-gray-400 text-sm">
-            © 2024 NutriGuide AI. All rights reserved.
+            © 2024 NutriPlan. All rights reserved.
           </div>
           <div className="flex space-x-6 text-sm text-gray-400">
             <button className="hover:text-white transition-colors duration-200">Privacy</button>

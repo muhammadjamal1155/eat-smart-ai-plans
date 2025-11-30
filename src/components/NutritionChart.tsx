@@ -1,5 +1,5 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, BarChart, Bar } from 'recharts';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -13,7 +13,14 @@ interface NutritionChartProps {
 
 const NutritionChart = ({ type, data, title }: NutritionChartProps) => {
   const allDataKeys = Object.keys(data[0] || {}).filter(key => key !== 'day' && key !== 'nutrient');
-  const [visibleDataKeys, setVisibleDataKeys] = useState<string[]>(allDataKeys);
+  const [visibleDataKeys, setVisibleDataKeys] = useState<string[]>([]);
+
+  // Update visible keys when data loads for the first time
+  useEffect(() => {
+    if (visibleDataKeys.length === 0 && allDataKeys.length > 0) {
+      setVisibleDataKeys(allDataKeys);
+    }
+  }, [data, allDataKeys.join(',')]); // Depend on data keys changing
 
   const handleCheckboxChange = useCallback((key: string) => {
     setVisibleDataKeys(prevKeys =>
@@ -55,7 +62,7 @@ const NutritionChart = ({ type, data, title }: NutritionChartProps) => {
         </LineChart>
       );
     }
-    
+
     return (
       <BarChart data={data}>
         <CartesianGrid strokeDasharray="3 3" />
@@ -64,13 +71,13 @@ const NutritionChart = ({ type, data, title }: NutritionChartProps) => {
         <Tooltip />
         <Legend />
         {visibleDataKeys.map(key => (
-            <Bar
-              key={key}
-              dataKey={key}
-              fill={getStrokeColor(key)}
-              hide={!visibleDataKeys.includes(key)}
-            />
-          ))}
+          <Bar
+            key={key}
+            dataKey={key}
+            fill={getStrokeColor(key)}
+            hide={!visibleDataKeys.includes(key)}
+          />
+        ))}
       </BarChart>
     );
   };

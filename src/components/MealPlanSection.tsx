@@ -58,7 +58,7 @@ function DraggableMeal({ meal }: { meal: Meal }) {
 
   return (
     <div ref={setNodeRef} style={style} {...listeners} {...attributes} className="cursor-grab shadow-lg scale-105 rounded-lg overflow-hidden">
-      <MealPlanCard mealType="" meal={meal} onMealChange={() => { }} />
+      <MealPlanCard mealType="breakfast" meal={meal} onMealChange={() => { }} />
     </div>
   );
 }
@@ -203,7 +203,7 @@ const MealPlanSection = () => {
           const file = new File([blob], 'meal-plan.png', { type: 'image/png' });
           await navigator.share({
             title: 'My Meal Plan',
-            text: 'Check out my weekly meal plan from Eat Smart!',
+            text: 'Check out my weekly meal plan from NutriPlan!',
             files: [file],
           });
           toast({
@@ -247,13 +247,13 @@ const MealPlanSection = () => {
     return null;
   };
 
-  const handleDragStart = (event: DragStartEvent) => setActiveId(event.active.id as string);
+  const handleDragStart = (event: DragStartEvent) => setActiveId(String(event.active.id));
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over) return;
 
-    const activeContainer = findContainer(active.id);
-    const overContainer = findContainer(over.id);
+    const activeContainer = findContainer(String(active.id));
+    const overContainer = findContainer(String(over.id));
     if (!activeContainer || !overContainer || activeContainer === overContainer) return;
 
     const [fromDay, fromMealType] = activeContainer.split('-');
@@ -331,7 +331,7 @@ const MealPlanSection = () => {
                       <DroppableMealSlot key={mealType} id={`${day}-${mealType}`}>
                         {filteredMeals[day]?.[mealType as keyof DayMeals] ? (
                           <MealPlanCard
-                            mealType={mealType}
+                            mealType={mealType as "breakfast" | "lunch" | "dinner"}
                             meal={filteredMeals[day][mealType as keyof DayMeals]!}
                             onMealChange={(newMeal) => handleMealChange(day, mealType as keyof DayMeals, newMeal)}
                           />

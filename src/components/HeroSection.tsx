@@ -33,14 +33,14 @@ const HeroSection = () => {
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight">
                 Eat Smart,{' '}
                 <span className="text-primary">Live Healthy</span>{' '}
-                with NutriGuide AI
+                with NutriPlan
               </h1>
               <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
-                Get personalized diet plans and nutrition recommendations powered by advanced AI. 
+                Get personalized diet plans and nutrition recommendations powered by advanced AI.
                 Transform your eating habits and achieve your health goals with science-backed guidance.
               </p>
             </div>
-            
+
             <div className="flex flex-col sm:flex-row gap-4">
               <Button size="lg" className="btn-primary text-lg px-8 py-4 interactive touch-manipulation active:scale-95 w-full sm:w-auto" onClick={handleStartJourney}>
                 Start Your Journey

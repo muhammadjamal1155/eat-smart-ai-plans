@@ -25,7 +25,7 @@ const Navigation = () => {
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      
+
       // Show header when at top of page
       if (currentScrollY < 10) {
         setIsVisible(true);
@@ -36,7 +36,7 @@ const Navigation = () => {
         // Show when scrolling up
         setIsVisible(true);
       }
-      
+
       setLastScrollY(currentScrollY);
     };
 
@@ -83,114 +83,106 @@ const Navigation = () => {
   };
 
   return (
-    <nav className={`bg-background/80 backdrop-blur-md shadow-soft border-b border-border fixed top-0 w-full z-50 transition-all duration-300 ${
-      isVisible ? 'translate-y-0' : '-translate-y-full'
-    }`}>
+    <nav className={`bg-background/80 backdrop-blur-md shadow-soft border-b border-border fixed top-0 w-full z-50 transition-all duration-300 ${isVisible ? 'translate-y-0' : '-translate-y-full'
+      }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
           <div className="flex items-center">
             <div className="flex-shrink-0 flex items-center">
               <Link to="/" className="flex items-center interactive">
                 <Utensils className="h-8 w-8 text-primary" />
-                <span className="ml-2 text-xl font-bold text-foreground">NutriGuide AI</span>
+                <span className="ml-2 text-xl font-bold text-foreground">NutriPlan</span>
               </Link>
             </div>
             <div className="hidden lg:ml-6 lg:flex lg:space-x-8">
               {user ? (
                 <>
-                  <Link 
-                    to="/dashboard" 
-                    className={`px-3 py-2 text-sm font-medium transition-colors ${
-                      isActivePath('/dashboard') 
-                        ? 'text-primary border-b-2 border-primary' 
+                  <Link
+                    to="/dashboard"
+                    className={`px-3 py-2 text-sm font-medium transition-colors ${isActivePath('/dashboard')
+                        ? 'text-primary border-b-2 border-primary'
                         : 'text-foreground hover:text-primary'
-                    }`}
+                      }`}
                   >
                     Dashboard
                   </Link>
-                  <Link 
-                    to="/meal-plans" 
-                    className={`px-3 py-2 text-sm font-medium transition-colors ${
-                      isActivePath('/meal-plans') 
-                        ? 'text-primary border-b-2 border-primary' 
+                  <Link
+                    to="/meal-plans"
+                    className={`px-3 py-2 text-sm font-medium transition-colors ${isActivePath('/meal-plans')
+                        ? 'text-primary border-b-2 border-primary'
                         : 'text-foreground hover:text-primary'
-                    }`}
+                      }`}
                   >
                     Meal Plans
                   </Link>
-                  <Link 
-                    to="/insights" 
-                    className={`px-3 py-2 text-sm font-medium transition-colors ${
-                      isActivePath('/insights') 
-                        ? 'text-primary border-b-2 border-primary' 
+                  <Link
+                    to="/insights"
+                    className={`px-3 py-2 text-sm font-medium transition-colors ${isActivePath('/insights')
+                        ? 'text-primary border-b-2 border-primary'
                         : 'text-foreground hover:text-primary'
-                    }`}
+                      }`}
                   >
                     AI Insights
                   </Link>
-                  <Link 
-                    to="/analytics" 
-                    className={`px-3 py-2 text-sm font-medium transition-colors ${
-                      isActivePath('/analytics') 
-                        ? 'text-primary border-b-2 border-primary' 
+                  <Link
+                    to="/analytics"
+                    className={`px-3 py-2 text-sm font-medium transition-colors ${isActivePath('/analytics')
+                        ? 'text-primary border-b-2 border-primary'
                         : 'text-foreground hover:text-primary'
-                    }`}
+                      }`}
                   >
                     Analytics
                   </Link>
                 </>
               ) : (
                 <>
-                  <Link 
-                    to="/#features" 
+                  <Link
+                    to="/#features"
                     onClick={() => handleHashScroll('#features')}
                     className="text-foreground hover:text-primary px-3 py-2 text-sm font-medium transition-colors"
                   >
                     Features
                   </Link>
-                  <Link 
-                    to="/#meal-plans" 
+                  <Link
+                    to="/#meal-plans"
                     onClick={() => handleHashScroll('#meal-plans')}
                     className="text-foreground hover:text-primary px-3 py-2 text-sm font-medium transition-colors"
                   >
                     Meal Plans
                   </Link>
-                  <Link 
-                    to="/#insights" 
+                  <Link
+                    to="/#insights"
                     onClick={() => handleHashScroll('#insights')}
                     className="text-foreground hover:text-primary px-3 py-2 text-sm font-medium transition-colors"
                   >
                     AI Insights
                   </Link>
-                  <Link 
-                    to="/help-center" 
-                    className={`px-3 py-2 text-sm font-medium transition-colors ${
-                      isActivePath('/help-center') 
-                        ? 'text-primary border-b-2 border-primary' 
+                  <Link
+                    to="/help-center"
+                    className={`px-3 py-2 text-sm font-medium transition-colors ${isActivePath('/help-center')
+                        ? 'text-primary border-b-2 border-primary'
                         : 'text-foreground hover:text-primary'
-                    }`}
+                      }`}
                   >
                     Help Center
                   </Link>
                 </>
               )}
-              <Link 
-                to="/about" 
-                className={`px-3 py-2 text-sm font-medium transition-colors ${
-                  isActivePath('/about') 
-                    ? 'text-primary border-b-2 border-primary' 
+              <Link
+                to="/about"
+                className={`px-3 py-2 text-sm font-medium transition-colors ${isActivePath('/about')
+                    ? 'text-primary border-b-2 border-primary'
                     : 'text-foreground hover:text-primary'
-                }`}
+                  }`}
               >
                 About
               </Link>
-              <Link 
-                to="/contact" 
-                className={`px-3 py-2 text-sm font-medium transition-colors ${
-                  isActivePath('/contact') 
-                    ? 'text-primary border-b-2 border-primary' 
+              <Link
+                to="/contact"
+                className={`px-3 py-2 text-sm font-medium transition-colors ${isActivePath('/contact')
+                    ? 'text-primary border-b-2 border-primary'
                     : 'text-foreground hover:text-primary'
-                }`}
+                  }`}
               >
                 Contact
               </Link>
@@ -302,51 +294,47 @@ const Navigation = () => {
             </button>
           </div>
         </div>
-        
+
         <div className={`${isMobileMenuOpen ? 'block animate-slide-in-top' : 'hidden'} lg:hidden bg-background/95 backdrop-blur-lg border-t border-border`} id="mobile-menu">
           <div className="px-2 pt-2 pb-3 space-y-2 sm:px-3">
             {user ? (
               <>
-                <Link 
-                  to="/dashboard" 
-                  className={`block px-4 py-4 rounded-lg text-base font-medium transition-all duration-200 touch-manipulation ${
-                    isActivePath('/dashboard') 
-                      ? 'text-primary bg-primary/10 shadow-sm' 
+                <Link
+                  to="/dashboard"
+                  className={`block px-4 py-4 rounded-lg text-base font-medium transition-all duration-200 touch-manipulation ${isActivePath('/dashboard')
+                      ? 'text-primary bg-primary/10 shadow-sm'
                       : 'text-foreground hover:text-primary hover:bg-accent active:scale-95'
-                  }`}
+                    }`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Dashboard
                 </Link>
-                <Link 
-                  to="/meal-plans" 
-                  className={`block px-4 py-4 rounded-lg text-base font-medium transition-all duration-200 touch-manipulation ${
-                    isActivePath('/meal-plans') 
-                      ? 'text-primary bg-primary/10 shadow-sm' 
+                <Link
+                  to="/meal-plans"
+                  className={`block px-4 py-4 rounded-lg text-base font-medium transition-all duration-200 touch-manipulation ${isActivePath('/meal-plans')
+                      ? 'text-primary bg-primary/10 shadow-sm'
                       : 'text-foreground hover:text-primary hover:bg-accent active:scale-95'
-                  }`}
+                    }`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Meal Plans
                 </Link>
-                <Link 
-                  to="/insights" 
-                  className={`block px-4 py-4 rounded-lg text-base font-medium transition-all duration-200 touch-manipulation ${
-                    isActivePath('/insights') 
-                      ? 'text-primary bg-primary/10 shadow-sm' 
+                <Link
+                  to="/insights"
+                  className={`block px-4 py-4 rounded-lg text-base font-medium transition-all duration-200 touch-manipulation ${isActivePath('/insights')
+                      ? 'text-primary bg-primary/10 shadow-sm'
                       : 'text-foreground hover:text-primary hover:bg-accent active:scale-95'
-                  }`}
+                    }`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   AI Insights
                 </Link>
-                <Link 
-                  to="/analytics" 
-                  className={`block px-4 py-4 rounded-lg text-base font-medium transition-all duration-200 touch-manipulation ${
-                    isActivePath('/analytics') 
-                      ? 'text-primary bg-primary/10 shadow-sm' 
+                <Link
+                  to="/analytics"
+                  className={`block px-4 py-4 rounded-lg text-base font-medium transition-all duration-200 touch-manipulation ${isActivePath('/analytics')
+                      ? 'text-primary bg-primary/10 shadow-sm'
                       : 'text-foreground hover:text-primary hover:bg-accent active:scale-95'
-                  }`}
+                    }`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Analytics
@@ -354,8 +342,8 @@ const Navigation = () => {
               </>
             ) : (
               <>
-                <Link 
-                  to="/#features" 
+                <Link
+                  to="/#features"
                   onClick={() => {
                     handleHashScroll('#features');
                     setIsMobileMenuOpen(false);
@@ -364,8 +352,8 @@ const Navigation = () => {
                 >
                   Features
                 </Link>
-                <Link 
-                  to="/#meal-plans" 
+                <Link
+                  to="/#meal-plans"
                   onClick={() => {
                     handleHashScroll('#meal-plans');
                     setIsMobileMenuOpen(false);
@@ -374,8 +362,8 @@ const Navigation = () => {
                 >
                   Meal Plans
                 </Link>
-                <Link 
-                  to="/#insights" 
+                <Link
+                  to="/#insights"
                   onClick={() => {
                     handleHashScroll('#insights');
                     setIsMobileMenuOpen(false);
@@ -386,40 +374,37 @@ const Navigation = () => {
                 </Link>
               </>
             )}
-            <Link 
-              to="/about" 
-              className={`block px-4 py-4 rounded-lg text-base font-medium transition-all duration-200 touch-manipulation ${
-                isActivePath('/about') 
-                  ? 'text-primary bg-primary/10 shadow-sm' 
+            <Link
+              to="/about"
+              className={`block px-4 py-4 rounded-lg text-base font-medium transition-all duration-200 touch-manipulation ${isActivePath('/about')
+                  ? 'text-primary bg-primary/10 shadow-sm'
                   : 'text-foreground hover:text-primary hover:bg-accent active:scale-95'
-              }`}
+                }`}
               onClick={() => setIsMobileMenuOpen(false)}
             >
               About
             </Link>
-                            <Link 
-                              to="/contact" 
-                              className={`block px-4 py-4 rounded-lg text-base font-medium transition-all duration-200 touch-manipulation ${
-                                isActivePath('/contact') 
-                                  ? 'text-primary bg-primary/10 shadow-sm' 
-                                  : 'text-foreground hover:text-primary hover:bg-accent active:scale-95'
-                              }`}
-                              onClick={() => setIsMobileMenuOpen(false)}
-                            >
-                              Contact
-                            </Link>
-                            <Link 
-                              to="/help-center" 
-                              className={`block px-4 py-4 rounded-lg text-base font-medium transition-all duration-200 touch-manipulation ${
-                                isActivePath('/help-center') 
-                                  ? 'text-primary bg-primary/10 shadow-sm' 
-                                  : 'text-foreground hover:text-primary hover:bg-accent active:scale-95'
-                              }`}
-                              onClick={() => setIsMobileMenuOpen(false)}
-                            >
-                              Help Center
-                            </Link>          </div>
-           {user ? (
+            <Link
+              to="/contact"
+              className={`block px-4 py-4 rounded-lg text-base font-medium transition-all duration-200 touch-manipulation ${isActivePath('/contact')
+                  ? 'text-primary bg-primary/10 shadow-sm'
+                  : 'text-foreground hover:text-primary hover:bg-accent active:scale-95'
+                }`}
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Contact
+            </Link>
+            <Link
+              to="/help-center"
+              className={`block px-4 py-4 rounded-lg text-base font-medium transition-all duration-200 touch-manipulation ${isActivePath('/help-center')
+                  ? 'text-primary bg-primary/10 shadow-sm'
+                  : 'text-foreground hover:text-primary hover:bg-accent active:scale-95'
+                }`}
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Help Center
+            </Link>          </div>
+          {user ? (
             <div className="pt-4 pb-3 border-t border-border">
               <div className="mt-3 px-2 space-y-1">
                 <Link

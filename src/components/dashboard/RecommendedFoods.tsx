@@ -16,6 +16,20 @@ interface RecommendedFoodsProps {
   isLoading?: boolean;
 }
 
+const FALLBACK_IMAGES = [
+  'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=300&q=80', // Bowl
+  'https://images.unsplash.com/photo-1467003909585-2f8a72700288?auto=format&fit=crop&w=300&q=80', // Salmon
+  'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=300&q=80', // Salad
+  'https://images.unsplash.com/photo-1473093295043-cdd812d0e601?auto=format&fit=crop&w=300&q=80', // Pasta
+  'https://images.unsplash.com/photo-1490474418585-ba9bad8fd0ea?auto=format&fit=crop&w=300&q=80', // Fruit
+  'https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=300&q=80', // Chicken
+];
+
+const getFallbackImage = (name: string) => {
+  const index = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % FALLBACK_IMAGES.length;
+  return FALLBACK_IMAGES[index];
+};
+
 const FoodCard = memo(({ food }: { food: Food }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
@@ -30,17 +44,18 @@ const FoodCard = memo(({ food }: { food: Food }) => {
           <img
             src={food.image}
             alt={food.name}
-            className={`w-full h-32 object-cover rounded-lg transition-opacity duration-300 ${
-              imageLoaded ? 'opacity-100' : 'opacity-0 absolute'
-            }`}
+            className={`w-full h-32 object-cover rounded-lg transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0 absolute'
+              }`}
             onLoad={() => setImageLoaded(true)}
             onError={() => setImageError(true)}
             loading="lazy"
           />
         ) : (
-          <div className="w-full h-32 bg-muted rounded-lg flex items-center justify-center">
-            <span className="text-muted-foreground text-sm">Image unavailable</span>
-          </div>
+          <img
+            src={getFallbackImage(food.name)}
+            alt={food.name}
+            className="w-full h-32 object-cover rounded-lg"
+          />
         )}
       </div>
       <h4 className="font-semibold text-card-foreground mb-2">{food.name}</h4>

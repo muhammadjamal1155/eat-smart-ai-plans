@@ -33,6 +33,7 @@ const NutritionForm = lazy(() => import('@/pages/NutritionForm'));
 const Reminders = lazy(() => import('@/pages/Reminders'));
 const Profile = lazy(() => import('@/pages/Profile'));
 const Settings = lazy(() => import('@/pages/Settings'));
+const ResetPassword = lazy(() => import('@/pages/ResetPassword'));
 
 function App() {
   return (
@@ -59,6 +60,7 @@ function App() {
                   <Route path="/contact" element={<Contact />} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/register" element={<Register />} />
+                  <Route path="/reset-password" element={<ResetPassword />} />
                   <Route path="/mobile-app" element={<MobileApp />} />
                   <Route path="/careers" element={<Careers />} />
                   <Route path="/press" element={<Press />} />

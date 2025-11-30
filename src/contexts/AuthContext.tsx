@@ -16,6 +16,20 @@ export interface LifestylePreferences {
   hydrationGoal?: number | null;
 }
 
+export interface ConnectedDevice {
+  id: string;
+  name: string;
+  type: string;
+  lastSync: string;
+}
+
+export interface LoginHistoryItem {
+  id: string;
+  device: string;
+  location: string;
+  timestamp: string;
+}
+
 export interface User {
   id: string;
   name: string;
@@ -28,6 +42,11 @@ export interface User {
   lifestyle?: LifestylePreferences;
   timezone?: string;
   avatarColor?: string;
+  security?: {
+    twoFactorEnabled: boolean;
+    connectedDevices: ConnectedDevice[];
+    loginHistory: LoginHistoryItem[];
+  };
 }
 
 interface AuthContextType {
@@ -89,6 +108,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         lifestyle: {
           ...prev.lifestyle,
           ...updates.lifestyle,
+        },
+        security: {
+          twoFactorEnabled: false,
+          connectedDevices: [],
+          loginHistory: [],
+          ...prev.security,
+          ...updates.security,
         },
       };
       persistUser(nextUser);

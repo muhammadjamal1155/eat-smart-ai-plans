@@ -1,3 +1,16 @@
+import Navigation from '@/components/Navigation';
+import Footer from '@/components/Footer';
+import { usePageTitle } from '@/hooks/use-page-title';
+
+const TermsOfService = () => {
+  usePageTitle('Terms of Service');
+
+  return (
+    <div className="min-h-screen">
+      <Navigation />
+      <main className="pt-20">
+        <section className="py-12 md:py-20 bg-gray-50">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <header className="mb-8 md:mb-12 text-center">
               <h1 className="text-4xl sm:text-5xl font-bold">Terms of Service</h1>
               <p className="mt-4 text-lg text-muted-foreground">
@@ -41,11 +54,11 @@
                 If you have any questions about these Terms of Service, please contact us at legal@nutriguide.ai.
               </p>
             </div>
-          </div >
-        </section >
-      </main >
-  <Footer />
-    </div >
+          </div>
+        </section>
+      </main>
+      <Footer />
+    </div>
   );
 };
 

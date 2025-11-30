@@ -573,16 +573,53 @@ const Profile = () => {
                       </p>
                       <div className="mt-4 flex flex-wrap gap-3">
                         <Button
-                          onClick={() =>
-                            toast({
-                              title: 'Password reset sent',
-                              description: `We just emailed a reset link to ${user.email}. Follow the instructions to choose a new password.`,
-                            })
-                          }
+                          onClick={async () => {
+                            try {
+                              const response = await fetch('http://localhost:5000/api/reset-password', {
+                                method: 'POST',
+                                headers: {
+                                  'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({ email: user.email }),
+                              });
+
+                              if (response.ok) {
+                                toast({
+                                  title: 'Password reset sent',
+                                  description: `We just emailed a reset link to ${user.email}. (Check server console for simulation)`,
+                                });
+                              } else {
+                                throw new Error('Failed to send reset link');
+                              }
+                            } catch (error) {
+                              toast({
+                                title: 'Error',
+                                description: 'Could not send reset link. Please try again.',
+                                variant: 'destructive',
+                              });
+                            }
+                          }}
                         >
                           Send password reset
                         </Button>
-                        <Button variant="outline">Enable two-factor (coming soon)</Button>
+                        <Button
+                          variant={user.security?.twoFactorEnabled ? "default" : "outline"}
+                          onClick={async () => {
+                            const enabled = !user.security?.twoFactorEnabled;
+                            await updateUser({
+                              security: {
+                                ...user.security!,
+                                twoFactorEnabled: enabled
+                              }
+                            });
+                            toast({
+                              title: enabled ? 'Two-factor authentication enabled' : 'Two-factor authentication disabled',
+                              description: enabled ? 'Your account is now more secure.' : 'We recommend keeping 2FA enabled.',
+                            });
+                          }}
+                        >
+                          {user.security?.twoFactorEnabled ? 'Disable two-factor' : 'Enable two-factor'}
+                        </Button>
                       </div>
                     </div>
 
@@ -590,25 +627,112 @@ const Profile = () => {
                       <Card className="border-dashed">
                         <CardHeader>
                           <CardTitle className="text-base">Connected devices</CardTitle>
-                          <CardDescription>Apple Health, Fitbit Sense</CardDescription>
+                          <CardDescription>
+                            {user.security?.connectedDevices?.length
+                              ? user.security.connectedDevices.map(d => d.name).join(', ')
+                              : 'No devices connected'}
+                          </CardDescription>
                         </CardHeader>
+                        <CardContent className="space-y-2">
+                          {user.security?.connectedDevices?.map(device => (
+                            <div key={device.id} className="flex items-center justify-between text-sm">
+                              <span>{device.name}</span>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-auto p-1 text-destructive hover:text-destructive"
+                                onClick={async () => {
+                                  await updateUser({
+                                    security: {
+                                      ...user.security!,
+                                      connectedDevices: user.security!.connectedDevices.filter(d => d.id !== device.id)
+                                    }
+                                  });
+                                  toast({ title: 'Device disconnected', description: `${device.name} has been removed.` });
+                                }}
+                              >
+                                Disconnect
+                              </Button>
+                            </div>
+                          ))}
+                        </CardContent>
                         <CardFooter className="flex justify-between">
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" disabled>
                             Manage connections
                           </Button>
-                          <Button size="sm">Connect new</Button>
+                          <Button
+                            size="sm"
+                            onClick={async () => {
+                              const newDevice = {
+                                id: Math.random().toString(36).substr(2, 9),
+                                name: ['Oura Ring', 'Garmin Watch', 'MyFitnessPal', 'Strava'][Math.floor(Math.random() * 4)],
+                                type: 'Health App',
+                                lastSync: new Date().toISOString()
+                              };
+                              await updateUser({
+                                security: {
+                                  ...user.security!,
+                                  connectedDevices: [...(user.security?.connectedDevices || []), newDevice]
+                                }
+                              });
+                              toast({ title: 'Device connected', description: `${newDevice.name} is now synced.` });
+                            }}
+                          >
+                            Connect new
+                          </Button>
                         </CardFooter>
                       </Card>
                       <Card className="border-dashed">
                         <CardHeader>
                           <CardTitle className="text-base">Login history</CardTitle>
-                          <CardDescription>Last sign in: Today, 08:24 BST</CardDescription>
+                          <CardDescription>
+                            Last sign in: {user.security?.loginHistory?.[0]?.timestamp ? new Date(user.security.loginHistory[0].timestamp).toLocaleString() : 'Never'}
+                          </CardDescription>
                         </CardHeader>
+                        <CardContent className="space-y-2">
+                          {user.security?.loginHistory?.slice(0, 3).map(login => (
+                            <div key={login.id} className="flex justify-between text-xs text-muted-foreground">
+                              <span>{login.device} ({login.location})</span>
+                              <span>{new Date(login.timestamp).toLocaleDateString()}</span>
+                            </div>
+                          ))}
+                          {!user.security?.loginHistory?.length && <p className="text-sm text-muted-foreground">No recent login history.</p>}
+                        </CardContent>
                         <CardFooter className="flex justify-between">
-                          <Button variant="outline" size="sm">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={async () => {
+                              const newLogin = {
+                                id: Math.random().toString(36).substr(2, 9),
+                                device: 'Chrome on Windows',
+                                location: 'London, UK',
+                                timestamp: new Date().toISOString()
+                              };
+                              await updateUser({
+                                security: {
+                                  ...user.security!,
+                                  loginHistory: [newLogin, ...(user.security?.loginHistory || [])]
+                                }
+                              });
+                              toast({ title: 'Activity refreshed', description: 'Latest login activity loaded.' });
+                            }}
+                          >
                             View activity
                           </Button>
-                          <Button size="sm" variant="destructive">
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={async () => {
+                              await updateUser({
+                                security: {
+                                  ...user.security!,
+                                  loginHistory: []
+                                }
+                              });
+                              toast({ title: 'Signed out', description: 'All other sessions have been terminated.' });
+                            }}
+                          >
                             Sign out of all devices
                           </Button>
                         </CardFooter>

@@ -60,7 +60,7 @@ const LoginForm = ({ onSwitchToRegister }: { onSwitchToRegister: () => void }) =
     try {
       // Simulate login delay
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       // Demo user login
       const demoUser = {
         id: '1',
@@ -73,7 +73,7 @@ const LoginForm = ({ onSwitchToRegister }: { onSwitchToRegister: () => void }) =
       };
 
       login(demoUser);
-      
+
       toast({
         title: "Welcome back!",
         description: "Successfully logged into NutriGuide AI.",
@@ -129,6 +129,11 @@ const LoginForm = ({ onSwitchToRegister }: { onSwitchToRegister: () => void }) =
               className={passwordError ? 'border-destructive' : ''}
             />
             {passwordError && <p className="text-sm text-destructive">{passwordError}</p>}
+            <div className="text-right">
+              <a href="/reset-password" className="text-sm text-primary hover:underline">
+                Forgot password?
+              </a>
+            </div>
           </div>
 
           <Button type="submit" className="w-full" disabled={isLoading || emailError !== '' || passwordError !== ''}>

@@ -32,5 +32,23 @@ def get_meals():
     meals = engine.search_meals(query)
     return jsonify(meals)
 
+@app.route('/api/reset-password', methods=['POST'])
+def reset_password():
+    data = request.json
+    email = data.get('email')
+    
+    if not email:
+        return jsonify({"error": "Email is required"}), 400
+        
+    # In a real application, you would generate a token and send an email here.
+    # For now, we will log it to the console to simulate the action.
+    print(f"----------------------------------------------------------------")
+    print(f"SIMULATION: Password reset requested for {email}")
+    print(f"Email would be sent to: {email}")
+    print(f"Reset Link: http://localhost:5173/reset-password-confirm?token=simulation-token")
+    print(f"----------------------------------------------------------------")
+    
+    return jsonify({"message": "Password reset link sent (simulated)", "status": "success"})
+
 if __name__ == '__main__':
     app.run(debug=True)

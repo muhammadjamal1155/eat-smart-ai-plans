@@ -4,6 +4,9 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { toast } from "@/hooks/use-toast";
+import { useNavigate } from 'react-router-dom';
 import { Clock, Users, Filter, ArrowLeft, ChefHat, Utensils } from 'lucide-react';
 
 interface Meal {
@@ -16,7 +19,7 @@ interface Meal {
     fats: number;
     tags: string[];
     time: string;
-    ingredients: string;
+    ingredients: string[];
     steps: string[];
 }
 
@@ -34,18 +37,53 @@ const RecommendationResults = ({ data, onBack }: RecommendationResultsProps) => 
     const [filter, setFilter] = useState('All');
     const [selectedMeal, setSelectedMeal] = useState<Meal | null>(null);
 
+    const filters = ['All', 'Healthy', 'Quick', 'Protein-rich', 'Vegan', 'Low Carb', 'Gluten Free'];
+
+    const filterMap: { [key: string]: string[] } = {
+        'All': [],
+        'Healthy': ['low-in-something', 'low-sodium', 'low-fat', 'healthy'],
+        'Quick': ['30-minutes-or-less', '15-minutes-or-less', 'easy', 'quick'],
+        'Protein-rich': ['high-protein', 'protein'],
+        'Vegan': ['vegan'],
+        'Low Carb': ['low-carb', 'very-low-carbs'],
+        'Gluten Free': ['gluten-free']
+    };
+
     const filteredMeals = filter === 'All'
         ? data.meals
-        : data.meals.filter(meal => meal.tags.some(tag => tag.toLowerCase().includes(filter.toLowerCase())));
+        : data.meals.filter(meal => {
+            const targetTags = filterMap[filter] || [];
+            return meal.tags.some(tag => targetTags.some(t => tag.toLowerCase().includes(t)));
+        });
 
-    const filters = ['All', 'Healthy', 'Quick', 'Protein-rich', 'Vegan'];
+    const fallbackImages = [
+        "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&q=80", // Salad bowl
+        "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&q=80", // Steak/Meat
+        "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=800&q=80", // Healthy bowl
+        "https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=800&q=80", // Pancakes/Breakfast
+        "https://images.unsplash.com/photo-1476718406336-bb5a9690ee2a?w=800&q=80", // Soup
+        "https://images.unsplash.com/photo-1482049016688-2d3e1b311543?w=800&q=80", // Sandwich/Toast
+        "https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=800&q=80", // French toast/Dessert
+        "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&q=80", // Veggie bowl
+    ];
 
-    const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-        e.currentTarget.src = "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&q=80"; // Fallback food image
+    const getFallbackImage = (id: string) => {
+        const index = parseInt(id) % fallbackImages.length;
+        return fallbackImages[index];
+    };
+
+    const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>, id: string) => {
+        e.currentTarget.src = getFallbackImage(id);
+    };
+
+    const navigate = useNavigate();
+
+    const handleGoToMealPlan = () => {
+        navigate('/meal-plans');
     };
 
     return (
-        <div className="w-full max-w-6xl mx-auto space-y-6">
+        <div className="w-full max-w-6xl mx-auto space-y-8">
             <div className="flex items-center justify-between">
                 <Button variant="ghost" onClick={onBack} className="flex items-center gap-2">
                     <ArrowLeft className="w-4 h-4" /> Back
@@ -54,6 +92,16 @@ const RecommendationResults = ({ data, onBack }: RecommendationResultsProps) => 
                     <h2 className="text-2xl font-bold text-primary">Your Daily Target: {data.target_calories} kcal</h2>
                     <p className="text-muted-foreground">Based on your BMR ({data.bmr}) and Activity</p>
                 </div>
+            </div>
+
+            <div className="bg-secondary/10 border-primary/20 rounded-lg p-6 flex flex-col md:flex-row items-center justify-between gap-4">
+                <div>
+                    <h3 className="text-xl font-semibold text-primary mb-2">Ready to plan your week?</h3>
+                    <p className="text-muted-foreground">Head over to the Meal Planner to add these recommended meals to your weekly schedule.</p>
+                </div>
+                <Button onClick={handleGoToMealPlan} className="bg-primary text-primary-foreground hover:bg-primary/90">
+                    Go to Meal Planner
+                </Button>
             </div>
 
             <div className="flex items-center gap-2 overflow-x-auto pb-2">
@@ -75,9 +123,9 @@ const RecommendationResults = ({ data, onBack }: RecommendationResultsProps) => 
                     <Card key={meal.id} className="overflow-hidden hover:shadow-lg transition-shadow bg-card border-primary/20 flex flex-col">
                         <div className="relative h-48 w-full">
                             <img
-                                src={meal.image}
+                                src={meal.image && !meal.image.includes('placeholder') ? meal.image : getFallbackImage(meal.id)}
                                 alt={meal.name}
-                                onError={handleImageError}
+                                onError={(e) => handleImageError(e, meal.id)}
                                 className="w-full h-full object-cover"
                             />
                             <div className="absolute top-2 right-2 flex gap-1">
@@ -125,10 +173,10 @@ const RecommendationResults = ({ data, onBack }: RecommendationResultsProps) => 
                             </div>
                         </CardContent>
 
-                        <CardFooter className="pt-2">
+                        <CardFooter className="pt-2 gap-2">
                             <Dialog>
                                 <DialogTrigger asChild>
-                                    <Button className="w-full bg-[#C5D86D] text-black hover:bg-[#B5C85D]" onClick={() => setSelectedMeal(meal)}>
+                                    <Button className="flex-1 bg-[#C5D86D] text-black hover:bg-[#B5C85D]" onClick={() => setSelectedMeal(meal)}>
                                         View Recipe
                                     </Button>
                                 </DialogTrigger>
@@ -149,9 +197,14 @@ const RecommendationResults = ({ data, onBack }: RecommendationResultsProps) => 
                                                 <h3 className="text-lg font-semibold flex items-center gap-2 text-primary">
                                                     <Utensils className="w-5 h-5" /> Ingredients
                                                 </h3>
-                                                <p className="text-muted-foreground leading-relaxed bg-secondary/10 p-4 rounded-lg">
-                                                    {meal.ingredients}
-                                                </p>
+                                                <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                                    {meal.ingredients.map((ingredient, index) => (
+                                                        <li key={index} className="flex items-center gap-2 text-muted-foreground bg-secondary/10 p-2 rounded-md">
+                                                            <div className="w-2 h-2 rounded-full bg-primary flex-shrink-0" />
+                                                            <span className="capitalize">{ingredient}</span>
+                                                        </li>
+                                                    ))}
+                                                </ul>
                                             </div>
 
                                             <div className="space-y-3">

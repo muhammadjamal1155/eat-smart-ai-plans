@@ -25,6 +25,12 @@ def recommend():
         return jsonify(recommendations), 500
 
     return jsonify(recommendations)
+    
+@app.route('/meals', methods=['GET'])
+def get_meals():
+    query = request.args.get('query', '')
+    meals = engine.search_meals(query)
+    return jsonify(meals)
 
 if __name__ == '__main__':
     app.run(debug=True)

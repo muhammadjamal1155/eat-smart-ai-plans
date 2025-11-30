@@ -18,15 +18,14 @@ try:
     tag_counts = Counter(all_tags)
     
     # Common diet keywords to look for
-    diet_keywords = [
-        'vegan', 'vegetarian', 'keto', 'paleo', 'gluten-free', 'dairy-free', 
-        'low-carb', 'low-fat', 'high-protein', 'nut-free', 'egg-free'
-    ]
+    search_terms = ['health', 'quick', 'fast', 'protein', 'vegan', 'vegetarian', 'low-carb', 'gluten']
     
-    print("Diet Tag Counts:")
-    for keyword in diet_keywords:
-        count = tag_counts.get(keyword, 0)
-        print(f"{keyword}: {count}")
+    print("Tag Search Results:")
+    for term in search_terms:
+        print(f"\n--- Tags containing '{term}' ---")
+        matches = [tag for tag in tag_counts.keys() if term in tag]
+        for match in matches:
+            print(f"{match}: {tag_counts[match]}")
         
     print("\nTop 20 Most Common Tags:")
     for tag, count in tag_counts.most_common(20):

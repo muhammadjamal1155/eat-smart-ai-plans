@@ -43,6 +43,26 @@ const MealPlanCard = ({ mealType, meal, onMealChange }: MealPlanCardProps) => {
     setIsEditing(false);
   };
 
+  const fallbackImages = [
+    "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&q=80", // Salad bowl
+    "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&q=80", // Steak/Meat
+    "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=800&q=80", // Healthy bowl
+    "https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=800&q=80", // Pancakes/Breakfast
+    "https://images.unsplash.com/photo-1476718406336-bb5a9690ee2a?w=800&q=80", // Soup
+    "https://images.unsplash.com/photo-1482049016688-2d3e1b311543?w=800&q=80", // Sandwich/Toast
+    "https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=800&q=80", // French toast/Dessert
+    "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&q=80", // Veggie bowl
+  ];
+
+  const getFallbackImage = (id: string) => {
+    const index = parseInt(id) % fallbackImages.length;
+    return fallbackImages[index];
+  };
+
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>, id: string) => {
+    e.currentTarget.src = getFallbackImage(id);
+  };
+
   if (!meal) {
     return (
       <Card className="h-full border-2 border-dashed border-gray-300 hover:border-health-400 transition-colors">
@@ -85,15 +105,16 @@ const MealPlanCard = ({ mealType, meal, onMealChange }: MealPlanCardProps) => {
               </Button>
             </div>
           </div>
-          
+
           <img
-            src={meal.image}
+            src={meal.image && !meal.image.includes('placeholder') ? meal.image : getFallbackImage(meal.id)}
             alt={meal.name}
+            onError={(e) => handleImageError(e, meal.id)}
             className="w-full h-32 object-cover rounded-lg"
           />
-          
+
           <h5 className="font-medium text-foreground text-sm leading-tight">{meal.name}</h5>
-          
+
           <div className="flex flex-wrap gap-1">
             {meal.tags.slice(0, 2).map((tag) => (
               <Badge key={tag} variant="secondary" className="text-xs">
@@ -101,7 +122,7 @@ const MealPlanCard = ({ mealType, meal, onMealChange }: MealPlanCardProps) => {
               </Badge>
             ))}
           </div>
-          
+
           <div className="flex justify-between text-xs text-muted-foreground">
             <div className="flex items-center">
               <Clock className="w-3 h-3 mr-1" />
@@ -112,14 +133,14 @@ const MealPlanCard = ({ mealType, meal, onMealChange }: MealPlanCardProps) => {
               <span>{meal.servings}</span>
             </div>
           </div>
-          
+
           <div className="grid grid-cols-2 gap-1 text-xs text-muted-foreground">
             <div className="truncate">Cal: {meal.calories}</div>
             <div className="truncate">Pro: {meal.protein}g</div>
             <div className="truncate">Carb: {meal.carbs}g</div>
             <div className="truncate">Fat: {meal.fats}g</div>
           </div>
-          
+
           <div className="space-y-1">
             <div className="text-xs font-medium text-foreground">Ingredients:</div>
             <div className="text-xs text-muted-foreground leading-tight">

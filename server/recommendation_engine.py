@@ -207,7 +207,7 @@ class RecommendationEngine:
                     "image": row['image_url'] if pd.notna(row['image_url']) else "https://via.placeholder.com/300",
                     "time": f"{int(row['minutes'])} min",
                     "tags": eval(row['tags'])[:3] if isinstance(row['tags'], str) else [],
-                    "ingredients": row['ingredients'],
+                    "ingredients": eval(row['ingredients']) if isinstance(row['ingredients'], str) else [],
                     "steps": eval(row['steps']) if isinstance(row['steps'], str) else []
                 })
                 
@@ -220,8 +220,38 @@ class RecommendationEngine:
 
         except Exception as e:
             print(f"Error generating recommendations: {e}")
-            with open("error.log", "a") as f:
-                f.write(f"Error: {str(e)}\n")
-                import traceback
-                traceback.print_exc(file=f)
             return {"error": str(e)}
+
+    def search_meals(self, query=None):
+        if self.data.empty:
+            return []
+        
+        if not query:
+            # Return random sample if no query
+            return self._format_results(self.data.sample(20))
+            
+        # Search by name or tags
+        mask = (
+            self.data['name'].str.contains(query, case=False, na=False) | 
+            self.data['tags'].str.contains(query, case=False, na=False)
+        )
+        results_df = self.data[mask].head(20)
+        return self._format_results(results_df)
+
+    def _format_results(self, df):
+        results = []
+        for _, row in df.iterrows():
+            results.append({
+                "id": str(row['id']),
+                "name": row['name'],
+                "calories": int(row['calories']),
+                "protein": int(row['protein']),
+                "carbs": int(row['carbs']),
+                "fats": int(row['fats']),
+                "image": row['image_url'] if pd.notna(row['image_url']) else "https://via.placeholder.com/300",
+                "time": f"{int(row['minutes'])} min",
+                "tags": eval(row['tags'])[:3] if isinstance(row['tags'], str) else [],
+                "ingredients": eval(row['ingredients']) if isinstance(row['ingredients'], str) else [],
+                "steps": eval(row['steps']) if isinstance(row['steps'], str) else []
+            })
+        return results

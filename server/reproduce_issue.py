@@ -27,13 +27,10 @@ def reproduce():
             }
         },
         {
-            "name": "Empty Payload Test",
-            "payload": {}
-        },
-        {
-            "name": "Missing Fields Test",
+            "name": "Filter Tags Test",
             "payload": {
-                "age": "30", "gender": "male"
+                "age": "30", "weight": "70", "height": "175", "gender": "male",
+                "goal": "maintenance", "activity_level": "sedentary", "diet_type": "any", "allergies": []
             }
         }
     ]
@@ -45,13 +42,12 @@ def reproduce():
             print("Status Code:", response.status_code)
             if response.status_code == 200:
                 data = response.json()
-                print(f"Meals Found: {len(data.get('meals', []))}")
+                if data.get('meals'):
+                    print("First 3 meals tags:")
+                    for i, meal in enumerate(data['meals'][:3]):
+                        print(f"Meal {i+1}: {meal['tags']}")
             else:
                 print("Response Text:", response.text)
-                try:
-                    print("Error JSON:", response.json())
-                except:
-                    pass
         except Exception as e:
             print("Error:", e)
 

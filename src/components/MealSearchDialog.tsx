@@ -42,6 +42,19 @@ const MealSearchDialog = ({ onSelectMeal, mealType, isOpen, onOpenChange }: Meal
       setIsLoading(true);
       try {
         if (selectedFilter === 'recommended') {
+          // Try to get saved recommendations first to ensure consistency with Nutrition Form
+          const savedRecommendations = localStorage.getItem('recommendedMeals');
+          if (savedRecommendations) {
+            try {
+              setMeals(JSON.parse(savedRecommendations));
+              setIsLoading(false);
+              return;
+            } catch (e) {
+              console.error("Failed to parse saved recommendations", e);
+              localStorage.removeItem('recommendedMeals');
+            }
+          }
+
           const userProfileStr = localStorage.getItem('userProfile');
           if (userProfileStr) {
             const userProfile = JSON.parse(userProfileStr);

@@ -15,7 +15,9 @@ const DashboardSection = memo(() => {
     targets: [],
     weeklyData: [],
     comparison: [],
+    recommendedFoods: []
   });
+  const [isLoading, setIsLoading] = React.useState(true);
 
   React.useEffect(() => {
     const savedProfile = localStorage.getItem('userProfile');
@@ -70,7 +72,6 @@ const DashboardSection = memo(() => {
       { nutrient: 'Fats', current: currentFats, target: targetFats },
     ];
 
-    setDashboardData({ targets, weeklyData: weekly, comparison });
     // 4. Dynamic Achievement
     let achievement = {
       title: 'Get Started',
@@ -111,6 +112,8 @@ const DashboardSection = memo(() => {
       }
     }
 
+    setDashboardData({ targets, weeklyData: weekly, comparison, achievement, recommendedFoods: [] });
+
     // 5. Dynamic Recommendations (Fetch from API)
     const fetchRecommendations = async () => {
       const fallbackFoods = [
@@ -137,12 +140,36 @@ const DashboardSection = memo(() => {
         },
       ];
 
-      if (!userProfile) {
-        setDashboardData((prev: any) => ({ ...prev, recommendedFoods: fallbackFoods }));
-        return;
-      }
-
       try {
+        // Try to get saved recommendations first to ensure consistency with Nutrition Form
+        const savedRecommendations = localStorage.getItem('recommendedMeals');
+        if (savedRecommendations) {
+          try {
+            const parsedMeals = JSON.parse(savedRecommendations);
+            if (parsedMeals && parsedMeals.length > 0) {
+              const mappedMeals = parsedMeals.slice(0, 3).map((meal: any) => ({
+                name: meal.name,
+                image: meal.image,
+                calories: meal.calories,
+                protein: meal.protein,
+                benefits: meal.tags ? meal.tags.slice(0, 2) : ['Healthy'],
+              }));
+              setDashboardData((prev: any) => ({ ...prev, recommendedFoods: mappedMeals }));
+              setIsLoading(false);
+              return;
+            }
+          } catch (e) {
+            console.error("Failed to parse saved recommendations", e);
+            localStorage.removeItem('recommendedMeals');
+          }
+        }
+
+        if (!userProfile) {
+          setDashboardData((prev: any) => ({ ...prev, recommendedFoods: fallbackFoods }));
+          setIsLoading(false);
+          return;
+        }
+
         const response = await fetch('http://localhost:5000/recommend', {
           method: 'POST',
           headers: {
@@ -181,12 +208,12 @@ const DashboardSection = memo(() => {
       } catch (error) {
         console.error("Failed to fetch recommendations:", error);
         setDashboardData((prev: any) => ({ ...prev, recommendedFoods: fallbackFoods }));
+      } finally {
+        setIsLoading(false);
       }
     };
 
     fetchRecommendations();
-
-    setDashboardData({ targets, weeklyData: weekly, comparison, achievement, recommendedFoods: [] });
   }, []);
 
   return (
@@ -227,7 +254,7 @@ const DashboardSection = memo(() => {
               </div>
 
               {/* Recommended Foods */}
-              <RecommendedFoods foods={dashboardData.recommendedFoods || []} />
+              <RecommendedFoods foods={dashboardData.recommendedFoods || []} isLoading={isLoading} />
             </div>
 
             {/* Right Column - Sidebar */}

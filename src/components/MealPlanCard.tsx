@@ -25,10 +25,10 @@ interface MealPlanCardProps {
   mealType: 'breakfast' | 'lunch' | 'dinner';
   meal: Meal | null;
   onMealChange: (meal: Meal | null) => void;
+  onEdit?: () => void;
 }
 
-const MealPlanCard = ({ mealType, meal, onMealChange }: MealPlanCardProps) => {
-  const [isEditing, setIsEditing] = useState(false);
+const MealPlanCard = ({ mealType, meal, onMealChange, onEdit }: MealPlanCardProps) => {
 
   const handleRemoveMeal = () => {
     onMealChange(null);
@@ -40,7 +40,6 @@ const MealPlanCard = ({ mealType, meal, onMealChange }: MealPlanCardProps) => {
 
   const handleMealSelect = (selectedMeal: Meal) => {
     onMealChange(selectedMeal);
-    setIsEditing(false);
   };
 
   const fallbackImages = [
@@ -71,10 +70,12 @@ const MealPlanCard = ({ mealType, meal, onMealChange }: MealPlanCardProps) => {
             <h4 className="font-semibold text-foreground capitalize mb-2 text-sm">{mealType}</h4>
             <p className="text-muted-foreground text-sm mb-4">No meal planned</p>
           </div>
-          <MealSearchDialog
-            mealType={mealType}
-            onSelectMeal={handleMealSelect}
-          />
+          {/* If no meal, we typically use the parent's add button, but if this card is rendered, it might have its own trigger if desired. 
+              However, the parent usually handles the "Add" state. 
+              If we want this card to be clickable to add, we can use onEdit here too. */}
+          <Button variant="outline" size="sm" onClick={onEdit}>
+            Add Meal
+          </Button>
         </CardContent>
       </Card>
     );
@@ -90,7 +91,7 @@ const MealPlanCard = ({ mealType, meal, onMealChange }: MealPlanCardProps) => {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setIsEditing(true)}
+                onClick={onEdit}
                 className="h-7 w-7 p-0"
               >
                 <Edit3 className="w-3 h-3" />
@@ -148,15 +149,6 @@ const MealPlanCard = ({ mealType, meal, onMealChange }: MealPlanCardProps) => {
               {meal.ingredients.length > 3 && '...'}
             </div>
           </div>
-
-          {isEditing && (
-            <div className="pt-2 border-t">
-              <MealSearchDialog
-                mealType={mealType}
-                onSelectMeal={handleMealSelect}
-              />
-            </div>
-          )}
         </div>
       </CardContent>
     </Card>

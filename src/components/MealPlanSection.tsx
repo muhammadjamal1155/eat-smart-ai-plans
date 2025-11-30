@@ -319,6 +319,17 @@ const MealPlanSection = () => {
               <Button onClick={handleSharePlan}>
                 <Share2 className="mr-2 h-4 w-4" /> Share
               </Button>
+              <Button variant="destructive" onClick={() => {
+                if (window.confirm("Are you sure you want to delete all meals from your plan? This action cannot be undone.")) {
+                  setWeekMeals(initialWeekMeals);
+                  toast({
+                    title: "All Meals Deleted",
+                    description: "Your meal plan has been cleared.",
+                  });
+                }
+              }}>
+                <Trash2 className="mr-2 h-4 w-4" /> Clear Plan
+              </Button>
             </div>
 
             {daysOfWeek.map((day) => {
@@ -334,6 +345,7 @@ const MealPlanSection = () => {
                             mealType={mealType as "breakfast" | "lunch" | "dinner"}
                             meal={filteredMeals[day][mealType as keyof DayMeals]!}
                             onMealChange={(newMeal) => handleMealChange(day, mealType as keyof DayMeals, newMeal)}
+                            onEdit={() => handleOpenBrowseMeals(day, mealType as keyof DayMeals)}
                           />
                         ) : (
                           <Button

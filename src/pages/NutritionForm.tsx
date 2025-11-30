@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Progress } from "@/components/ui/progress";
 import { toast } from "@/hooks/use-toast";
 import RecommendationResults from "@/components/RecommendationResults";
+import { useAuth } from "@/hooks/use-auth";
 
 const steps = [
   { id: 1, title: "Personal Details" },
@@ -25,7 +26,7 @@ export default function NutritionForm() {
     age: "",
     gender: "",
     height: "",
-    heightUnit: "cm",
+    heightUnit: "ft",
     weight: "",
     weightUnit: "kg",
     goal: "",
@@ -40,6 +41,7 @@ export default function NutritionForm() {
   const [recommendations, setRecommendations] = useState<any>(null);
   const [showResults, setShowResults] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const { user, updateUser, login } = useAuth();
 
   const navigate = useNavigate();
 
@@ -120,6 +122,59 @@ export default function NutritionForm() {
       };
       localStorage.setItem('userProfile', JSON.stringify(userProfile));
 
+      // Save specific recommendations to ensure consistency in Meal Planner
+      if (data.meals) {
+        localStorage.setItem('recommendedMeals', JSON.stringify(data.meals));
+      }
+
+      // Update AuthContext user
+      if (user) {
+        await updateUser({
+          name: formData.fullName,
+          age: parseInt(formData.age),
+          weight: weightInKg,
+          height: heightInCm,
+          goal: formData.goal,
+          nutrition: {
+            calories: data.target_calories,
+            protein: data.target_protein || Math.round(data.target_calories * 0.3 / 4), // Fallback calculation if API doesn't return macros
+            carbs: data.target_carbs || Math.round(data.target_calories * 0.4 / 4),
+            fats: data.target_fats || Math.round(data.target_calories * 0.3 / 9),
+            fiber: 30 // Default
+          },
+          lifestyle: {
+            activityLevel: formData.activityLevel as any, // Type assertion for simplicity, or map values
+            dietaryPreference: formData.dietType,
+            allergies: formData.foodAllergies ? formData.foodAllergies.split(',') : [],
+            hydrationGoal: parseFloat(formData.waterIntake) || 2.5
+          }
+        });
+      } else {
+        // If for some reason user is null (shouldn't happen in protected route), log them in
+        login({
+          id: '1',
+          name: formData.fullName,
+          email: 'user@example.com',
+          age: parseInt(formData.age),
+          weight: weightInKg,
+          height: heightInCm,
+          goal: formData.goal,
+          nutrition: {
+            calories: data.target_calories,
+            protein: data.target_protein || Math.round(data.target_calories * 0.3 / 4),
+            carbs: data.target_carbs || Math.round(data.target_calories * 0.4 / 4),
+            fats: data.target_fats || Math.round(data.target_calories * 0.3 / 9),
+            fiber: 30
+          },
+          lifestyle: {
+            activityLevel: formData.activityLevel as any,
+            dietaryPreference: formData.dietType,
+            allergies: formData.foodAllergies ? formData.foodAllergies.split(',') : [],
+            hydrationGoal: parseFloat(formData.waterIntake) || 2.5
+          }
+        });
+      }
+
       setShowResults(true);
       toast({
         title: "Plan Generated!",
@@ -187,14 +242,14 @@ export default function NutritionForm() {
                   <div className="space-y-2">
                     <Label htmlFor="height">Height</Label>
                     <div className="flex gap-2">
-                      <Input id="height" type="number" value={formData.height} onChange={handleChange} placeholder="180" required className="w-2/3" />
+                      <Input id="height" type="number" value={formData.height} onChange={handleChange} placeholder="5.9" required className="w-2/3" />
                       <Select onValueChange={(value) => handleSelectChange("heightUnit", value)} value={formData.heightUnit}>
                         <SelectTrigger className="w-1/3">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="cm">cm</SelectItem>
                           <SelectItem value="ft">ft</SelectItem>
+                          <SelectItem value="cm">cm</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>

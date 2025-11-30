@@ -1,39 +1,15 @@
 
-import { lazy, Suspense } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Suspense } from 'react';
+import { BrowserRouter as Router } from 'react-router-dom';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { ThemeProvider } from '@/components/ThemeProvider';
 
 import Chatbot from '@/components/Chatbot';
 import { Toaster } from '@/components/ui/toaster';
 import ErrorBoundary from '@/components/ErrorBoundary';
-import ProtectedRoute from '@/components/ProtectedRoute';
 import '@/App.css';
 import ScrollToTop from '@/components/ScrollToTop';
-
-const Index = lazy(() => import('@/pages/Index'));
-const Dashboard = lazy(() => import('@/pages/Dashboard'));
-const MealPlans = lazy(() => import('@/pages/MealPlans'));
-const Insights = lazy(() => import('@/pages/Insights'));
-const Analytics = lazy(() => import('@/pages/Analytics'));
-const About = lazy(() => import('@/pages/About'));
-const Contact = lazy(() => import('@/pages/Contact'));
-const Account = lazy(() => import('@/pages/Account'));
-const Login = lazy(() => import('@/pages/Login'));
-const Register = lazy(() => import('@/pages/Register'));
-const NotFound = lazy(() => import('@/pages/NotFound'));
-const MobileApp = lazy(() => import('@/pages/MobileApp'));
-const Careers = lazy(() => import('@/pages/Careers'));
-const Press = lazy(() => import('@/pages/Press'));
-const Blog = lazy(() => import('@/pages/Blog'));
-const HelpCenter = lazy(() => import('@/pages/HelpCenter'));
-const PrivacyPolicy = lazy(() => import('@/pages/PrivacyPolicy'));
-const TermsOfService = lazy(() => import('@/pages/TermsOfService'));
-const NutritionForm = lazy(() => import('@/pages/NutritionForm'));
-const Reminders = lazy(() => import('@/pages/Reminders'));
-const Profile = lazy(() => import('@/pages/Profile'));
-const Settings = lazy(() => import('@/pages/Settings'));
-const ResetPassword = lazy(() => import('@/pages/ResetPassword'));
+import AnimatedRoutes from '@/components/AnimatedRoutes';
 
 function App() {
   return (
@@ -47,31 +23,7 @@ function App() {
                 Skip to main content
               </a>
               <Suspense fallback={<div>Loading...</div>}>
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/account" element={<ProtectedRoute><Account /></ProtectedRoute>} />
-                  <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-                  <Route path="/meal-plans" element={<ProtectedRoute><MealPlans /></ProtectedRoute>} />
-                  <Route path="/insights" element={<ProtectedRoute><Insights /></ProtectedRoute>} />
-                  <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
-                  <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-                  <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-                  <Route path="/about" element={<About />} />
-                  <Route path="/contact" element={<Contact />} />
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/register" element={<Register />} />
-                  <Route path="/reset-password" element={<ResetPassword />} />
-                  <Route path="/mobile-app" element={<MobileApp />} />
-                  <Route path="/careers" element={<Careers />} />
-                  <Route path="/press" element={<Press />} />
-                  <Route path="/blog" element={<Blog />} />
-                  <Route path="/help-center" element={<HelpCenter />} />
-                  <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-                  <Route path="/terms-of-service" element={<TermsOfService />} />
-                  <Route path="/nutrition-form" element={<ProtectedRoute><NutritionForm /></ProtectedRoute>} />
-                  <Route path="/reminders" element={<ProtectedRoute><Reminders /></ProtectedRoute>} />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
+                <AnimatedRoutes />
               </Suspense>
               <Toaster />
               <Chatbot />
@@ -80,6 +32,15 @@ function App() {
         </AuthProvider>
       </ThemeProvider>
     </ErrorBoundary>
+  );
+}
+              <Toaster />
+              <Chatbot />
+            </div >
+          </Router >
+        </AuthProvider >
+      </ThemeProvider >
+    </ErrorBoundary >
   );
 }
 

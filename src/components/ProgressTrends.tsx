@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -61,7 +62,11 @@ const ProgressTrends = () => {
       await new Promise(resolve => setTimeout(resolve, 400));
 
       const savedWeekMeals = localStorage.getItem('weekMeals');
+      const savedProfile = localStorage.getItem('userProfile');
       const weekMeals: Record<string, DayMeals> = savedWeekMeals ? JSON.parse(savedWeekMeals) : {};
+      const userProfile = savedProfile ? JSON.parse(savedProfile) : null;
+
+      const targetCalories = userProfile?.target_calories || 2000;
 
       const savedWeights = localStorage.getItem('weightEntries');
       const weightEntries: WeightEntry[] = savedWeights ? JSON.parse(savedWeights) : [];
@@ -83,7 +88,7 @@ const ProgressTrends = () => {
         const totalFats = meals.reduce((sum, m) => sum + m.fats, 0);
 
         return {
-          date: day.substring(0, 3),
+          date: day.substring(0, 3), // Mon, Tue, etc.
           calories: totalCalories,
           protein: totalProtein,
           carbs: totalCarbs,
@@ -94,13 +99,14 @@ const ProgressTrends = () => {
       if (selectedMetric === 'calories') {
         data.caloriesTrend = dailyAggregates.map(d => ({
           ...d,
+          // Mocking 'burned' calories for now as we don't track activity yet
           burned: Math.round(d.calories * 0.25),
-          target: 2000,
+          target: targetCalories,
         }));
         const avgWeeklyCalories = dailyAggregates.reduce((sum, d) => sum + d.calories, 0) / 7;
         stats.calories = {
           avgWeekly: Math.round(avgWeeklyCalories),
-          trend: avgWeeklyCalories > 2000 ? 'up' : 'down',
+          trend: avgWeeklyCalories > targetCalories ? 'up' : 'down',
           consistency: 92,
         };
       }
@@ -192,7 +198,13 @@ const ProgressTrends = () => {
                 </ResponsiveContainer>
               </CardContent>
             </Card>
-          ) : <p>No weight data yet.</p>}
+          ) : (
+            <Card>
+              <CardContent className="p-6 text-center text-muted-foreground">
+                <p>No weight data available yet.</p>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
 
         {/* CALORIES TAB */}

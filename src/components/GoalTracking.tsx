@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -25,56 +25,74 @@ interface Goal {
 }
 
 const GoalTracking = () => {
-  const [goals, setGoals] = useState<Goal[]>([
-    {
-      id: '1',
-      title: 'Reach Target Weight',
-      category: 'weight',
-      target: 70,
-      current: 71.2,
-      unit: 'kg',
-      deadline: '2024-04-15',
-      status: 'active',
-      priority: 'high',
-      description: 'Lose 5kg for better health and fitness'
-    },
-    {
-      id: '2',
-      title: 'Increase Daily Protein',
-      category: 'nutrition',
-      target: 120,
-      current: 105,
-      unit: 'g',
-      deadline: '2024-03-30',
-      status: 'active',
-      priority: 'medium',
-      description: 'Support muscle growth and recovery'
-    },
-    {
-      id: '3',
-      title: 'Drink More Water',
-      category: 'health',
-      target: 8,
-      current: 6.5,
-      unit: 'glasses',
-      deadline: '2024-03-25',
-      status: 'active',
-      priority: 'medium',
-      description: 'Improve hydration and overall health'
-    },
-    {
-      id: '4',
-      title: 'Reduce Sugar Intake',
-      category: 'nutrition',
-      target: 25,
-      current: 35,
-      unit: 'g',
-      deadline: '2024-04-01',
-      status: 'active',
-      priority: 'high',
-      description: 'Limit added sugars to WHO recommendations'
+  const [goals, setGoals] = useState<Goal[]>([]);
+
+  // Load goals from localStorage on mount
+  useEffect(() => {
+    const savedGoals = localStorage.getItem('userGoals');
+    if (savedGoals) {
+      setGoals(JSON.parse(savedGoals));
+    } else {
+      // Default goals if none exist
+      setGoals([
+        {
+          id: '1',
+          title: 'Reach Target Weight',
+          category: 'weight',
+          target: 70,
+          current: 71.2,
+          unit: 'kg',
+          deadline: '2024-04-15',
+          status: 'active',
+          priority: 'high',
+          description: 'Lose 5kg for better health and fitness'
+        },
+        {
+          id: '2',
+          title: 'Increase Daily Protein',
+          category: 'nutrition',
+          target: 120,
+          current: 105,
+          unit: 'g',
+          deadline: '2024-03-30',
+          status: 'active',
+          priority: 'medium',
+          description: 'Support muscle growth and recovery'
+        },
+        {
+          id: '3',
+          title: 'Drink More Water',
+          category: 'health',
+          target: 8,
+          current: 6.5,
+          unit: 'glasses',
+          deadline: '2024-03-25',
+          status: 'active',
+          priority: 'medium',
+          description: 'Improve hydration and overall health'
+        },
+        {
+          id: '4',
+          title: 'Reduce Sugar Intake',
+          category: 'nutrition',
+          target: 25,
+          current: 35,
+          unit: 'g',
+          deadline: '2024-04-01',
+          status: 'active',
+          priority: 'high',
+          description: 'Limit added sugars to WHO recommendations'
+        }
+      ]);
     }
-  ]);
+  }, []);
+
+  // Save goals to localStorage whenever they change
+  useEffect(() => {
+    if (goals.length > 0) {
+      localStorage.setItem('userGoals', JSON.stringify(goals));
+    }
+  }, [goals]);
 
   const [newGoal, setNewGoal] = useState({
     title: '',
@@ -125,8 +143,8 @@ const GoalTracking = () => {
   };
 
   const handleUpdateProgress = (goalId: string, newProgress: number) => {
-    setGoals(goals.map(goal => 
-      goal.id === goalId 
+    setGoals(goals.map(goal =>
+      goal.id === goalId
         ? { ...goal, current: newProgress, status: newProgress >= goal.target ? 'completed' : 'active' }
         : goal
     ));
@@ -268,13 +286,13 @@ const GoalTracking = () => {
                 <Input
                   id="title"
                   value={newGoal.title}
-                  onChange={(e) => setNewGoal({...newGoal, title: e.target.value})}
+                  onChange={(e) => setNewGoal({ ...newGoal, title: e.target.value })}
                   placeholder="e.g., Increase daily fiber intake"
                 />
               </div>
               <div>
                 <Label htmlFor="category">Category</Label>
-                <Select value={newGoal.category} onValueChange={(value) => setNewGoal({...newGoal, category: value as Goal['category']})}>
+                <Select value={newGoal.category} onValueChange={(value) => setNewGoal({ ...newGoal, category: value as Goal['category'] })}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -295,7 +313,7 @@ const GoalTracking = () => {
                   id="target"
                   type="number"
                   value={newGoal.target}
-                  onChange={(e) => setNewGoal({...newGoal, target: parseFloat(e.target.value)})}
+                  onChange={(e) => setNewGoal({ ...newGoal, target: parseFloat(e.target.value) })}
                 />
               </div>
               <div>
@@ -304,7 +322,7 @@ const GoalTracking = () => {
                   id="current"
                   type="number"
                   value={newGoal.current}
-                  onChange={(e) => setNewGoal({...newGoal, current: parseFloat(e.target.value)})}
+                  onChange={(e) => setNewGoal({ ...newGoal, current: parseFloat(e.target.value) })}
                 />
               </div>
               <div>
@@ -312,7 +330,7 @@ const GoalTracking = () => {
                 <Input
                   id="unit"
                   value={newGoal.unit}
-                  onChange={(e) => setNewGoal({...newGoal, unit: e.target.value})}
+                  onChange={(e) => setNewGoal({ ...newGoal, unit: e.target.value })}
                   placeholder="e.g., g, kg, glasses"
                 />
               </div>
@@ -325,12 +343,12 @@ const GoalTracking = () => {
                   id="deadline"
                   type="date"
                   value={newGoal.deadline}
-                  onChange={(e) => setNewGoal({...newGoal, deadline: e.target.value})}
+                  onChange={(e) => setNewGoal({ ...newGoal, deadline: e.target.value })}
                 />
               </div>
               <div>
                 <Label htmlFor="priority">Priority</Label>
-                <Select value={newGoal.priority} onValueChange={(value) => setNewGoal({...newGoal, priority: value as Goal['priority']})}>
+                <Select value={newGoal.priority} onValueChange={(value) => setNewGoal({ ...newGoal, priority: value as Goal['priority'] })}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -348,7 +366,7 @@ const GoalTracking = () => {
               <Input
                 id="description"
                 value={newGoal.description}
-                onChange={(e) => setNewGoal({...newGoal, description: e.target.value})}
+                onChange={(e) => setNewGoal({ ...newGoal, description: e.target.value })}
                 placeholder="Optional description or notes"
               />
             </div>
@@ -406,7 +424,7 @@ const GoalTracking = () => {
                     <span>{Math.round(getProgressPercentage(goal))}% complete</span>
                   </div>
                   <Progress value={getProgressPercentage(goal)} className="h-2" />
-                  
+
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                       <Calendar className="w-4 h-4" />

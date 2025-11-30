@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -85,9 +86,23 @@ const NutritionReports = () => {
         await new Promise((resolve) => setTimeout(resolve, 800)); // simulate API delay
 
         const savedWeekMeals = localStorage.getItem("weekMeals");
+        const savedProfile = localStorage.getItem("userProfile");
+
         const weekMeals: Record<string, DayMeals> = savedWeekMeals
           ? JSON.parse(savedWeekMeals)
           : {};
+
+        const userProfile = savedProfile ? JSON.parse(savedProfile) : null;
+
+        // Default targets if no profile
+        const targets = {
+          calories: userProfile?.target_calories || 2000,
+          protein: userProfile?.target_protein || 150,
+          carbs: userProfile?.target_carbs || 250,
+          fats: userProfile?.target_fats || 70,
+          water: userProfile?.waterIntake || 2.5,
+          workouts: 5
+        };
 
         // Build weekly breakdown
         const dailyBreakdown = daysOfWeek.map((day) => {
@@ -106,7 +121,7 @@ const NutritionReports = () => {
 
           const score = Math.min(
             100,
-            (totalCalories / 2000) * 100 + (totalProtein / 120) * 100
+            (totalCalories / targets.calories) * 100
           );
 
           return {
@@ -115,7 +130,7 @@ const NutritionReports = () => {
             protein: totalProtein,
             carbs: totalCarbs,
             fats: totalFats,
-            score: Math.round(score / 2),
+            score: Math.round(score),
           };
         });
 
@@ -131,11 +146,14 @@ const NutritionReports = () => {
             },
             { calories: 0, protein: 0, carbs: 0, fats: 0 }
           );
+
+          const count = arr.length || 1;
+
           const avg = {
-            calories: Math.round(totals.calories / arr.length),
-            protein: Math.round(totals.protein / arr.length),
-            carbs: Math.round(totals.carbs / arr.length),
-            fats: Math.round(totals.fats / arr.length),
+            calories: Math.round(totals.calories / count),
+            protein: Math.round(totals.protein / count),
+            carbs: Math.round(totals.carbs / count),
+            fats: Math.round(totals.fats / count),
           };
           const totalMacros = totals.protein + totals.carbs + totals.fats;
           const macroDistribution = [
@@ -168,75 +186,27 @@ const NutritionReports = () => {
         };
 
         // Build base data
-        let data;
-        if (selectedPeriod === "week") {
-          const { avg, macroDistribution } = aggregate(dailyBreakdown);
-          data = {
-            period: "This Week",
-            summary: {
-              avgCalories: avg.calories,
-              targetCalories: 2000,
-              avgProtein: avg.protein,
-              targetProtein: 120,
-              avgCarbs: avg.carbs,
-              targetCarbs: 250,
-              avgFats: avg.fats,
-              targetFats: 80,
-              waterIntake: 85,
-              sleepQuality: 78,
-              workoutDays: 5,
-              targetWorkouts: 5,
-            },
-            dailyBreakdown,
-            macroDistribution,
-          };
-        }
+        const { avg, macroDistribution } = aggregate(dailyBreakdown);
 
-        if (selectedPeriod === "month") {
-          const { avg, macroDistribution } = aggregate(dailyBreakdown);
-          data = {
-            period: "This Month",
-            summary: {
-              avgCalories: avg.calories,
-              targetCalories: 2000,
-              avgProtein: avg.protein,
-              targetProtein: 120,
-              avgCarbs: avg.carbs,
-              targetCarbs: 250,
-              avgFats: avg.fats,
-              targetFats: 80,
-              waterIntake: 90,
-              sleepQuality: 80,
-              workoutDays: 20,
-              targetWorkouts: 22,
-            },
-            dailyBreakdown,
-            macroDistribution,
-          };
-        }
-
-        if (selectedPeriod === "quarter") {
-          const { avg, macroDistribution } = aggregate(dailyBreakdown);
-          data = {
-            period: "This Quarter",
-            summary: {
-              avgCalories: avg.calories,
-              targetCalories: 2000,
-              avgProtein: avg.protein,
-              targetProtein: 120,
-              avgCarbs: avg.carbs,
-              targetCarbs: 250,
-              avgFats: avg.fats,
-              targetFats: 80,
-              waterIntake: 88,
-              sleepQuality: 79,
-              workoutDays: 60,
-              targetWorkouts: 65,
-            },
-            dailyBreakdown,
-            macroDistribution,
-          };
-        }
+        const data = {
+          period: selectedPeriod === 'week' ? "This Week" : selectedPeriod === 'month' ? "This Month" : "This Quarter",
+          summary: {
+            avgCalories: avg.calories,
+            targetCalories: Math.round(targets.calories),
+            avgProtein: avg.protein,
+            targetProtein: Math.round(targets.protein),
+            avgCarbs: avg.carbs,
+            targetCarbs: Math.round(targets.carbs),
+            avgFats: avg.fats,
+            targetFats: Math.round(targets.fats),
+            waterIntake: 85,
+            sleepQuality: 78,
+            workoutDays: 3,
+            targetWorkouts: targets.workouts,
+          },
+          dailyBreakdown,
+          macroDistribution,
+        };
 
         setReportData(data);
       } catch (error) {

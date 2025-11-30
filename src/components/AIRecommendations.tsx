@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -59,34 +59,105 @@ const AIRecommendations = () => {
 
   const generateNewRecommendations = async () => {
     setIsGenerating(true);
-    
+
     // Simulate AI processing
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    const newRecommendations: Recommendation[] = [
-      {
-        id: '5',
-        type: 'meal',
-        title: 'Try Mediterranean Diet',
-        description: 'Based on your preferences, Mediterranean meals could improve your heart health markers.',
-        impact: 'high',
-        category: 'Nutrition',
-        actionText: 'Explore Recipes'
-      },
-      {
-        id: '6',
-        type: 'nutrition',
-        title: 'Optimize Post-Workout Nutrition',
-        description: 'Eating within 30 minutes after exercise can improve your recovery and muscle building.',
-        impact: 'medium',
-        category: 'Performance',
-        actionText: 'Create Post-Workout Plan'
+    await new Promise(resolve => setTimeout(resolve, 1500));
+
+    const newRecommendations: Recommendation[] = [];
+
+    try {
+      const savedProfile = localStorage.getItem('userProfile');
+      const savedMeals = localStorage.getItem('weekMeals');
+
+      if (savedProfile) {
+        const profile = JSON.parse(savedProfile);
+
+        // Goal based recommendation
+        if (profile.goal) {
+          const goalText = profile.goal.replace('-', ' ');
+          newRecommendations.push({
+            id: 'rec-goal',
+            type: 'goal',
+            title: `Focus on ${goalText}`,
+            description: `Your current plan is optimized for ${goalText}. Stick to your daily calorie target of ${Math.round(profile.target_calories)} kcal.`,
+            impact: 'high',
+            category: 'Wellness',
+            actionText: 'View Goal Details'
+          });
+        }
+
+        // Hydration recommendation
+        if (profile.waterIntake) {
+          newRecommendations.push({
+            id: 'rec-water',
+            type: 'habit',
+            title: 'Hydration Goal',
+            description: `Don't forget to drink ${profile.waterIntake}L of water daily to support your metabolism and energy levels.`,
+            impact: 'medium',
+            category: 'Health',
+            actionText: 'Set Reminders'
+          });
+        }
       }
-    ];
-    
-    setRecommendations(prev => [...newRecommendations, ...prev.slice(0, 4)]);
+
+      if (savedMeals) {
+        const weekMeals = JSON.parse(savedMeals);
+        let totalMeals = 0;
+        let uniqueIngredients = new Set();
+
+        Object.values(weekMeals).forEach((day: any) => {
+          ['breakfast', 'lunch', 'dinner'].forEach(type => {
+            if (day[type]) {
+              totalMeals++;
+              if (day[type].ingredients) {
+                day[type].ingredients.forEach((ing: string) => uniqueIngredients.add(ing));
+              }
+            }
+          });
+        });
+
+        if (totalMeals < 15) {
+          newRecommendations.push({
+            id: 'rec-plan',
+            type: 'meal',
+            title: 'Complete Your Week',
+            description: `You have only planned ${totalMeals} meals. Try to plan at least 15 meals for a complete week.`,
+            impact: 'high',
+            category: 'Efficiency',
+            actionText: 'Go to Meal Planner'
+          });
+        } else {
+          newRecommendations.push({
+            id: 'rec-variety',
+            type: 'nutrition',
+            title: 'Great Variety!',
+            description: `You have a diverse menu with over ${uniqueIngredients.size} different ingredients this week.`,
+            impact: 'low',
+            category: 'Nutrition',
+            actionText: 'View Grocery List'
+          });
+        }
+      }
+
+      if (newRecommendations.length === 0) {
+        newRecommendations.push({
+          id: 'rec-default',
+          type: 'goal',
+          title: 'Get Started',
+          description: 'Complete your nutrition profile and add meals to your plan to get personalized insights.',
+          impact: 'high',
+          category: 'Getting Started',
+          actionText: 'Update Profile'
+        });
+      }
+
+    } catch (error) {
+      console.error("Error generating recommendations:", error);
+    }
+
+    setRecommendations(prev => [...newRecommendations, ...prev.slice(0, 2)]); // Keep some old ones
     setIsGenerating(false);
-    
+
     toast({
       title: "New Recommendations Generated!",
       description: "AI has analyzed your recent data and created personalized suggestions.",
@@ -97,6 +168,8 @@ const AIRecommendations = () => {
     switch (recommendation.actionText) {
       case 'View Protein-Rich Meals':
       case 'Find High-Fiber Foods':
+      case 'View Goal Details':
+      case 'Go to Meal Planner':
         toast({
           title: "Redirecting to Meal Plans",
           description: `Searching for ${recommendation.actionText.toLowerCase().replace('view ', '').replace('find ', '')}...`,
@@ -116,6 +189,9 @@ const AIRecommendations = () => {
           description: "Reminder functionality is coming soon!",
         });
         window.location.href = '/reminders';
+        break;
+      case 'Update Profile':
+        window.location.href = '/#nutrition-form';
         break;
       default:
         toast({
@@ -157,7 +233,7 @@ const AIRecommendations = () => {
             <Brain className="w-5 h-5 text-forest-500" />
             <span>AI Recommendations</span>
           </CardTitle>
-          <Button 
+          <Button
             onClick={generateNewRecommendations}
             disabled={isGenerating}
             size="sm"
@@ -187,7 +263,7 @@ const AIRecommendations = () => {
                   {rec.impact}
                 </Badge>
               </div>
-              
+
               <div className="flex justify-end">
                 <Badge
                   variant="secondary"
@@ -197,11 +273,11 @@ const AIRecommendations = () => {
                 </Badge>
               </div>
             </div>
-            
+
             <p className="text-muted-foreground text-sm mb-3 mt-3">{rec.description}</p>
-            
-            <Button 
-              size="sm" 
+
+            <Button
+              size="sm"
               variant="outline"
               className="w-full border-border/70 hover:bg-forest-100/60 dark:hover:bg-forest-900/30"
               onClick={() => handleRecommendationAction(rec)}

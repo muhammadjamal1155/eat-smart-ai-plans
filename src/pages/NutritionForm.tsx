@@ -110,6 +110,16 @@ export default function NutritionForm() {
 
       const data = await response.json();
       setRecommendations(data);
+
+      // Save user profile to localStorage for Insights page
+      const userProfile = {
+        ...formData,
+        target_calories: data.target_calories,
+        bmr: data.bmr,
+        tdee: data.tdee
+      };
+      localStorage.setItem('userProfile', JSON.stringify(userProfile));
+
       setShowResults(true);
       toast({
         title: "Plan Generated!",

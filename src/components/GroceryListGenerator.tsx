@@ -29,7 +29,7 @@ const GroceryListGenerator = () => {
     { id: '7', name: 'Salmon Fillets', category: 'Meat & Fish', quantity: '4', unit: 'pieces', checked: false, source: 'meal-plan' },
     { id: '8', name: 'Sweet Potatoes', category: 'Produce', quantity: '3', unit: 'pieces', checked: false, source: 'meal-plan' },
   ]);
-  
+
   const [isGenerating, setIsGenerating] = useState(false);
 
   const categories = ['All', 'Produce', 'Dairy', 'Meat & Fish', 'Pantry', 'Bakery'];
@@ -37,21 +37,97 @@ const GroceryListGenerator = () => {
 
   const generateFromMealPlan = async () => {
     setIsGenerating(true);
-    
-    // Simulate API call to generate grocery list from meal plan
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    toast({
-      title: "Grocery List Updated!",
-      description: "Generated from your weekly meal plan with smart quantity calculations.",
-    });
-    
+
+    // Simulate processing time
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    try {
+      const savedMeals = localStorage.getItem('weekMeals');
+      if (!savedMeals) {
+        toast({
+          title: "No Meal Plan Found",
+          description: "Please create a meal plan first.",
+          variant: "destructive"
+        });
+        setIsGenerating(false);
+        return;
+      }
+
+      const weekMeals = JSON.parse(savedMeals);
+      const ingredientsMap = new Map<string, GroceryItem>();
+      let idCounter = 1;
+
+      // Helper to categorize ingredients (simple keyword based)
+      const categorizeIngredient = (name: string): string => {
+        const lowerName = name.toLowerCase();
+        if (['chicken', 'beef', 'fish', 'salmon', 'steak', 'pork', 'meat', 'egg'].some(k => lowerName.includes(k))) return 'Meat & Fish';
+        if (['milk', 'cheese', 'yogurt', 'cream', 'butter'].some(k => lowerName.includes(k))) return 'Dairy';
+        if (['bread', 'bun', 'tortilla', 'bagel'].some(k => lowerName.includes(k))) return 'Bakery';
+        if (['apple', 'banana', 'berry', 'spinach', 'lettuce', 'tomato', 'potato', 'onion', 'garlic', 'carrot', 'vegetable', 'fruit'].some(k => lowerName.includes(k))) return 'Produce';
+        return 'Pantry';
+      };
+
+      Object.values(weekMeals).forEach((day: any) => {
+        ['breakfast', 'lunch', 'dinner'].forEach(type => {
+          const meal = day[type];
+          if (meal && meal.ingredients) {
+            meal.ingredients.forEach((ing: string) => {
+              // Simple parsing: assume format "quantity unit name" or just "name"
+              // For now, we just use the whole string as name and default quantity
+              const name = ing.trim();
+              const category = categorizeIngredient(name);
+
+              if (ingredientsMap.has(name)) {
+                // const existing = ingredientsMap.get(name)!;
+                // Very basic quantity aggregation (just incrementing count if unit matches, otherwise appending)
+                // Since our data is just strings, we'll just keep unique items for now
+              } else {
+                ingredientsMap.set(name, {
+                  id: String(idCounter++),
+                  name: name,
+                  category: category,
+                  quantity: '1', // Default
+                  unit: 'item', // Default
+                  checked: false,
+                  source: 'meal-plan'
+                });
+              }
+            });
+          }
+        });
+      });
+
+      const newList = Array.from(ingredientsMap.values());
+
+      if (newList.length === 0) {
+        toast({
+          title: "No Ingredients Found",
+          description: "Your meal plan seems to be empty.",
+          variant: "destructive"
+        });
+      } else {
+        setGroceryList(newList);
+        toast({
+          title: "Grocery List Updated!",
+          description: `Generated ${newList.length} items from your weekly meal plan.`,
+        });
+      }
+
+    } catch (error) {
+      console.error("Error generating list:", error);
+      toast({
+        title: "Error",
+        description: "Failed to generate grocery list.",
+        variant: "destructive"
+      });
+    }
+
     setIsGenerating(false);
   };
 
   const toggleItem = (id: string) => {
-    setGroceryList(prev => 
-      prev.map(item => 
+    setGroceryList(prev =>
+      prev.map(item =>
         item.id === id ? { ...item, checked: !item.checked } : item
       )
     );
@@ -66,9 +142,20 @@ const GroceryListGenerator = () => {
   };
 
   const downloadList = () => {
+    const text = groceryList.map(item => `[${item.checked ? 'x' : ' '}] ${item.name} (${item.category})`).join('\n');
+    const blob = new Blob([text], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'grocery-list.txt';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
     toast({
       title: "Download Started",
-      description: "Your grocery list is being prepared for download.",
+      description: "Your grocery list has been downloaded.",
     });
   };
 
@@ -80,7 +167,7 @@ const GroceryListGenerator = () => {
     });
   };
 
-  const filteredItems = groceryList.filter(item => 
+  const filteredItems = groceryList.filter(item =>
     selectedCategory === 'All' || item.category === selectedCategory
   );
 
@@ -101,7 +188,7 @@ const GroceryListGenerator = () => {
             <span>Smart Grocery List</span>
           </CardTitle>
           <div className="flex gap-2">
-            <Button 
+            <Button
               onClick={generateFromMealPlan}
               disabled={isGenerating}
               size="sm"
@@ -110,7 +197,7 @@ const GroceryListGenerator = () => {
               <Plus className="w-4 h-4 mr-2" />
               {isGenerating ? 'Generating...' : 'From Meal Plan'}
             </Button>
-            <Button onClick={downloadList} size="sm" className="btn-primary">
+            <Button onClick={downloadList} size="sm" className="btn-primary" disabled={groceryList.length === 0}>
               <Download className="w-4 h-4 mr-2" />
               Download
             </Button>
@@ -119,7 +206,7 @@ const GroceryListGenerator = () => {
         <div className="flex justify-between text-sm text-muted-foreground">
           <span>{completedCount} of {totalCount} items completed</span>
           {completedCount > 0 && (
-            <Button 
+            <Button
               onClick={clearCompleted}
               size="sm"
               variant="ghost"
@@ -152,6 +239,9 @@ const GroceryListGenerator = () => {
                 <div className="text-center py-8 text-muted-foreground">
                   <ShoppingCart className="w-12 h-12 mx-auto mb-2 opacity-50" />
                   <p>No items in this category</p>
+                  {groceryList.length === 0 && (
+                    <p className="text-xs mt-2">Click "From Meal Plan" to generate your list.</p>
+                  )}
                 </div>
               ) : (
                 filteredItems.map((item) => (
@@ -166,7 +256,7 @@ const GroceryListGenerator = () => {
                       />
                       <div className={`flex-1 ${item.checked ? 'line-through text-muted-foreground/70' : ''}`}>
                         <div className="flex items-center space-x-2">
-                          <span className="font-medium">{item.name}</span>
+                          <span className="font-medium capitalize">{item.name}</span>
                           <Badge variant="outline" className="text-xs border-border/60">
                             {item.category}
                           </Badge>
@@ -176,9 +266,7 @@ const GroceryListGenerator = () => {
                             </Badge>
                           )}
                         </div>
-                        <div className="text-sm text-muted-foreground">
-                          {item.quantity} {item.unit}
-                        </div>
+                        {/* Quantity display removed as we are just listing ingredients for now */}
                       </div>
                     </div>
                     <Button

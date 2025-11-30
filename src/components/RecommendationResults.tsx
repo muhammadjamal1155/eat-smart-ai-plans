@@ -2,7 +2,9 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Clock, Users, Flame, Filter, ArrowLeft } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Clock, Users, Filter, ArrowLeft, ChefHat, Utensils } from 'lucide-react';
 
 interface Meal {
     id: string;
@@ -14,6 +16,8 @@ interface Meal {
     fats: number;
     tags: string[];
     time: string;
+    ingredients: string;
+    steps: string[];
 }
 
 interface RecommendationResultsProps {
@@ -28,12 +32,17 @@ interface RecommendationResultsProps {
 
 const RecommendationResults = ({ data, onBack }: RecommendationResultsProps) => {
     const [filter, setFilter] = useState('All');
+    const [selectedMeal, setSelectedMeal] = useState<Meal | null>(null);
 
     const filteredMeals = filter === 'All'
         ? data.meals
         : data.meals.filter(meal => meal.tags.some(tag => tag.toLowerCase().includes(filter.toLowerCase())));
 
     const filters = ['All', 'Healthy', 'Quick', 'Protein-rich', 'Vegan'];
+
+    const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+        e.currentTarget.src = "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&q=80"; // Fallback food image
+    };
 
     return (
         <div className="w-full max-w-6xl mx-auto space-y-6">
@@ -63,11 +72,12 @@ const RecommendationResults = ({ data, onBack }: RecommendationResultsProps) => 
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredMeals.map((meal) => (
-                    <Card key={meal.id} className="overflow-hidden hover:shadow-lg transition-shadow bg-card border-primary/20">
+                    <Card key={meal.id} className="overflow-hidden hover:shadow-lg transition-shadow bg-card border-primary/20 flex flex-col">
                         <div className="relative h-48 w-full">
                             <img
                                 src={meal.image}
                                 alt={meal.name}
+                                onError={handleImageError}
                                 className="w-full h-full object-cover"
                             />
                             <div className="absolute top-2 right-2 flex gap-1">
@@ -80,10 +90,10 @@ const RecommendationResults = ({ data, onBack }: RecommendationResultsProps) => 
                         </div>
 
                         <CardHeader className="pb-2">
-                            <CardTitle className="text-xl">{meal.name}</CardTitle>
+                            <CardTitle className="text-xl line-clamp-1" title={meal.name}>{meal.name}</CardTitle>
                         </CardHeader>
 
-                        <CardContent className="space-y-4">
+                        <CardContent className="space-y-4 flex-grow">
                             <div className="flex items-center justify-between text-sm text-muted-foreground">
                                 <div className="flex items-center gap-1">
                                     <Clock className="w-4 h-4" />
@@ -115,10 +125,54 @@ const RecommendationResults = ({ data, onBack }: RecommendationResultsProps) => 
                             </div>
                         </CardContent>
 
-                        <CardFooter>
-                            <Button className="w-full bg-[#C5D86D] text-black hover:bg-[#B5C85D]">
-                                Add to Plan
-                            </Button>
+                        <CardFooter className="pt-2">
+                            <Dialog>
+                                <DialogTrigger asChild>
+                                    <Button className="w-full bg-[#C5D86D] text-black hover:bg-[#B5C85D]" onClick={() => setSelectedMeal(meal)}>
+                                        View Recipe
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
+                                    <DialogHeader>
+                                        <DialogTitle className="text-2xl font-bold flex items-center gap-2">
+                                            <ChefHat className="w-6 h-6 text-primary" />
+                                            {meal.name}
+                                        </DialogTitle>
+                                        <DialogDescription>
+                                            Ready in {meal.time} • {meal.calories} Calories
+                                        </DialogDescription>
+                                    </DialogHeader>
+
+                                    <ScrollArea className="h-[60vh] pr-4">
+                                        <div className="space-y-6 py-4">
+                                            <div className="space-y-3">
+                                                <h3 className="text-lg font-semibold flex items-center gap-2 text-primary">
+                                                    <Utensils className="w-5 h-5" /> Ingredients
+                                                </h3>
+                                                <p className="text-muted-foreground leading-relaxed bg-secondary/10 p-4 rounded-lg">
+                                                    {meal.ingredients}
+                                                </p>
+                                            </div>
+
+                                            <div className="space-y-3">
+                                                <h3 className="text-lg font-semibold flex items-center gap-2 text-primary">
+                                                    <ChefHat className="w-5 h-5" /> Instructions
+                                                </h3>
+                                                <div className="space-y-4">
+                                                    {meal.steps.map((step, index) => (
+                                                        <div key={index} className="flex gap-4">
+                                                            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold text-sm">
+                                                                {index + 1}
+                                                            </div>
+                                                            <p className="text-muted-foreground pt-1">{step}</p>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </ScrollArea>
+                                </DialogContent>
+                            </Dialog>
                         </CardFooter>
                     </Card>
                 ))}

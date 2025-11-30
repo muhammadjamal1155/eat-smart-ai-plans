@@ -74,11 +74,20 @@ export default function NutritionForm() {
 
     try {
       // Prepare data for backend (convert units if necessary)
-      // For now assuming backend takes kg and cm
+      let weightInKg = parseFloat(formData.weight);
+      if (formData.weightUnit === 'lbs') {
+        weightInKg = weightInKg * 0.453592;
+      }
+
+      let heightInCm = parseFloat(formData.height);
+      if (formData.heightUnit === 'ft') {
+        heightInCm = heightInCm * 30.48;
+      }
+
       const payload = {
         age: formData.age,
-        weight: formData.weight, // Add unit conversion logic if needed
-        height: formData.height, // Add unit conversion logic if needed
+        weight: weightInKg,
+        height: heightInCm,
         gender: formData.gender,
         goal: formData.goal,
         activity_level: formData.activityLevel,

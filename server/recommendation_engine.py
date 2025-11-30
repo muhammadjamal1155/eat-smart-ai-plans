@@ -87,116 +87,127 @@ class RecommendationEngine:
         return bmr * multipliers.get(activity_level, 1.2)
 
     def recommend(self, user_data):
-        if self.data.empty:
-            return {"error": "Data not loaded"}
+        # Run tournament: Evaluate all models
+        eval_results = self.evaluate_models(user_data)
+        
+        best_model = 'knn' # Default
+        best_score = float('inf')
+        
+        # Scoring logic: Minimize Calorie Error
+        print("--- Model Tournament Results ---")
+        for model_name, metrics in eval_results.items():
+            if "error" in metrics:
+                continue
+                
+            error = metrics['calorie_error']
+            print(f"Model: {model_name}, Error: {error}, Diversity: {metrics['diversity_score']}")
+            
+            # Simple logic: Lowest error wins
+            if error < best_score:
+                best_score = error
+                best_model = model_name
+                
+        print(f"Winner: {best_model}")
+        print("--------------------------------")
+        
+        result = self._run_recommendation_logic(user_data, model_type=best_model)
+        
+        # Inject model info
+        if "error" not in result:
+            result["model_used"] = best_model
+            result["model_confidence"] = "High" if best_score < 100 else "Medium"
+            
+        return result
+    def _get_common_data(self, user_data):
+        pass
 
+    def recommend_knn(self, user_data):
+        return self._run_recommendation_logic(user_data, model_type='knn')
+
+    def recommend_cosine(self, user_data):
+        return self._run_recommendation_logic(user_data, model_type='cosine')
+
+    def recommend_tfidf(self, user_data):
+        return self._run_recommendation_logic(user_data, model_type='tfidf')
+
+    def _run_recommendation_logic(self, user_data, model_type='knn'):
+        if self.data.empty: return {"error": "Data not loaded"}
         try:
-            # Check for required fields
             required_fields = ['age', 'weight', 'height', 'gender', 'goal', 'activity_level']
             missing_fields = [field for field in required_fields if not user_data.get(field)]
-            
-            if missing_fields:
-                formatted_fields = ", ".join(missing_fields).replace("_", " ")
-                return {"error": f"We need your {formatted_fields} to create your perfect meal plan! 🥗"}
+            if missing_fields: return {"error": f"Missing: {', '.join(missing_fields)}"}
 
-            # Helper to safely parse numbers
             def safe_get(key, type_func):
                 val = user_data.get(key)
-                try:
-                    return type_func(val)
-                except (ValueError, TypeError):
-                    return None
+                try: return type_func(val)
+                except: return None
 
             age = safe_get('age', int)
             weight = safe_get('weight', float)
             height = safe_get('height', float)
-            
-            if age is None or weight is None or height is None:
-                 return {"error": "Invalid numeric values for age, weight, or height"}
+            if age is None or weight is None or height is None: return {"error": "Invalid numeric values"}
 
             gender = user_data.get('gender', 'male')
             goal = user_data.get('goal', 'maintenance')
             activity_level = user_data.get('activity_level', 'sedentary')
             diet_type = user_data.get('diet_type', 'any')
             allergies = user_data.get('allergies', [])
-            
-            # Handle case where diet_type is "none" (frontend option)
-            if diet_type == 'none':
-                diet_type = 'any'
+            if diet_type == 'none': diet_type = 'any'
 
-            # Calculate Nutritional Needs
             bmr = self.calculate_bmr(weight, height, age, gender)
             tdee = self.calculate_tdee(bmr, activity_level)
-            
             target_calories = tdee
-            if goal == 'weight-loss':
-                target_calories -= 500
-            elif goal == 'weight-gain':
-                target_calories += 500
-            elif goal == 'muscle-gain':
-                target_calories += 250
-            
-            # Approximate macro breakdown (standard balanced diet)
-            # Protein: 30%, Fats: 30%, Carbs: 40%
-            # Note: Our dataset has PDV for macros, not grams. 
-            # We need to map target grams to PDV or just use calories primarily.
-            # For this iteration, we will focus on matching Calories and finding balanced meals.
-            # We can try to map target macros to PDV if we assume standard reference values (e.g. 50g protein = 100% DV)
-            # But that's risky. Let's rely on the model finding meals with similar calorie profiles.
-            
-            # Construct a query vector. 
-            # Since we trained on [calories, protein(PDV), carbs(PDV), fats(PDV)], we need to provide these.
-            # We can estimate target PDV. 
-            # Standard reference: Protein 50g, Fat 65g, Carbs 300g (approx 2000 cal diet)
-            
+            if goal == 'weight-loss': target_calories -= 500
+            elif goal == 'weight-gain': target_calories += 500
+            elif goal == 'muscle-gain': target_calories += 250
+
             target_protein_g = (target_calories * 0.3) / 4
             target_fats_g = (target_calories * 0.3) / 9
             target_carbs_g = (target_calories * 0.4) / 4
-            
             target_protein_pdv = (target_protein_g / 50) * 100
             target_fats_pdv = (target_fats_g / 65) * 100
             target_carbs_pdv = (target_carbs_g / 300) * 100
-            
-            # Filter by diet type FIRST
+
             filtered_data = self.data.copy()
             if diet_type != 'any':
                 filtered_data = filtered_data[filtered_data['tags'].str.contains(diet_type.lower(), na=False)]
-            
-            if filtered_data.empty:
-                return {"error": f"No meals found for diet type: {diet_type}"}
-
-            # Filter by allergies
             if allergies:
                 for allergy in allergies:
                     filtered_data = filtered_data[~filtered_data['ingredients'].str.contains(allergy.lower(), na=False)]
             
-            if filtered_data.empty:
-                return {"error": "No meals found after filtering allergies"}
+            if filtered_data.empty: return {"error": "No meals found"}
 
-            # Prepare features for the filtered dataset
-            features_subset = self.scaler.transform(filtered_data[self.feature_columns])
+            candidates = pd.DataFrame()
             
-            # Fit a temporary model on the filtered data
-            # n_neighbors cannot be larger than the dataset
-            n_neighbors = min(20, len(filtered_data))
-            temp_model = NearestNeighbors(n_neighbors=n_neighbors, algorithm='brute', metric='euclidean')
-            temp_model.fit(features_subset)
-            
-            # Scale the query
-            query = np.array([[target_calories / 3, target_protein_pdv / 3, target_carbs_pdv / 3, target_fats_pdv / 3]]) 
-            query_scaled = self.scaler.transform(query)
-            
-            # Fetch more candidates to ensure variety
-            n_candidates = min(50, len(filtered_data))
-            distances, indices = temp_model.kneighbors(query_scaled, n_neighbors=n_candidates)
-            
-            candidates = filtered_data.iloc[indices[0]].copy()
-            
-            if allergies:
-                for allergy in allergies:
-                    candidates = candidates[~candidates['ingredients'].str.contains(allergy.lower(), na=False)]
-            
-            # Categorize candidates
+            if model_type == 'knn':
+                features_subset = self.scaler.transform(filtered_data[self.feature_columns])
+                n_neighbors = min(50, len(filtered_data))
+                temp_model = NearestNeighbors(n_neighbors=n_neighbors, algorithm='brute', metric='euclidean')
+                temp_model.fit(features_subset)
+                query = np.array([[target_calories / 3, target_protein_pdv / 3, target_carbs_pdv / 3, target_fats_pdv / 3]]) 
+                query_scaled = self.scaler.transform(query)
+                distances, indices = temp_model.kneighbors(query_scaled, n_neighbors=n_neighbors)
+                candidates = filtered_data.iloc[indices[0]].copy()
+                
+            elif model_type == 'cosine':
+                features_subset = self.scaler.transform(filtered_data[self.feature_columns])
+                query = np.array([[target_calories / 3, target_protein_pdv / 3, target_carbs_pdv / 3, target_fats_pdv / 3]]) 
+                query_scaled = self.scaler.transform(query)
+                sim_scores = cosine_similarity(query_scaled, features_subset)
+                top_indices = sim_scores.argsort()[0][-50:][::-1]
+                candidates = filtered_data.iloc[top_indices].copy()
+                
+            elif model_type == 'tfidf':
+                query_text = f"{diet_type} {goal}".strip()
+                if query_text:
+                    query_vec = self.tfidf.transform([query_text])
+                    tfidf_subset = self.tfidf_matrix[filtered_data.index]
+                    sim_scores = cosine_similarity(query_vec, tfidf_subset)
+                    top_indices = sim_scores.argsort()[0][-50:][::-1]
+                    candidates = filtered_data.iloc[top_indices].copy()
+                else:
+                    candidates = filtered_data.sample(min(50, len(filtered_data)))
+
             breakfasts = []
             lunches = []
             dinners = []
@@ -204,69 +215,37 @@ class RecommendationEngine:
             
             for _, row in candidates.iterrows():
                 m_type = self._infer_meal_type(row)
-                if m_type == 'Breakfast':
-                    breakfasts.append(row)
-                elif m_type == 'Lunch':
-                    lunches.append(row)
-                elif m_type == 'Dinner':
-                    dinners.append(row)
-                else:
-                    others.append(row)
+                if m_type == 'Breakfast': breakfasts.append(row)
+                elif m_type == 'Lunch': lunches.append(row)
+                elif m_type == 'Dinner': dinners.append(row)
+                else: others.append(row)
             
-            # Select balanced meals (2 Breakfast, 2 Lunch, 2 Dinner)
             final_selection_rows = []
-            
             def add_rows(source, count):
                 added = 0
                 for item in source:
                     if added >= count: break
-                    # Check for duplicates based on ID
                     if not any(x['id'] == item['id'] for x in final_selection_rows):
                         final_selection_rows.append(item)
                         added += 1
                 return added
 
-            # 1. Fill Breakfasts (Target 2)
             add_rows(breakfasts, 2)
-            
-            # 2. Fill Lunches (Target 2)
-            # First try explicit lunches
             l_added = add_rows(lunches, 2)
-            # If needed, fill with 'others' (Lunch/Dinner items)
-            if l_added < 2:
-                add_rows(others, 2 - l_added)
-            
-            # 3. Fill Dinners (Target 2)
-            # First try explicit dinners
+            if l_added < 2: add_rows(others, 2 - l_added)
             d_added = add_rows(dinners, 2)
-            # If needed, fill with 'others' (Lunch/Dinner items)
-            if d_added < 2:
-                add_rows(others, 2 - d_added)
+            if d_added < 2: add_rows(others, 2 - d_added)
             
-            # 4. Fill any remaining slots (to reach 6)
             remaining_slots = 6 - len(final_selection_rows)
             if remaining_slots > 0:
-                # Pool remaining items: unused breakfasts, lunches, dinners, others
-                # We prioritize others (main dishes) over extra breakfasts for lunch/dinner slots
                 rest = others + lunches + dinners + breakfasts
                 add_rows(rest, remaining_slots)
             
-            # Format output
             results = []
             for row in final_selection_rows:
                 meal_type = self._infer_meal_type(row)
                 tags = eval(row['tags'])[:3] if isinstance(row['tags'], str) else []
-                
-                # Ensure the tag matches the slot we intended? 
-                # Actually _infer_meal_type might return 'Lunch/Dinner' for items in 'others'.
-                # We should probably force the tag to be 'Lunch' or 'Dinner' based on position?
-                # But that might be misleading. Better to show 'Lunch/Dinner' or let the user decide.
-                # However, the user wants to see "Lunch" and "Dinner".
-                # If it's 'Lunch/Dinner', maybe we can just show that.
-                
-                if meal_type not in tags:
-                    tags.insert(0, meal_type)
-
+                if meal_type not in tags: tags.insert(0, meal_type)
                 results.append({
                     "id": int(row['id']),
                     "name": row['name'].title(),
@@ -287,10 +266,39 @@ class RecommendationEngine:
                 "tdee": int(tdee),
                 "meals": results
             }
-
         except Exception as e:
-            print(f"Error generating recommendations: {e}")
+            print(f"Error in {model_type}: {e}")
             return {"error": str(e)}
+
+    def evaluate_models(self, user_data):
+        models = ['knn', 'cosine', 'tfidf']
+        evaluation = {}
+        
+        for m in models:
+            result = self._run_recommendation_logic(user_data, model_type=m)
+            if "error" in result:
+                evaluation[m] = {"error": result["error"]}
+                continue
+                
+            meals = result['meals']
+            target_cal = result['target_calories']
+            total_cal = sum(m['calories'] for m in meals)
+            cal_error = abs(total_cal - target_cal)
+            
+            all_ingredients = set()
+            for meal in meals:
+                for ing in meal['ingredients']:
+                    all_ingredients.add(ing)
+            diversity_score = len(all_ingredients)
+            
+            evaluation[m] = {
+                "calorie_error": cal_error,
+                "diversity_score": diversity_score,
+                "total_calories": total_cal,
+                "meal_count": len(meals)
+            }
+            
+        return evaluation
 
     def search_meals(self, query=None):
         if self.data.empty:

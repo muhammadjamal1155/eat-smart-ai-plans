@@ -7,7 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { toast } from "@/hooks/use-toast";
 import { useNavigate } from 'react-router-dom';
-import { Clock, Users, Filter, ArrowLeft, ChefHat, Utensils } from 'lucide-react';
+import { Clock, Users, Filter, ArrowLeft, ChefHat, Utensils, Brain, Zap } from 'lucide-react';
 
 interface Meal {
     id: string;
@@ -29,6 +29,8 @@ interface RecommendationResultsProps {
         bmr: number;
         tdee: number;
         meals: Meal[];
+        model_used?: string;
+        model_confidence?: string;
     };
     onBack: () => void;
 }
@@ -85,12 +87,27 @@ const RecommendationResults = ({ data, onBack }: RecommendationResultsProps) => 
     return (
         <div className="w-full max-w-6xl mx-auto space-y-8">
             <div className="flex items-center justify-between">
-                <Button variant="ghost" onClick={onBack} className="flex items-center gap-2">
+                <Button variant="ghost" onClick={onBack} className="flex items-center gap-2 hover:bg-transparent hover:text-primary transition-colors">
                     <ArrowLeft className="w-4 h-4" /> Back
                 </Button>
-                <div className="text-right">
-                    <h2 className="text-2xl font-bold text-primary">Your Daily Target: {data.target_calories} kcal</h2>
-                    <p className="text-muted-foreground">Based on your BMR ({data.bmr}) and Activity</p>
+                <div className="text-right space-y-2">
+                    <div>
+                        <h2 className="text-3xl font-bold text-primary tracking-tight">Your Daily Target: {data.target_calories} kcal</h2>
+                        <p className="text-muted-foreground font-medium">Based on your BMR ({data.bmr}) and Activity</p>
+                    </div>
+
+                    {data.model_used && (
+                        <div className="flex justify-end gap-3 pt-2">
+                            <Badge className="px-3 py-1.5 bg-violet-500/10 text-violet-600 border-violet-200 hover:bg-violet-500/20 gap-1.5 transition-colors">
+                                <Brain className="w-3.5 h-3.5" />
+                                <span className="font-semibold">AI Model: {data.model_used.toUpperCase()}</span>
+                            </Badge>
+                            <Badge className="px-3 py-1.5 bg-emerald-500/10 text-emerald-600 border-emerald-200 hover:bg-emerald-500/20 gap-1.5 transition-colors">
+                                <Zap className="w-3.5 h-3.5" />
+                                <span className="font-semibold">Confidence: {data.model_confidence}</span>
+                            </Badge>
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -237,7 +254,7 @@ const RecommendationResults = ({ data, onBack }: RecommendationResultsProps) => 
                     </Card>
                 ))}
             </div>
-        </div>
+        </div >
     );
 };
 

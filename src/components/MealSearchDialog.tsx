@@ -18,9 +18,11 @@ interface Meal {
   carbs: number;
   fats: number;
   cookTime: number;
+  time?: string;
   servings: number;
   tags: string[];
   ingredients: string[];
+  steps?: string[];
 }
 
 interface MealSearchDialogProps {

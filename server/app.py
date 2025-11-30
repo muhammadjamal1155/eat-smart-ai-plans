@@ -50,5 +50,24 @@ def reset_password():
     
     return jsonify({"message": "Password reset link sent (simulated)", "status": "success"})
 
+@app.route('/api/email-grocery-list', methods=['POST'])
+def email_grocery_list():
+    data = request.json
+    email = data.get('email')
+    items = data.get('items')
+    
+    if not email or not items:
+        return jsonify({"error": "Email and items are required"}), 400
+        
+    # Simulation
+    print(f"----------------------------------------------------------------")
+    print(f"SIMULATION: Sending Grocery List to {email}")
+    print(f"Items:")
+    for item in items:
+        print(f" - {item}")
+    print(f"----------------------------------------------------------------")
+    
+    return jsonify({"message": "Grocery list sent (simulated)", "status": "success"})
+
 if __name__ == '__main__':
     app.run(debug=True)

@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Flame, Brain, Fish, Leaf, Search, Printer, Trash2,
   Save, Share2, Calendar, MoreVertical, ShoppingCart,
-  Loader2, Download, Shuffle, Plus
+  Loader2, Download, Shuffle, Plus, ChefHat, Utensils
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import MealPlanCard from './MealPlanCard';
@@ -21,6 +21,15 @@ import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 // ---------------- Interfaces ----------------
 interface Meal {
@@ -32,9 +41,11 @@ interface Meal {
   carbs: number;
   fats: number;
   cookTime: number;
+  time?: string;
   servings: number;
   tags: string[];
   ingredients: string[];
+  steps?: string[];
 }
 
 interface DayMeals {
@@ -95,6 +106,7 @@ const MealPlanSection = () => {
 
   const [isBrowseMealsOpen, setIsBrowseMealsOpen] = useState(false);
   const [activeMealSlot, setActiveMealSlot] = useState<{ day: string; mealType: keyof DayMeals } | null>(null);
+  const [selectedMealDetails, setSelectedMealDetails] = useState<Meal | null>(null);
 
   const handleOpenBrowseMeals = (day: string, mealType: keyof DayMeals) => {
     setActiveMealSlot({ day, mealType });
@@ -297,29 +309,30 @@ const MealPlanSection = () => {
       className="scroll-mt-24 md:scroll-mt-28 py-20 relative w-full overflow-x-hidden animate-fade-in"
       ref={mealPlanRef}
     >
-      <div className="container mx-auto">
+      <div className="container mx-auto px-4">
         <Card className="glass-panel shadow-large">
           <CardHeader>
             <CardTitle>Weekly Meal Plan</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex gap-2 mb-4">
+            <div className="flex flex-wrap gap-2 mb-4">
               <Input
                 placeholder="Search meals..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full md:w-auto md:flex-1"
               />
-              <Button onClick={handleGenerateShoppingList}>
-                <ShoppingCart className="mr-2 h-4 w-4" /> Shopping List
+              <Button onClick={handleGenerateShoppingList} size="sm" className="flex-1 md:flex-none">
+                <ShoppingCart className="mr-2 h-4 w-4" /> <span className="hidden sm:inline">Shopping List</span>
               </Button>
-              <Button onClick={handleDownloadPlan} disabled={isDownloading}>
+              <Button onClick={handleDownloadPlan} disabled={isDownloading} size="sm" className="flex-1 md:flex-none">
                 {isDownloading ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : <Download className="mr-2 h-4 w-4" />}
-                Download
+                <span className="hidden sm:inline">Download</span>
               </Button>
-              <Button onClick={handleSharePlan}>
-                <Share2 className="mr-2 h-4 w-4" /> Share
+              <Button onClick={handleSharePlan} size="sm" className="flex-1 md:flex-none">
+                <Share2 className="mr-2 h-4 w-4" /> <span className="hidden sm:inline">Share</span>
               </Button>
-              <Button variant="destructive" onClick={() => {
+              <Button variant="destructive" size="sm" className="flex-1 md:flex-none" onClick={() => {
                 if (window.confirm("Are you sure you want to delete all meals from your plan? This action cannot be undone.")) {
                   setWeekMeals(initialWeekMeals);
                   toast({
@@ -328,16 +341,19 @@ const MealPlanSection = () => {
                   });
                 }
               }}>
-                <Trash2 className="mr-2 h-4 w-4" /> Clear Plan
+                <Trash2 className="mr-2 h-4 w-4" /> <span className="hidden sm:inline">Clear</span>
               </Button>
             </div>
 
             {daysOfWeek.map((day) => {
               const summary = calculateDailySummary(filteredMeals[day]);
               return (
-                <div key={day} className="mb-6">
-                  <h3 className="font-semibold text-lg mb-2">{day}</h3>
-                  <div className="grid grid-cols-3 gap-4">
+                <div key={day} className="mb-8">
+                  <h3 className="font-semibold text-lg mb-3 flex items-center">
+                    <Calendar className="w-5 h-5 mr-2 text-primary" />
+                    {day}
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {['breakfast', 'lunch', 'dinner'].map((mealType) => (
                       <DroppableMealSlot key={mealType} id={`${day}-${mealType}`}>
                         {filteredMeals[day]?.[mealType as keyof DayMeals] ? (
@@ -346,23 +362,27 @@ const MealPlanSection = () => {
                             meal={filteredMeals[day][mealType as keyof DayMeals]!}
                             onMealChange={(newMeal) => handleMealChange(day, mealType as keyof DayMeals, newMeal)}
                             onEdit={() => handleOpenBrowseMeals(day, mealType as keyof DayMeals)}
+                            onViewDetails={() => setSelectedMealDetails(filteredMeals[day][mealType as keyof DayMeals]!)}
                           />
                         ) : (
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => handleOpenBrowseMeals(day, mealType as keyof DayMeals)}
-                            className="w-full h-full flex flex-col items-center justify-center text-muted-foreground hover:text-primary"
+                            className="w-full h-full min-h-[150px] flex flex-col items-center justify-center text-muted-foreground hover:text-primary border-dashed"
                           >
-                            <Plus className="w-5 h-5 mb-1" />
+                            <Plus className="w-6 h-6 mb-2 opacity-50" />
                             Add {mealType}
                           </Button>
                         )}
                       </DroppableMealSlot>
                     ))}
                   </div>
-                  <div className="mt-2 text-sm text-muted-foreground">
-                    Calories: {summary.calories} | Protein: {summary.protein}g | Carbs: {summary.carbs}g | Fats: {summary.fats}g
+                  <div className="mt-3 text-xs md:text-sm text-muted-foreground bg-muted/30 p-2 rounded-md flex flex-wrap gap-3">
+                    <span><Flame className="w-3 h-3 inline mr-1" /> {summary.calories} kcal</span>
+                    <span><Fish className="w-3 h-3 inline mr-1" /> {summary.protein}g Protein</span>
+                    <span><Leaf className="w-3 h-3 inline mr-1" /> {summary.carbs}g Carbs</span>
+                    <span><Brain className="w-3 h-3 inline mr-1" /> {summary.fats}g Fats</span>
                   </div>
                 </div>
               );
@@ -370,12 +390,68 @@ const MealPlanSection = () => {
           </CardContent>
         </Card>
       </div>
+
       <MealSearchDialog
         isOpen={isBrowseMealsOpen}
         onOpenChange={setIsBrowseMealsOpen}
         onSelectMeal={handleBrowseMealSelect}
         mealType={activeMealSlot?.mealType || 'breakfast'}
       />
+
+      <Dialog open={!!selectedMealDetails} onOpenChange={(open) => !open && setSelectedMealDetails(null)}>
+        <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold flex items-center gap-2">
+              <ChefHat className="w-6 h-6 text-primary" />
+              {selectedMealDetails?.name}
+            </DialogTitle>
+            <DialogDescription>
+              Ready in {selectedMealDetails?.time || `${selectedMealDetails?.cookTime} min`} • {selectedMealDetails?.calories} Calories
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedMealDetails && (
+            <ScrollArea className="h-[60vh] pr-4">
+              <div className="space-y-6 py-4">
+                <div className="space-y-3">
+                  <h3 className="text-lg font-semibold flex items-center gap-2 text-primary">
+                    <Utensils className="w-5 h-5" /> Ingredients
+                  </h3>
+                  <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    {selectedMealDetails.ingredients.map((ingredient, index) => (
+                      <li key={index} className="flex items-center gap-2 text-muted-foreground bg-secondary/10 p-2 rounded-md">
+                        <div className="w-2 h-2 rounded-full bg-primary flex-shrink-0" />
+                        <span className="capitalize">{ingredient}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {selectedMealDetails.steps && selectedMealDetails.steps.length > 0 && (
+                  <div className="space-y-3">
+                    <h3 className="text-lg font-semibold flex items-center gap-2 text-primary">
+                      <ChefHat className="w-5 h-5" /> Instructions
+                    </h3>
+                    <div className="space-y-4">
+                      {selectedMealDetails.steps.map((step, index) => (
+                        <div key={index} className="flex gap-4">
+                          <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold text-sm">
+                            {index + 1}
+                          </div>
+                          <p className="text-muted-foreground pt-1">{step}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </ScrollArea>
+          )}
+          <DialogFooter>
+            <Button onClick={() => setSelectedMealDetails(null)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 };

@@ -48,98 +48,153 @@ interface WeightEntry {
 
 const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
+
 const ProgressTrends = () => {
   const [selectedMetric, setSelectedMetric] = useState<'weight' | 'calories' | 'macros'>('weight');
   const [selectedRange, setSelectedRange] = useState<'day' | 'month' | 'quarter'>('day');
   const [trendData, setTrendData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
+  // Weight Log State
+  const [isWeightDialogOpen, setIsWeightDialogOpen] = useState(false);
+  const [newWeight, setNewWeight] = useState('');
+  const [newDate, setNewDate] = useState(new Date().toISOString().split('T')[0]);
+
+  const fetchData = async () => {
     setIsLoading(true);
-    setTrendData(null);
+    // setTrendData(null); // Keep previous data while loading to avoid flicker if desired, but let's follow pattern
 
-    const fetchData = async () => {
-      await new Promise(resolve => setTimeout(resolve, 400));
+    await new Promise(resolve => setTimeout(resolve, 400));
 
-      const savedWeekMeals = localStorage.getItem('weekMeals');
-      const savedProfile = localStorage.getItem('userProfile');
-      const weekMeals: Record<string, DayMeals> = savedWeekMeals ? JSON.parse(savedWeekMeals) : {};
-      const userProfile = savedProfile ? JSON.parse(savedProfile) : null;
+    const savedWeekMeals = localStorage.getItem('weekMeals');
+    const savedProfile = localStorage.getItem('userProfile');
+    const weekMeals: Record<string, DayMeals> = savedWeekMeals ? JSON.parse(savedWeekMeals) : {};
+    const userProfile = savedProfile ? JSON.parse(savedProfile) : null;
 
-      const targetCalories = userProfile?.target_calories || 2000;
+    const targetCalories = userProfile?.target_calories || 2000;
 
-      const savedWeights = localStorage.getItem('weightEntries');
-      const weightEntries: WeightEntry[] = savedWeights ? JSON.parse(savedWeights) : [];
+    const savedWeights = localStorage.getItem('weightEntries');
+    const weightEntries: WeightEntry[] = savedWeights ? JSON.parse(savedWeights) : [];
 
-      let data: any = {};
-      let stats: any = {
-        weight: null,
-        calories: null,
-        macros: null,
-      };
+    // Sort weight entries by date
+    weightEntries.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-      // CALORIES & MACROS
-      const dailyAggregates = daysOfWeek.map(day => {
-        const dayMeals = weekMeals[day] || { breakfast: null, lunch: null, dinner: null };
-        const meals = [dayMeals.breakfast, dayMeals.lunch, dayMeals.dinner].filter(Boolean) as Meal[];
-        const totalCalories = meals.reduce((sum, m) => sum + m.calories, 0);
-        const totalProtein = meals.reduce((sum, m) => sum + m.protein, 0);
-        const totalCarbs = meals.reduce((sum, m) => sum + m.carbs, 0);
-        const totalFats = meals.reduce((sum, m) => sum + m.fats, 0);
-
-        return {
-          date: day.substring(0, 3), // Mon, Tue, etc.
-          calories: totalCalories,
-          protein: totalProtein,
-          carbs: totalCarbs,
-          fats: totalFats,
-        };
-      });
-
-      if (selectedMetric === 'calories') {
-        data.caloriesTrend = dailyAggregates.map(d => ({
-          ...d,
-          // Mocking 'burned' calories for now as we don't track activity yet
-          burned: Math.round(d.calories * 0.25),
-          target: targetCalories,
-        }));
-        const avgWeeklyCalories = dailyAggregates.reduce((sum, d) => sum + d.calories, 0) / 7;
-        stats.calories = {
-          avgWeekly: Math.round(avgWeeklyCalories),
-          trend: avgWeeklyCalories > targetCalories ? 'up' : 'down',
-          consistency: 92,
-        };
-      }
-
-      if (selectedMetric === 'macros') {
-        data.macrosTrend = dailyAggregates.map(d => ({
-          date: d.date,
-          protein: d.protein,
-          carbs: d.carbs,
-          fats: d.fats,
-        }));
-      }
-
-      // WEIGHT
-      if (selectedMetric === 'weight') {
-        let filtered = weightEntries;
-        if (selectedRange === 'day') {
-          filtered = weightEntries.slice(-7); // last 7 days
-        } else if (selectedRange === 'month') {
-          filtered = weightEntries.slice(-30);
-        } else if (selectedRange === 'quarter') {
-          filtered = weightEntries.slice(-90);
-        }
-
-        data.weightTrend = filtered;
-      }
-
-      setTrendData({ ...data, progressStats: stats });
-      setIsLoading(false);
+    let data: any = {};
+    let stats: any = {
+      weight: null,
+      calories: null,
+      macros: null,
     };
 
+    // CALORIES & MACROS
+    const dailyAggregates = daysOfWeek.map(day => {
+      const dayMeals = weekMeals[day] || { breakfast: null, lunch: null, dinner: null };
+      const meals = [dayMeals.breakfast, dayMeals.lunch, dayMeals.dinner].filter(Boolean) as Meal[];
+      const totalCalories = meals.reduce((sum, m) => sum + m.calories, 0);
+      const totalProtein = meals.reduce((sum, m) => sum + m.protein, 0);
+      const totalCarbs = meals.reduce((sum, m) => sum + m.carbs, 0);
+      const totalFats = meals.reduce((sum, m) => sum + m.fats, 0);
+
+      return {
+        date: day.substring(0, 3), // Mon, Tue, etc.
+        calories: totalCalories,
+        protein: totalProtein,
+        carbs: totalCarbs,
+        fats: totalFats,
+      };
+    });
+
+    if (selectedMetric === 'calories') {
+      data.caloriesTrend = dailyAggregates.map(d => ({
+        ...d,
+        // Mocking 'burned' calories for now as we don't track activity yet
+        burned: Math.round(d.calories * 0.25),
+        target: targetCalories,
+      }));
+      const avgWeeklyCalories = dailyAggregates.reduce((sum, d) => sum + d.calories, 0) / 7;
+      stats.calories = {
+        avgWeekly: Math.round(avgWeeklyCalories),
+        trend: avgWeeklyCalories > targetCalories ? 'up' : 'down',
+        consistency: 92,
+      };
+    }
+
+    if (selectedMetric === 'macros') {
+      data.macrosTrend = dailyAggregates.map(d => ({
+        date: d.date,
+        protein: d.protein,
+        carbs: d.carbs,
+        fats: d.fats,
+      }));
+    }
+
+    // WEIGHT
+    if (selectedMetric === 'weight') {
+      let filtered = weightEntries;
+      if (selectedRange === 'day') {
+        filtered = weightEntries.slice(-7); // last 7 entries (approx week)
+      } else if (selectedRange === 'month') {
+        filtered = weightEntries.slice(-30);
+      } else if (selectedRange === 'quarter') {
+        filtered = weightEntries.slice(-90);
+      }
+
+      data.weightTrend = filtered;
+    }
+
+    setTrendData({ ...data, progressStats: stats });
+    setIsLoading(false);
+  };
+
+  useEffect(() => {
     fetchData();
   }, [selectedMetric, selectedRange]);
+
+  const handleAddWeight = () => {
+    if (!newWeight || !newDate) {
+      toast({ title: "Error", description: "Please enter both weight and date.", variant: "destructive" });
+      return;
+    }
+
+    const savedWeights = localStorage.getItem('weightEntries');
+    const weightEntries: WeightEntry[] = savedWeights ? JSON.parse(savedWeights) : [];
+
+    const newEntry: WeightEntry = {
+      date: newDate,
+      weight: parseFloat(newWeight),
+      target: 70, // Mock target, ideally from profile
+      bodyFat: 0 // Optional
+    };
+
+    // Check if entry for date exists and update it, else add new
+    const existingIndex = weightEntries.findIndex(e => e.date === newDate);
+    if (existingIndex >= 0) {
+      weightEntries[existingIndex] = newEntry;
+    } else {
+      weightEntries.push(newEntry);
+    }
+
+    localStorage.setItem('weightEntries', JSON.stringify(weightEntries));
+
+    toast({ title: "Weight Logged", description: "Your progress has been updated." });
+    setIsWeightDialogOpen(false);
+    setNewWeight('');
+    fetchData(); // Refresh chart
+  };
 
   const weightTrend = trendData?.weightTrend || [];
   const caloriesTrend = trendData?.caloriesTrend || [];
@@ -147,21 +202,69 @@ const ProgressTrends = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center flex-wrap gap-4">
         <div>
           <h2 className="text-2xl font-bold">Progress Trends</h2>
           <p className="text-gray-600">Track your journey over time</p>
         </div>
-        <Select value={selectedRange} onValueChange={(val: any) => setSelectedRange(val)}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Select range" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="day">This Week</SelectItem>
-            <SelectItem value="month">This Month</SelectItem>
-            <SelectItem value="quarter">This Quarter</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="flex items-center gap-2">
+          <Dialog open={isWeightDialogOpen} onOpenChange={setIsWeightDialogOpen}>
+            <DialogTrigger asChild>
+              <Button size="sm" className="gap-1">
+                <Plus className="w-4 h-4" /> Log Weight
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Log Weight Entry</DialogTitle>
+                <DialogDescription>
+                  Add a new weight entry to track your progress.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="date" className="text-right">
+                    Date
+                  </Label>
+                  <Input
+                    id="date"
+                    type="date"
+                    value={newDate}
+                    onChange={(e) => setNewDate(e.target.value)}
+                    className="col-span-3"
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="weight" className="text-right">
+                    Weight (kg)
+                  </Label>
+                  <Input
+                    id="weight"
+                    type="number"
+                    step="0.1"
+                    value={newWeight}
+                    onChange={(e) => setNewWeight(e.target.value)}
+                    className="col-span-3"
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button onClick={handleAddWeight}>Save Entry</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
+          <Select value={selectedRange} onValueChange={(val: any) => setSelectedRange(val)}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Select range" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="day">Last 7 Entries</SelectItem>
+              <SelectItem value="month">Last 30 Entries</SelectItem>
+              <SelectItem value="quarter">Last 90 Entries</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       <Tabs value={selectedMetric} onValueChange={(val) => setSelectedMetric(val as any)}>

@@ -16,9 +16,11 @@ interface Meal {
   carbs: number;
   fats: number;
   cookTime: number;
+  time?: string;
   servings: number;
   tags: string[];
   ingredients: string[];
+  steps?: string[];
 }
 
 interface MealPlanCardProps {
@@ -26,9 +28,10 @@ interface MealPlanCardProps {
   meal: Meal | null;
   onMealChange: (meal: Meal | null) => void;
   onEdit?: () => void;
+  onViewDetails?: () => void;
 }
 
-const MealPlanCard = ({ mealType, meal, onMealChange, onEdit }: MealPlanCardProps) => {
+const MealPlanCard = ({ mealType, meal, onMealChange, onEdit, onViewDetails }: MealPlanCardProps) => {
 
   const handleRemoveMeal = () => {
     onMealChange(null);
@@ -107,14 +110,19 @@ const MealPlanCard = ({ mealType, meal, onMealChange, onEdit }: MealPlanCardProp
             </div>
           </div>
 
-          <img
-            src={meal.image && !meal.image.includes('placeholder') ? meal.image : getFallbackImage(meal.id)}
-            alt={meal.name}
-            onError={(e) => handleImageError(e, meal.id)}
-            className="w-full h-32 object-cover rounded-lg"
-          />
+          <div className="relative cursor-pointer" onClick={onViewDetails}>
+            <img
+              src={meal.image && !meal.image.includes('placeholder') ? meal.image : getFallbackImage(meal.id)}
+              alt={meal.name}
+              onError={(e) => handleImageError(e, meal.id)}
+              className="w-full h-32 object-cover rounded-lg"
+            />
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100">
+              <span className="text-white text-xs font-medium bg-black/50 px-2 py-1 rounded">View Details</span>
+            </div>
+          </div>
 
-          <h5 className="font-medium text-foreground text-sm leading-tight">{meal.name}</h5>
+          <h5 className="font-medium text-foreground text-sm leading-tight cursor-pointer hover:text-primary" onClick={onViewDetails}>{meal.name}</h5>
 
           <div className="flex flex-wrap gap-1">
             {meal.tags.slice(0, 2).map((tag) => (
@@ -149,6 +157,15 @@ const MealPlanCard = ({ mealType, meal, onMealChange, onEdit }: MealPlanCardProp
               {meal.ingredients.length > 3 && '...'}
             </div>
           </div>
+
+          {onViewDetails && (
+            <Button
+              className="w-full mt-2 bg-[#C5D86D] text-black hover:bg-[#B5C85D] h-8 text-xs font-medium"
+              onClick={onViewDetails}
+            >
+              View Recipe
+            </Button>
+          )}
         </div>
       </CardContent>
     </Card>

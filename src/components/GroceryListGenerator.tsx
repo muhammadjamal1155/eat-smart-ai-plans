@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ShoppingCart, Download, Check, Plus, Trash2 } from 'lucide-react';
+import { ShoppingCart, Download, Check, Plus, Trash2, Mail } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 interface GroceryItem {
@@ -200,6 +200,52 @@ const GroceryListGenerator = () => {
             <Button onClick={downloadList} size="sm" className="btn-primary" disabled={groceryList.length === 0}>
               <Download className="w-4 h-4 mr-2" />
               Download
+            </Button>
+            <Button
+              onClick={async () => {
+                // Get user email from localStorage or prompt (simplifying by prompting for now if not in context)
+                // Ideally we use useAuth() here but let's keep it simple for this component
+                const userStr = localStorage.getItem('nutriplan-user');
+                let email = '';
+                if (userStr) {
+                  email = JSON.parse(userStr).email;
+                } else {
+                  email = prompt("Enter your email address:") || '';
+                }
+
+                if (!email) return;
+
+                const items = groceryList.map(item => `${item.quantity} ${item.unit} ${item.name} (${item.category})`);
+
+                try {
+                  const response = await fetch('http://localhost:5000/api/email-grocery-list', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, items })
+                  });
+
+                  if (response.ok) {
+                    toast({
+                      title: "Email Sent",
+                      description: `Grocery list sent to ${email} (Check server console)`,
+                    });
+                  } else {
+                    throw new Error("Failed to send email");
+                  }
+                } catch (e) {
+                  toast({
+                    title: "Error",
+                    description: "Could not send email.",
+                    variant: "destructive"
+                  });
+                }
+              }}
+              size="sm"
+              variant="outline"
+              disabled={groceryList.length === 0}
+            >
+              <Mail className="w-4 h-4 mr-2" />
+              Email
             </Button>
           </div>
         </div>

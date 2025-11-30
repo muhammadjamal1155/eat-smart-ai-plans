@@ -186,27 +186,97 @@ class RecommendationEngine:
             query = np.array([[target_calories / 3, target_protein_pdv / 3, target_carbs_pdv / 3, target_fats_pdv / 3]]) 
             query_scaled = self.scaler.transform(query)
             
-            distances, indices = temp_model.kneighbors(query_scaled)
+            # Fetch more candidates to ensure variety
+            n_candidates = min(50, len(filtered_data))
+            distances, indices = temp_model.kneighbors(query_scaled, n_neighbors=n_candidates)
             
-            recommendations = filtered_data.iloc[indices[0]].copy()
+            candidates = filtered_data.iloc[indices[0]].copy()
             
             if allergies:
                 for allergy in allergies:
-                    recommendations = recommendations[~recommendations['ingredients'].str.contains(allergy.lower(), na=False)]
+                    candidates = candidates[~candidates['ingredients'].str.contains(allergy.lower(), na=False)]
+            
+            # Categorize candidates
+            breakfasts = []
+            lunches = []
+            dinners = []
+            others = []
+            
+            for _, row in candidates.iterrows():
+                m_type = self._infer_meal_type(row)
+                if m_type == 'Breakfast':
+                    breakfasts.append(row)
+                elif m_type == 'Lunch':
+                    lunches.append(row)
+                elif m_type == 'Dinner':
+                    dinners.append(row)
+                else:
+                    others.append(row)
+            
+            # Select balanced meals (2 Breakfast, 2 Lunch, 2 Dinner)
+            final_selection_rows = []
+            
+            def add_rows(source, count):
+                added = 0
+                for item in source:
+                    if added >= count: break
+                    # Check for duplicates based on ID
+                    if not any(x['id'] == item['id'] for x in final_selection_rows):
+                        final_selection_rows.append(item)
+                        added += 1
+                return added
+
+            # 1. Fill Breakfasts (Target 2)
+            add_rows(breakfasts, 2)
+            
+            # 2. Fill Lunches (Target 2)
+            # First try explicit lunches
+            l_added = add_rows(lunches, 2)
+            # If needed, fill with 'others' (Lunch/Dinner items)
+            if l_added < 2:
+                add_rows(others, 2 - l_added)
+            
+            # 3. Fill Dinners (Target 2)
+            # First try explicit dinners
+            d_added = add_rows(dinners, 2)
+            # If needed, fill with 'others' (Lunch/Dinner items)
+            if d_added < 2:
+                add_rows(others, 2 - d_added)
+            
+            # 4. Fill any remaining slots (to reach 6)
+            remaining_slots = 6 - len(final_selection_rows)
+            if remaining_slots > 0:
+                # Pool remaining items: unused breakfasts, lunches, dinners, others
+                # We prioritize others (main dishes) over extra breakfasts for lunch/dinner slots
+                rest = others + lunches + dinners + breakfasts
+                add_rows(rest, remaining_slots)
             
             # Format output
             results = []
-            for _, row in recommendations.head(6).iterrows(): # Return top 6 valid ones
+            for row in final_selection_rows:
+                meal_type = self._infer_meal_type(row)
+                tags = eval(row['tags'])[:3] if isinstance(row['tags'], str) else []
+                
+                # Ensure the tag matches the slot we intended? 
+                # Actually _infer_meal_type might return 'Lunch/Dinner' for items in 'others'.
+                # We should probably force the tag to be 'Lunch' or 'Dinner' based on position?
+                # But that might be misleading. Better to show 'Lunch/Dinner' or let the user decide.
+                # However, the user wants to see "Lunch" and "Dinner".
+                # If it's 'Lunch/Dinner', maybe we can just show that.
+                
+                if meal_type not in tags:
+                    tags.insert(0, meal_type)
+
                 results.append({
                     "id": int(row['id']),
                     "name": row['name'].title(),
                     "calories": int(row['calories']),
-                    "protein": int(row['protein']), # This is PDV, frontend might need to know or we label it
-                    "carbs": int(row['carbs']), # PDV
-                    "fats": int(row['fats']), # PDV
+                    "protein": int(row['protein']),
+                    "carbs": int(row['carbs']),
+                    "fats": int(row['fats']),
                     "image": row['image_url'] if pd.notna(row['image_url']) else "https://via.placeholder.com/300",
                     "time": f"{int(row['minutes'])} min",
-                    "tags": eval(row['tags'])[:3] if isinstance(row['tags'], str) else [],
+                    "tags": tags,
                     "ingredients": eval(row['ingredients']) if isinstance(row['ingredients'], str) else [],
                     "steps": eval(row['steps']) if isinstance(row['steps'], str) else []
                 })
@@ -238,9 +308,27 @@ class RecommendationEngine:
         results_df = self.data[mask].head(20)
         return self._format_results(results_df)
 
+    def _infer_meal_type(self, row):
+        name = row['name'].lower()
+        tags = str(row['tags']).lower()
+        
+        if any(x in name or x in tags for x in ['breakfast', 'morning', 'oat', 'egg', 'pancake', 'waffle', 'cereal', 'toast', 'yogurt', 'muffin', 'bread']):
+            return 'Breakfast'
+        elif any(x in name or x in tags for x in ['lunch', 'sandwich', 'salad', 'soup', 'wrap', 'burger']):
+            return 'Lunch'
+        elif any(x in name or x in tags for x in ['dinner', 'supper', 'steak', 'roast', 'pasta', 'curry', 'stew', 'casserole', 'lasagna']):
+            return 'Dinner'
+        
+        return 'Lunch/Dinner'
+
     def _format_results(self, df):
         results = []
         for _, row in df.iterrows():
+            meal_type = self._infer_meal_type(row)
+            tags = eval(row['tags'])[:3] if isinstance(row['tags'], str) else []
+            if meal_type not in tags:
+                tags.insert(0, meal_type)
+                
             results.append({
                 "id": str(row['id']),
                 "name": row['name'],
@@ -250,7 +338,7 @@ class RecommendationEngine:
                 "fats": int(row['fats']),
                 "image": row['image_url'] if pd.notna(row['image_url']) else "https://via.placeholder.com/300",
                 "time": f"{int(row['minutes'])} min",
-                "tags": eval(row['tags'])[:3] if isinstance(row['tags'], str) else [],
+                "tags": tags,
                 "ingredients": eval(row['ingredients']) if isinstance(row['ingredients'], str) else [],
                 "steps": eval(row['steps']) if isinstance(row['steps'], str) else []
             })

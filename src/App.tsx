@@ -34,14 +34,6 @@ function App() {
     </ErrorBoundary>
   );
 }
-              <Toaster />
-              <Chatbot />
-            </div >
-          </Router >
-        </AuthProvider >
-      </ThemeProvider >
-    </ErrorBoundary >
-  );
-}
+
 
 export default App;

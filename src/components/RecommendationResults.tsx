@@ -129,11 +129,18 @@ const RecommendationResults = ({ data, onBack }: RecommendationResultsProps) => 
                                 className="w-full h-full object-cover"
                             />
                             <div className="absolute top-2 right-2 flex gap-1">
-                                {meal.tags.slice(0, 2).map(tag => (
-                                    <Badge key={tag} variant="secondary" className="bg-black/50 text-white hover:bg-black/70 backdrop-blur-sm">
-                                        {tag}
-                                    </Badge>
-                                ))}
+                                {meal.tags.slice(0, 3).map(tag => {
+                                    let badgeColor = "bg-black/50 text-white hover:bg-black/70";
+                                    if (tag === 'Breakfast') badgeColor = "bg-orange-500/90 text-white hover:bg-orange-600/90";
+                                    if (tag === 'Lunch') badgeColor = "bg-green-500/90 text-white hover:bg-green-600/90";
+                                    if (tag === 'Dinner') badgeColor = "bg-blue-500/90 text-white hover:bg-blue-600/90";
+
+                                    return (
+                                        <Badge key={tag} variant="secondary" className={`${badgeColor} backdrop-blur-sm`}>
+                                            {tag}
+                                        </Badge>
+                                    );
+                                })}
                             </div>
                         </div>
 

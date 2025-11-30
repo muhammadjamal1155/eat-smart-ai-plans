@@ -3,8 +3,10 @@ import Footer from '@/components/Footer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/hooks/use-theme';
+import { usePageTitle } from '@/hooks/use-page-title';
 
 const Settings = () => {
+  usePageTitle('Settings');
   const { theme, setTheme } = useTheme();
 
   return (

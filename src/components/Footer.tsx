@@ -8,14 +8,14 @@ const Footer = () => {
 
   const footerLinks = {
     product: [
-      { name: 'Features', href: '/', hash: '#features' },
+
       { name: 'Meal Plans', href: '/meal-plans', hash: null },
       { name: 'Analytics', href: '/analytics', hash: null },
       { name: 'Mobile App', href: '/mobile-app', hash: null },
     ],
     company: [
       { name: 'About Us', href: '/about', hash: null },
-      { name: 'Careers', href: '/careers', hash: null },
+
       { name: 'Press', href: '/press', hash: null },
       { name: 'Blog', href: '/blog', hash: null },
     ],
@@ -42,7 +42,7 @@ const Footer = () => {
         <button
           key={link.name}
           onClick={() => handleLinkClick(link.href, link.hash)}
-          className="text-gray-400 hover:text-white transition-colors duration-200"
+          className="text-muted-foreground hover:text-foreground transition-colors duration-200"
         >
           {link.name}
         </button>
@@ -55,7 +55,7 @@ const Footer = () => {
           key={link.name}
           to={`${link.href}${link.hash}`}
           onClick={() => handleLinkClick(link.href, link.hash)}
-          className="text-gray-400 hover:text-white transition-colors duration-200"
+          className="text-muted-foreground hover:text-foreground transition-colors duration-200"
         >
           {link.name}
         </Link>
@@ -66,7 +66,7 @@ const Footer = () => {
       <Link
         key={link.name}
         to={link.href}
-        className="text-gray-400 hover:text-white transition-colors duration-200"
+        className="text-muted-foreground hover:text-foreground transition-colors duration-200"
       >
         {link.name}
       </Link>
@@ -74,7 +74,7 @@ const Footer = () => {
   };
 
   return (
-    <footer className="bg-gray-900 text-white">
+    <footer className="bg-card text-card-foreground border-t border-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid lg:grid-cols-4 gap-8">
           {/* Brand Section */}
@@ -85,14 +85,14 @@ const Footer = () => {
               </div>
               <span className="font-poppins font-bold text-xl">NutriPlan</span>
             </Link>
-            <p className="text-gray-400 leading-relaxed">
+            <p className="text-muted-foreground leading-relaxed">
               Empowering healthier lives through personalized nutrition guidance powered by artificial intelligence.
             </p>
             <div className="space-y-2">
               <Button className="w-full btn-primary">
                 Download iOS App
               </Button>
-              <Button variant="outline" className="w-full text-white border-gray-600 hover:bg-gray-800">
+              <Button variant="outline" className="w-full">
                 Download Android App
               </Button>
             </div>
@@ -135,16 +135,16 @@ const Footer = () => {
           </div>
         </div>
 
-        <Separator className="my-8 bg-gray-800" />
+        <Separator className="my-8" />
 
         <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-          <div className="text-gray-400 text-sm">
+          <div className="text-muted-foreground text-sm">
             © 2024 NutriPlan. All rights reserved.
           </div>
-          <div className="flex space-x-6 text-sm text-gray-400">
-            <button className="hover:text-white transition-colors duration-200">Privacy</button>
-            <button className="hover:text-white transition-colors duration-200">Terms</button>
-            <button className="hover:text-white transition-colors duration-200">Cookies</button>
+          <div className="flex space-x-6 text-sm text-muted-foreground">
+            <button className="hover:text-foreground transition-colors duration-200">Privacy</button>
+            <button className="hover:text-foreground transition-colors duration-200">Terms</button>
+            <button className="hover:text-foreground transition-colors duration-200">Cookies</button>
           </div>
         </div>
       </div>

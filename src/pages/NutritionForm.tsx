@@ -11,6 +11,7 @@ import { Progress } from "@/components/ui/progress";
 import { toast } from "@/hooks/use-toast";
 import RecommendationResults from "@/components/RecommendationResults";
 import { useAuth } from "@/hooks/use-auth";
+import { usePageTitle } from "@/hooks/use-page-title";
 
 const steps = [
   { id: 1, title: "Personal Details" },
@@ -20,6 +21,7 @@ const steps = [
 ];
 
 export default function NutritionForm() {
+  usePageTitle('Nutrition Form');
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
     fullName: "",

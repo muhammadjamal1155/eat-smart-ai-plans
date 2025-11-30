@@ -1,8 +1,10 @@
 import React from 'react';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
+import { usePageTitle } from '@/hooks/use-page-title';
 
 const Reminders = () => {
+  usePageTitle('Reminders');
   return (
     <div className="min-h-screen w-full overflow-x-hidden">
       <Navigation />

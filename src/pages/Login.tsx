@@ -5,10 +5,12 @@ import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import LoginForm from '@/components/LoginForm';
 import { useAuth } from '@/hooks/use-auth';
+import { usePageTitle } from '@/hooks/use-page-title';
 
-const Login = () => { const navigate = useNavigate(); const location = useLocation();
+const Login = () => {
+  const navigate = useNavigate(); const location = useLocation();
+  usePageTitle('Login');
   useEffect(() => {
-    document.title = 'Login | NutriPlan';
     const desc = 'Login to NutriPlan to access personalized meal plans and nutrition insights.';
     let meta = document.querySelector('meta[name="description"]');
     if (!meta) {

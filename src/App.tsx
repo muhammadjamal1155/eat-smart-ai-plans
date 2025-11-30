@@ -9,6 +9,7 @@ import { Toaster } from '@/components/ui/toaster';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import '@/App.css';
+import ScrollToTop from '@/components/ScrollToTop';
 
 const Index = lazy(() => import('@/pages/Index'));
 const Dashboard = lazy(() => import('@/pages/Dashboard'));
@@ -39,6 +40,7 @@ function App() {
       <ThemeProvider defaultTheme="system" storageKey="nutriplan-theme">
         <AuthProvider>
           <Router>
+            <ScrollToTop />
             <div className="App page-surface w-full overflow-x-hidden" id="main-content">
               <a href="#main-content" className="skip-link">
                 Skip to main content

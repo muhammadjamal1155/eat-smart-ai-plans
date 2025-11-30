@@ -5,8 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Mail, Phone, MapPin, Search } from 'lucide-react';
 import { faqs, FAQ } from '@/lib/faq';
+import { usePageTitle } from '@/hooks/use-page-title';
 
 const HelpCenter = () => {
+  usePageTitle('Help Center');
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredFaqs = faqs.filter(faq =>

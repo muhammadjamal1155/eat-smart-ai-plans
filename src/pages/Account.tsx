@@ -17,6 +17,7 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { ArrowRight, CalendarDays, Download, Flame, ShieldAlert } from 'lucide-react';
 import type { LifestylePreferences, NutritionTargets } from '@/contexts/AuthContext';
+import { usePageTitle } from '@/hooks/use-page-title';
 
 const formatGoal = (goal?: string) =>
   goal ? goal.replace('-', ' ').replace(/\b\w/g, (letter) => letter.toUpperCase()) : 'Goal not set';
@@ -31,10 +32,7 @@ const renderAllergies = (allergies?: LifestylePreferences['allergies']) => {
 
 const Account = () => {
   const { user, logout } = useAuth();
-
-  useEffect(() => {
-    document.title = 'Account | NutriGuide AI';
-  }, []);
+  usePageTitle('Account');
 
   if (!user) {
     return (

@@ -6,8 +6,10 @@ import LandingHighlights from '@/components/LandingHighlights';
 import LandingPreview from '@/components/LandingPreview';
 import LandingCTA from '@/components/LandingCTA';
 import Footer from '@/components/Footer';
+import { usePageTitle } from '@/hooks/use-page-title';
 
 const Index = () => {
+  usePageTitle('Home');
   const location = useLocation();
 
   useEffect(() => {

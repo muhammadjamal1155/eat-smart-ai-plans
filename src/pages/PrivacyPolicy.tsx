@@ -1,13 +1,3 @@
-import Navigation from '@/components/Navigation';
-import Footer from '@/components/Footer';
-
-const PrivacyPolicy = () => {
-  return (
-    <div className="min-h-screen">
-      <Navigation />
-      <main className="pt-20">
-        <section className="py-12 md:py-20 bg-gray-50">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <header className="mb-8 md:mb-12 text-center">
               <h1 className="text-4xl sm:text-5xl font-bold">Privacy Policy</h1>
               <p className="mt-4 text-lg text-muted-foreground">
@@ -66,11 +56,11 @@ const PrivacyPolicy = () => {
                 If you have questions or comments about this policy, you may email us at privacy@nutriguide.ai.
               </p>
             </div>
-          </div>
-        </section>
-      </main>
-      <Footer />
-    </div>
+          </div >
+        </section >
+      </main >
+  <Footer />
+    </div >
   );
 };
 

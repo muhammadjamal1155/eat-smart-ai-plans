@@ -53,17 +53,17 @@ const AboutSection = () => {
               The Science Behind NutriGuide AI
             </h3>
             <p className="text-lg text-muted-foreground leading-relaxed">
-              NutriGuide AI combines cutting-edge artificial intelligence with decades of nutritional research 
-              to provide personalized diet recommendations that actually work. Our system analyzes your unique 
-              metabolic profile, dietary preferences, and lifestyle factors to create meal plans that are not 
+              NutriGuide AI combines cutting-edge artificial intelligence with decades of nutritional research
+              to provide personalized diet recommendations that actually work. Our system analyzes your unique
+              metabolic profile, dietary preferences, and lifestyle factors to create meal plans that are not
               only effective but also sustainable.
             </p>
             <p className="text-lg text-muted-foreground leading-relaxed">
-              Unlike generic diet plans, our AI continuously learns from your progress, adapting recommendations 
-              in real-time to ensure you stay on track towards your health goals. Every suggestion is backed by 
+              Unlike generic diet plans, our AI continuously learns from your progress, adapting recommendations
+              in real-time to ensure you stay on track towards your health goals. Every suggestion is backed by
               peer-reviewed research and validated nutritional science.
             </p>
-            
+
             <div className="space-y-3">
               <h4 className="text-xl font-semibold text-foreground">Data Sources:</h4>
               <div className="flex flex-wrap gap-2">
@@ -94,8 +94,8 @@ const AboutSection = () => {
         {/* Features Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
           {features.map((feature, index) => (
-            <Card 
-              key={feature.title} 
+            <Card
+              key={feature.title}
               className={`card-hover glass-panel animate-fade-in`}
               style={{ animationDelay: `${index * 0.1}s` }}
             >
@@ -111,7 +111,7 @@ const AboutSection = () => {
         </div>
 
         {/* Methodology Section */}
-        <Card className="glass-panel shadow-large bg-gradient-to-r from-forest-100/70 via-forest-200/50 to-forest-300/40">
+        <Card className="glass-panel shadow-large bg-gradient-to-r from-forest-100/70 via-forest-200/50 to-forest-300/40 dark:from-forest-900/50 dark:via-forest-800/50 dark:to-forest-900/50">
           <CardContent className="p-8">
             <div className="grid lg:grid-cols-2 gap-8 items-center">
               <div className="space-y-6">
@@ -147,7 +147,7 @@ const AboutSection = () => {
                   </div>
                 </div>
               </div>
-              
+
               <div className="glass-panel rounded-xl p-6">
                 <h4 className="text-xl font-semibold text-foreground mb-4">Key Statistics</h4>
                 <div className="space-y-4">

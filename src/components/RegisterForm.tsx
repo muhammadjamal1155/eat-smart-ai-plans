@@ -4,20 +4,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/hooks/use-auth';
 import { toast } from '@/hooks/use-toast';
-import { User, Mail, Lock, Target } from 'lucide-react';
+import { User, Mail, Lock } from 'lucide-react';
 
 const RegisterForm = ({ onSwitchToLogin }: { onSwitchToLogin: () => void }) => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    password: '',
-    age: '',
-    weight: '',
-    height: '',
-    goal: ''
+    password: ''
   });
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
@@ -44,20 +39,16 @@ const RegisterForm = ({ onSwitchToLogin }: { onSwitchToLogin: () => void }) => {
     try {
       // Simulate registration delay
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       // Create user object
       const newUser = {
         id: Date.now().toString(),
         name: formData.name,
-        email: formData.email,
-        age: formData.age ? parseInt(formData.age) : undefined,
-        weight: formData.weight ? parseFloat(formData.weight) : undefined,
-        height: formData.height ? parseFloat(formData.height) : undefined,
-        goal: formData.goal || undefined
+        email: formData.email
       };
 
       login(newUser);
-      
+
       toast({
         title: "Registration Successful!",
         description: "Welcome to NutriGuide AI. Let's start your health journey!",
@@ -124,65 +115,6 @@ const RegisterForm = ({ onSwitchToLogin }: { onSwitchToLogin: () => void }) => {
               placeholder="Create a password"
               required
             />
-          </div>
-
-          <div className="grid grid-cols-3 gap-3">
-            <div className="space-y-2">
-              <Label htmlFor="age">Age</Label>
-              <Input
-                id="age"
-                type="number"
-                value={formData.age}
-                onChange={(e) => handleInputChange('age', e.target.value)}
-                placeholder="25"
-                min="13"
-                max="120"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="weight">Weight (kg)</Label>
-              <Input
-                id="weight"
-                type="number"
-                value={formData.weight}
-                onChange={(e) => handleInputChange('weight', e.target.value)}
-                placeholder="70"
-                min="30"
-                max="300"
-                step="0.1"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="height">Height (cm)</Label>
-              <Input
-                id="height"
-                type="number"
-                value={formData.height}
-                onChange={(e) => handleInputChange('height', e.target.value)}
-                placeholder="175"
-                min="120"
-                max="250"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label className="flex items-center space-x-2">
-              <Target className="w-4 h-4" />
-              <span>Health Goal</span>
-            </Label>
-            <Select value={formData.goal} onValueChange={(value) => handleInputChange('goal', value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select your goal" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="weight-loss">Weight Loss</SelectItem>
-                <SelectItem value="weight-gain">Weight Gain</SelectItem>
-                <SelectItem value="muscle-gain">Muscle Gain</SelectItem>
-                <SelectItem value="maintenance">Maintain Weight</SelectItem>
-                <SelectItem value="general-health">General Health</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
 
           <Button type="submit" className="w-full" disabled={isLoading}>

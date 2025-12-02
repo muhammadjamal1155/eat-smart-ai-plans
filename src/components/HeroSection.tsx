@@ -1,6 +1,6 @@
 
 import { Button } from '@/components/ui/button';
-import { ArrowDown } from 'lucide-react';
+import { ArrowDown, Sparkles } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { useNavigate } from 'react-router-dom';
 
@@ -42,10 +42,11 @@ const HeroSection = () => {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button size="lg" className="btn-primary text-lg px-8 py-4 interactive touch-manipulation active:scale-95 w-full sm:w-auto" onClick={handleStartJourney}>
-                Start Your Journey
+              <Button size="lg" className="btn-primary text-lg px-8 py-4 interactive touch-manipulation active:scale-95 w-full sm:w-auto gap-2" onClick={handleStartJourney}>
+                <Sparkles className="w-5 h-5" />
+                Get My Free Meal Plan
               </Button>
-              <Button size="lg" variant="outline" className="btn-secondary text-lg px-8 py-4 interactive touch-manipulation active:scale-95 w-full sm:w-auto">
+              <Button size="lg" variant="outline" className="btn-secondary text-lg px-8 py-4 interactive touch-manipulation active:scale-95 w-full sm:w-auto" onClick={() => navigate('/about')}>
                 Learn More
               </Button>
             </div>

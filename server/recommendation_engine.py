@@ -157,13 +157,31 @@ class RecommendationEngine:
             bmr = self.calculate_bmr(weight, height, age, gender)
             tdee = self.calculate_tdee(bmr, activity_level)
             target_calories = tdee
-            if goal == 'weight-loss': target_calories -= 500
-            elif goal == 'weight-gain': target_calories += 500
-            elif goal == 'muscle-gain': target_calories += 250
+            
+            # Calorie Adjustments
+            if goal == 'weight-loss':
+                target_calories -= 500
+            elif goal == 'weight-gain':
+                target_calories += 500
+            elif goal == 'muscle-gain':
+                target_calories += 250
+            elif goal == 'maintenance' or goal == 'general-health':
+                target_calories = tdee # No change
 
-            target_protein_g = (target_calories * 0.3) / 4
-            target_fats_g = (target_calories * 0.3) / 9
-            target_carbs_g = (target_calories * 0.4) / 4
+            # Macro Distribution (Protein/Fats/Carbs)
+            if goal == 'muscle-gain':
+                p_ratio, f_ratio, c_ratio = 0.35, 0.25, 0.40 # Higher protein for muscle
+            elif goal == 'weight-loss':
+                p_ratio, f_ratio, c_ratio = 0.40, 0.30, 0.30 # Higher protein for satiety
+            elif goal == 'weight-gain':
+                p_ratio, f_ratio, c_ratio = 0.30, 0.30, 0.40 # Balanced surplus
+            else: # maintenance / general-health
+                p_ratio, f_ratio, c_ratio = 0.30, 0.30, 0.40 # Standard balanced
+
+            target_protein_g = (target_calories * p_ratio) / 4
+            target_fats_g = (target_calories * f_ratio) / 9
+            target_carbs_g = (target_calories * c_ratio) / 4
+            
             target_protein_pdv = (target_protein_g / 50) * 100
             target_fats_pdv = (target_fats_g / 65) * 100
             target_carbs_pdv = (target_carbs_g / 300) * 100

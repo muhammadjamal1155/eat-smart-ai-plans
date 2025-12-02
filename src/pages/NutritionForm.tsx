@@ -23,15 +23,17 @@ const steps = [
 export default function NutritionForm() {
   usePageTitle('Nutrition Form');
   const [currentStep, setCurrentStep] = useState(1);
+  const { user, updateUser, login } = useAuth();
+
   const [formData, setFormData] = useState({
-    fullName: "",
-    age: "",
+    fullName: user?.name || "",
+    age: user?.age?.toString() || "",
     gender: "",
-    height: "",
-    heightUnit: "ft",
-    weight: "",
+    height: user?.height?.toString() || "",
+    heightUnit: user?.height ? "cm" : "ft",
+    weight: user?.weight?.toString() || "",
     weightUnit: "kg",
-    goal: "",
+    goal: user?.goal || "",
     activityLevel: "",
     dietType: "",
     foodAllergies: "",
@@ -43,7 +45,6 @@ export default function NutritionForm() {
   const [recommendations, setRecommendations] = useState<any>(null);
   const [showResults, setShowResults] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { user, updateUser, login } = useAuth();
 
   const navigate = useNavigate();
 
@@ -279,20 +280,18 @@ export default function NutritionForm() {
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label>Your Goal</Label>
-                  <RadioGroup onValueChange={(value) => handleRadioChange("goal", value)} value={formData.goal} className="flex space-x-4">
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="weight-loss" id="weight-loss" />
-                      <Label htmlFor="weight-loss">Weight Loss</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="weight-gain" id="weight-gain" />
-                      <Label htmlFor="weight-gain">Weight Gain</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="maintenance" id="maintenance" />
-                      <Label htmlFor="maintenance">Maintenance</Label>
-                    </div>
-                  </RadioGroup>
+                  <Select onValueChange={(value) => handleSelectChange("goal", value)} value={formData.goal}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select your goal" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="weight-loss">Weight Loss</SelectItem>
+                      <SelectItem value="weight-gain">Weight Gain</SelectItem>
+                      <SelectItem value="muscle-gain">Muscle Gain</SelectItem>
+                      <SelectItem value="maintenance">Maintain Weight</SelectItem>
+                      <SelectItem value="general-health">General Health</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label>Activity Level</Label>

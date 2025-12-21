@@ -1,73 +1,112 @@
-# Welcome to your Lovable project
+# Eat Smart AI Plans (NutriPlan)
 
-## Project info
+**Eat Smart AI Plans** is an intelligent web application designed to generate personalized meal plans based on individual user data. By leveraging Artificial Intelligence and Machine Learning, the system calculates precise nutritional requirements and recommends meals that align with the user's health goals, dietary preferences, and restrictions.
 
-**URL**: https://lovable.dev/projects/908472ec-4661-457f-8835-47b86c6c2152
+## 🚀 Key Features
 
-## How can I edit this code?
+### User Dashboard (Protected)
+*   **AI-Powered Meal Plans**: Generates daily breakfast, lunch, and dinner plans using a winning-algorithm tournament strategy (KNN, Cosine Similarity, TF-IDF).
+*   **Personalized Intelligence**: Calculates BMR, TDEE, and macro targets based on age, weight, height, and goals.
+*   **Smart Grocery List**: Automatically aggregates ingredients from your plan into a categorized shopping list.
+*   **Insights & Analytics**: Visual charts showing how your plan meets your nutritional targets.
+*   **Dietary Filtering**: robust support for diets (Vegan, Keto, Paleo) and allergy exclusions.
 
-There are several ways of editing your application.
+### Public Pages
+*   **Landing Page**: Overview of features and value proposition.
+*   **Authentication**: Secure Login, Registration, and Password Reset flows.
+*   **Informational**: About Us, Contact, and Legal pages.
 
-**Use Lovable**
+## 🛠️ Tech Stack
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/908472ec-4661-457f-8835-47b86c6c2152) and start prompting.
+### Frontend
+*   **Framework**: [React](https://react.dev/) (v18) with TypeScript.
+*   **Build Tool**: [Vite](https://vitejs.dev/) for fast development.
+*   **Styling**: [Tailwind CSS](https://tailwindcss.com/) + [Shadcn UI](https://ui.shadcn.com/) (Radix Primitives).
+*   **State Management**: React Context + React Query (@tanstack/react-query).
+*   **Forms**: React Hook Form + Zod validation.
+*   **Visualizations**: Recharts.
 
-Changes made via Lovable will be committed automatically to this repo.
+### Backend
+*   **Server**: Python [Flask](https://flask.palletsprojects.com/).
+*   **Data Processing**: Pandas & NumPy.
+*   **Machine Learning**: Scikit-learn (KNN, Cosine Similarity, TF-IDF).
+*   **API**: RESTful endpoints.
 
-**Use your preferred IDE**
+## ⚙️ Prerequisites
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+*   **Node.js** (v18+ recommended)
+*   **Python** (v3.8+ recommended)
+*   **npm** (comes with Node.js)
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## 📦 Installation & Setup
 
-Follow these steps:
+Follow these steps to run the full application locally.
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
+### 1. Clone the Repository
+```bash
 git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+cd eat-smart-ai-plans
 ```
 
-**Edit a file directly in GitHub**
+### 2. Backend Setup (Python)
+The backend runs on port `5000`.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+1.  Navigate to the project root.
+2.  Activate the virtual environment:
+    *   **Windows**:
+        ```powershell
+        .\server\venv\Scripts\activate
+        ```
+    *   **Mac/Linux**:
+        ```bash
+        source server/venv/bin/activate
+        ```
+3.  Install dependencies (if needed):
+    ```bash
+    pip install -r server/requirements.txt
+    ```
+4.  Start the server:
+    ```bash
+    python server/app.py
+    ```
+    > The server will start at `http://127.0.0.1:5000`.
 
-**Use GitHub Codespaces**
+### 3. Frontend Setup (React)
+The frontend runs on port `8080`.
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+1.  Open a new terminal window in the project root.
+2.  Install Node dependencies:
+    ```bash
+    npm install
+    ```
+3.  Start the development server:
+    ```bash
+    npm run dev
+    ```
+    > The application will open at `http://localhost:8080`.
 
-## What technologies are used for this project?
+## 📖 Usage
 
-This project is built with:
+1.  **Register/Login**: Create an account to access the dashboard.
+2.  **Complete Profile**: Enter your physical stats (Age, Weight, Height) and Goals (Lose Weight, Muscle Gain, etc.) in the **Nutrition Form**.
+3.  **Generate Plan**: The AI will process your data and unique preferences to build a custom meal plan.
+4.  **View Insights**: Check the "Insights" tab to see nutritional breakdowns.
+5.  **Get Groceries**: Go to the "Grocery List" to see what you need to buy.
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## 📂 Project Structure
 
-## How can I deploy this project?
+```
+├── server/                 # Python Flask Backend
+│   ├── app.py             # API Entry Point
+│   ├── recommendation_engine.py # AI Logic
+│   └── data/              # Dataset (CSV/JSON)
+├── src/                    # React Frontend
+│   ├── components/        # Reusable UI Components
+│   ├── pages/             # Route Pages (Dashboard, etc.)
+│   ├── contexts/          # Global State (Auth)
+│   └── lib/               # Utilities & Helpers
+└── public/                 # Static Assets
+```
 
-Simply open [Lovable](https://lovable.dev/projects/908472ec-4661-457f-8835-47b86c6c2152) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+## 📄 License
+This project is for educational and personal use.

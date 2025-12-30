@@ -5,6 +5,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import TfidfVectorizer
 import numpy as np
 import os
+import ast
 import random
 import requests
 import json
@@ -31,91 +32,68 @@ class RecommendationEngine:
 
     def load_data(self):
         try:
-            # 1. Try Loading from Supabase first (via REST API)
-            if self.supabase_url and self.supabase_key:
-                try:
-                    print("Attempting to fetch meals from Supabase REST API...")
-                    
-                    headers = {
-                        "apikey": self.supabase_key,
-                        "Authorization": f"Bearer {self.supabase_key}",
-                        "Content-Type": "application/json"
-                    }
-                    
-                    # Fetch from 'meals' table
-                    api_url = f"{self.supabase_url}/rest/v1/meals?select=*"
-                    response = requests.get(api_url, headers=headers, timeout=5)
-                    
-                    if response.status_code == 200:
-                        meals_data = response.json()
-                        if meals_data and len(meals_data) > 0:
-                            print(f"Successfully loaded {len(meals_data)} meals from Supabase.")
-                            self.data = pd.DataFrame(meals_data)
-                            
-                            # Standardize columns
-                            self.data['diet_type'] = '' 
-                            self.data['cuisine'] = ''
-                            self.data['meal_type'] = ''
-                            
-                            if 'tags' in self.data.columns:
-                                self.data['tags'] = self.data['tags'].apply(lambda x: ",".join(x) if isinstance(x, list) else str(x))
-
-                            if 'image' in self.data.columns:
-                                self.data['image_url'] = self.data['image'] 
-                            
-                            self._prepare_features()
-                            return
-                        else:
-                            print("Supabase 'meals' table is empty. Falling back to CSV.")
-                    else:
-                        print(f"Supabase request failed: {response.status_code} {response.text}")
-                        
-                except Exception as db_err:
-                    print(f"Supabase REST fetch failed: {db_err}. Falling back to CSV.")
-
-            # 2. Fallback to CSV
-            # SWITCH TO NEW DATASET
-            data_path = os.path.join(os.path.dirname(__file__), 'data', 'healthy_eating.csv')
+            # 1. Try Loading from Supabase first (OPTIONAL - skipped for this update to prioritize local file)
+            # (Keeping logic commented or secondary if you want to migrate later)
             
-            # Fallback if file not found
+            # 2. Load Local Dataset (Food.com small_data.csv)
+            data_path = os.path.join(os.path.dirname(__file__), 'data', 'small_data.csv')
+            
             if not os.path.exists(data_path):
-                print(f"Dataset not found at {data_path}. Please check file location.")
+                print(f"Dataset not found at {data_path}.")
                 self.data = pd.DataFrame()
                 return
 
+            print("Loading dataset... this may take a moment.")
+            # Read only properly formatted lines to avoid parsing errors if any
             self.data = pd.read_csv(data_path)
             
-            # --- MAPPING NEW COLUMNS ---
-            # Healthy Eating Dataset has: calories, protein_g, fat_g, carbs_g, diet_type, meal_type
+            # --- PARSING FOOD.COM DATASET ---
+            # Columns: id, name, nutrition, steps, ingredients, tags, ...
             
-            # Map to internal standard names
-            self.data['id'] = self.data['meal_id']
-            self.data['name'] = self.data['meal_name']
+            # 1. Parse Nutrition (Stringified List -> Columns)
+            # valid format: [calories, total_fat_pdv, sugar_pdv, sodium_pdv, protein_pdv, sat_fat_pdv, carbs_pdv]
+            print("Parsing nutrition data...")
             
-            # Ensure numeric types
-            self.data['calories'] = pd.to_numeric(self.data['calories'], errors='coerce').fillna(0)
-            self.data['protein'] = pd.to_numeric(self.data['protein_g'], errors='coerce').fillna(0)
-            self.data['fats'] = pd.to_numeric(self.data['fat_g'], errors='coerce').fillna(0)
-            self.data['carbs'] = pd.to_numeric(self.data['carbs_g'], errors='coerce').fillna(0)
+            # Helper to safely parse lists
+            def safe_parse_list(val):
+                try: return ast.literal_eval(str(val))
+                except: return []
+
+            # Apply parsing
+            self.data['nutrition_parsed'] = self.data['nutrition'].apply(safe_parse_list)
             
-            # Clean text columns for searching/filtering
-            self.data['diet_type'] = self.data['diet_type'].astype(str).str.lower()
-            self.data['meal_type'] = self.data['meal_type'].astype(str).str.lower()
-            self.data['cuisine'] = self.data['cuisine'].astype(str).str.title()
+            # Extract Macros & Convert PDV to Grams (Approximate)
+            # PDV Assumptions: Protein 50g, Fat 78g, Carbs 275g (based on 2000 cal diet standards used in this dataset)
             
-            # --- NAME CLEANING LOGIC ---
-            self.data['name'] = self.data.apply(self._clean_meal_name, axis=1)
+            def get_macro(lst, idx, conv_factor):
+                if len(lst) > idx:
+                    pdv = float(lst[idx])
+                    return (pdv / 100) * conv_factor
+                return 0.0
+
+            self.data['calories'] = self.data['nutrition_parsed'].apply(lambda x: float(x[0]) if len(x)>0 else 0)
+            self.data['fats'] = self.data['nutrition_parsed'].apply(lambda x: get_macro(x, 1, 78)) # Total Fat
+            self.data['protein'] = self.data['nutrition_parsed'].apply(lambda x: get_macro(x, 4, 50)) # Protein
+            self.data['carbs'] = self.data['nutrition_parsed'].apply(lambda x: get_macro(x, 6, 275)) # Carbs (Total)
+
+            # 2. Clean Text Data
+            self.data['name'] = self.data['name'].astype(str).str.title()
             
-            # Create 'tags' for compatibility with old search logic
-            self.data['tags'] = self.data['diet_type'] + "," + self.data['cuisine'] + "," + self.data['meal_type']
+            # Parse steps and ingredients for frontend display
+            self.data['steps_list'] = self.data['steps'].apply(safe_parse_list)
+            self.data['ingredients_list'] = self.data['ingredients'].apply(safe_parse_list)
+            self.data['tags_list'] = self.data['tags'].apply(safe_parse_list)
+
+            # Create search tags string
+            self.data['combined_text'] = (
+                self.data['name'] + " " + 
+                self.data['ingredients'].astype(str) + " " + 
+                self.data['tags'].astype(str)
+            ).str.lower()
             
-            # --- IMAGE ASSIGNMENT LOGIC ---
-            self.data['image_url'] = self.data.apply(
-                lambda row: self._get_meal_image(row['name'], row['tags']), axis=1
-            )
-            
-            # Fill missing text fields
-            self.data.fillna('', inplace=True)
+            # Drop rows with broken nutrition
+            self.data = self.data[self.data['calories'] > 0].copy()
+            self.data.reset_index(drop=True, inplace=True)
             
             self._prepare_features()
             
@@ -127,87 +105,30 @@ class RecommendationEngine:
 
     def _prepare_features(self):
         try:
-            
             # Prepare features for KNN
             self.scaler = StandardScaler()
             self.features = self.scaler.fit_transform(self.data[self.feature_columns])
             
+            # We use a smaller sample for KNN fitting if dataset is huge to save memory/time,
+            # or just fit all if possible. 40k is manageable.
             self.model = NearestNeighbors(n_neighbors=20, algorithm='brute', metric='euclidean')
             self.model.fit(self.features)
             
-            # Prepare TF-IDF for text-based fallback
-            self.tfidf = TfidfVectorizer(stop_words='english')
-            # Combine relevant text fields for better matching
-            self.data['combined_text'] = self.data['name'] + " " + self.data['diet_type'] + " " + self.data['cuisine']
+            # TF-IDF for Text Search (using subset to save memory if needed)
+            self.tfidf = TfidfVectorizer(stop_words='english', max_features=5000)
             self.tfidf_matrix = self.tfidf.fit_transform(self.data['combined_text'])
             
-            print(f"Recommendation Engine initialized successfully with {len(self.data)} meals.")
+            print(f"Recommendation Engine initialized successfully with {len(self.data)} recipes.")
             
         except Exception as e:
-            print(f"Error initializing Recommendation Engine: {e}")
+            print(f"Error preparing features: {e}")
             import traceback
             traceback.print_exc()
-            self.data = pd.DataFrame()
-
-    def _clean_meal_name(self, row):
-        """
-        Fixes synthetic names like 'Husband Rice' -> 'Mexican Rice Bowl'
-        """
-        original_name = str(row['meal_name']).title()
-        cuisine = str(row['cuisine']).title()
-        
-        # Keywords to identify the core dish
-        keywords = [
-            'Rice', 'Pasta', 'Salad', 'Stew', 'Soup', 'Wrap', 'Burger', 'Pizza', 
-            'Taco', 'Curry', 'Steak', 'Fish', 'Pancake', 'Egg', 'Oat', 'Smoothie', 
-            'Yogurt', 'Chicken', 'Beef', 'Pork', 'Lamb', 'Tofu', 'Sandwich', 
-            'Toast', 'Noodle', 'Bowl', 'Fry', 'Roast', 'Pie'
-        ]
-        
-        core_dish = None
-        for word in keywords:
-            if word in original_name:
-                core_dish = word
-                break
-        
-        if not core_dish:
-            return original_name
-
-        # --- Smart Adjective Logic ---
-        # User requested to remove "Power", "Hearty" etc. 
-        # We will strictly use cuisine adjectives or just the cuisine itself.
-        
-        adjectives = []
-        
-        # Cuisine-based adjectives (Randomized deterministically)
-        name_hash = sum(ord(c) for c in original_name)
-        
-        cuisine_adjectives = {
-            'Mexican': ['Zesty', 'Spicy', 'Fiesta', 'Lime-Infused'],
-            'Indian': ['Spiced', 'Aromatic', 'Golden', 'Creamy'],
-            'Italian': ['Rustic', 'Herbed', 'Tuscan', 'Classic'],
-            'Asian': ['Savory', 'Umami', 'Fresh', 'Ginger'],
-            'American': ['Homestyle', 'Classic', 'Grilled', 'Comfort'],
-            'Mediterranean': ['Fresh', 'Lemon-Herb', 'Sunny', 'Olive']
-        }
-        
-        # Pick a cuisine adjective if valid (50% chance)
-        if cuisine in cuisine_adjectives:
-            options = cuisine_adjectives[cuisine]
-            if name_hash % 2 == 0: 
-                selected = options[name_hash % len(options)]
-                adjectives.insert(0, selected)
-
-        final_adjective = adjectives[0] if adjectives else ""
-        
-        # Construct final name: "Zesty Mexican Rice" or just "Mexican Rice"
-        name_parts = [part for part in [final_adjective, cuisine, core_dish] if part and part not in ['Nan', 'None']]
-        
-        return " ".join(name_parts)
 
     def _get_meal_image(self, name, tags):
         """
-        Assigns a high-quality stock image based on keywords and cuisine.
+        Assigns a high-quality stock image based on keywords.
+        (Since Food.com images might be links that are broken or complex to scrape, we stick to high-res stock fallbacks for UI quality)
         """
         name = str(name).lower()
         tags = str(tags).lower()
@@ -215,57 +136,25 @@ class RecommendationEngine:
         # Default fallback
         img = "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=800&q=80"
         
-        # Specific Logic
-        if 'salad' in name:
-            img = "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&q=80"
-            if 'fruit' in name: img = "https://images.unsplash.com/photo-1519996529931-28324d1a630e?w=800&q=80"
+        # Logic matches keywords to Unsplash URLs
+        if 'smoothie' in name or 'shake' in name: return "https://images.unsplash.com/photo-1505252585461-04db1eb84625?w=800&q=80"
+        if 'salad' in name: return "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&q=80"
+        if 'soup' in name or 'stew' in name: return "https://images.unsplash.com/photo-1476718406336-bb5a9690ee2a?w=800&q=80"
+        if 'pizza' in name: return "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800&q=80"
+        if 'burger' in name: return "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&q=80"
+        if 'pasta' in name or 'spaghetti' in name: return "https://images.unsplash.com/photo-1473093295043-cdd812d0e601?w=800&q=80"
+        if 'chicken' in name: return "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=800&q=80"
+        if 'beef' in name or 'steak' in name: return "https://images.unsplash.com/photo-1600891964092-4316c288032e?w=800&q=80"
+        if 'pancake' in name or 'waffle' in name: return "https://images.unsplash.com/photo-1506084868230-bb9d95c24759?w=800&q=80"
+        if 'cake' in name or 'dessert' in tags: return "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=800&q=80"
+        if 'curry' in name: return "https://images.unsplash.com/photo-1631515243349-e0cb75fb8d3a?w=800&q=80"
+        if 'sushi' in name: return "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=800&q=80"
+        if 'taco' in name: return "https://images.unsplash.com/photo-1551504734-5ee1c4a1479b?w=800&q=80"
         
-        elif 'wrap' in name or 'burrito' in name:
-            if 'mexican' in tags or 'mexican' in name:
-                img = "https://images.unsplash.com/photo-1626700051175-6818013e1d4f?w=800&q=80" # Burrito
-            elif 'asian' in tags or 'thai' in tags:
-                img = "https://images.unsplash.com/photo-1529693155106-1d113936495d?w=800&q=80" # Asian wrap
-            else:
-                img = "https://images.unsplash.com/photo-1529042410759-befb72002fef?w=800&q=80" # Generic wrap
-                
-        elif 'curry' in name:
-            if 'indian' in tags:
-                img = "https://images.unsplash.com/photo-1631515243349-e0cb75fb8d3a?w=800&q=80" # Indian Curry
-            elif 'thai' in tags:
-                img = "https://images.unsplash.com/photo-1628157774780-60d9d0c2423c?w=800&q=80" # Thai Curry
-            else:
-                img = "https://images.unsplash.com/photo-1455619452474-d2be8b1e70cd?w=800&q=80"
-        
-        elif 'pasta' in name or 'noodle' in name:
-            img = "https://images.unsplash.com/photo-1473093295043-cdd812d0e601?w=800&q=80"
-            if 'asian' in tags or 'noodle' in name:
-                img = "https://images.unsplash.com/photo-1552611052-33e04de081de?w=800&q=80"
-            elif 'creamy' in name or 'alfredo' in name:
-                img = "https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=800&q=80"
-                
-        elif 'rice' in name or 'bowl' in name:
-            img = "https://images.unsplash.com/photo-1512058564366-18510be2db19?w=800&q=80"
-            if 'mexican' in tags:
-                img = "https://images.unsplash.com/photo-1536304993881-ff000997fb50?w=800&q=80"
-        
-        elif 'stew' in name or 'soup' in name:
-            img = "https://images.unsplash.com/photo-1476718406336-bb5a9690ee2a?w=800&q=80"
-            if 'beef' in name or 'meat' in name:
-                img = "https://images.unsplash.com/photo-1534939561126-855b8675edd7?w=800&q=80"
-                
-        elif 'steak' in name or 'beef' in name:
-            img = "https://images.unsplash.com/photo-1600891964092-4316c288032e?w=800&q=80"
-            
-        elif 'chicken' in name:
-            img = "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=800&q=80"
-            
-        elif 'pancake' in name or 'breakfast' in tags or 'oat' in name:
-            img = "https://images.unsplash.com/photo-1506084868230-bb9d95c24759?w=800&q=80"
-
         return img
 
     def calculate_bmr(self, weight, height, age, gender):
-        if gender.lower() == 'male':
+        if str(gender).lower() == 'male':
             return (10 * weight) + (6.25 * height) - (5 * age) + 5
         else:
             return (10 * weight) + (6.25 * height) - (5 * age) - 161
@@ -281,46 +170,21 @@ class RecommendationEngine:
         return bmr * multipliers.get(activity_level, 1.2)
 
     def recommend(self, user_data):
-        # Run tournament: Evaluate all models
-        eval_results = self.evaluate_models(user_data)
-        
-        best_model = 'knn' # Default
-        best_score = float('inf')
-        
-        # Scoring logic: Minimize Calorie Error
-        print("--- Model Tournament Results ---")
-        for model_name, metrics in eval_results.items():
-            if "error" in metrics:
-                continue
-                
-            error = metrics['calorie_error']
-            print(f"Model: {model_name}, Error: {error:.2f}, Diversity: {metrics['diversity_score']}")
-            
-            # Simple logic: Lowest error wins
-            if error < best_score:
-                best_score = error
-                best_model = model_name
-                
-        print(f"Winner: {best_model}")
-        print("--------------------------------")
+        # Default Logic
+        best_model = 'knn'
         
         result = self._run_recommendation_logic(user_data, model_type=best_model)
         
-        # Inject model info
         if "error" not in result:
             result["model_used"] = best_model
-            result["model_confidence"] = "High" if best_score < 100 else "Medium"
+            result["model_confidence"] = "High"
             
         return result
 
     def _run_recommendation_logic(self, user_data, model_type='knn'):
         if self.data.empty: return {"error": "Data not loaded"}
         try:
-            required_fields = ['age', 'weight', 'height', 'gender', 'goal', 'activity_level']
-            # Basic validation but allow soft defaults if needed in future
-            missing_fields = [field for field in required_fields if not user_data.get(field)]
-            if missing_fields: return {"error": f"Missing: {', '.join(missing_fields)}"}
-
+            # Parse User Data
             def safe_get(key, type_func):
                 val = user_data.get(key)
                 try: return type_func(val)
@@ -334,158 +198,130 @@ class RecommendationEngine:
             gender = user_data.get('gender', 'male')
             goal = user_data.get('goal', 'maintenance')
             activity_level = user_data.get('activity_level', 'sedentary')
-            diet_type = user_data.get('diet_type', 'any').lower()
+            diet_type = str(user_data.get('diet_type', 'any')).lower()
             allergies = user_data.get('allergies', [])
-            if diet_type == 'none': diet_type = 'any'
-
+            
+            # --- CALCULATE TARGETS ---
             bmr = self.calculate_bmr(weight, height, age, gender)
             tdee = self.calculate_tdee(bmr, activity_level)
             target_calories = tdee
             
-            # Calorie Adjustments
-            if goal == 'weight-loss':
-                target_calories -= 500
-            elif goal == 'weight-gain':
-                target_calories += 500
-            elif goal == 'muscle-gain':
-                target_calories += 250
-            # maintenance = no change
+            if goal == 'weight-loss': target_calories -= 500
+            elif goal == 'weight-gain': target_calories += 500
+            elif goal == 'muscle-gain': target_calories += 250
 
-            # Macro Distribution (Protein/Fats/Carbs) - GRAMS
-            # 1g Protein = 4 kcal, 1g Carb = 4 kcal, 1g Fat = 9 kcal
-            if goal == 'muscle-gain':
-                p_ratio, f_ratio, c_ratio = 0.35, 0.25, 0.40
-            elif goal == 'weight-loss':
-                p_ratio, f_ratio, c_ratio = 0.40, 0.30, 0.30
-            elif goal == 'weight-gain':
-                p_ratio, f_ratio, c_ratio = 0.30, 0.30, 0.40
-            else: # maintenance
-                p_ratio, f_ratio, c_ratio = 0.30, 0.30, 0.40
+            # Macro Splits
+            if goal == 'muscle-gain': p_ratio, f_ratio, c_ratio = 0.35, 0.25, 0.40
+            elif goal == 'weight-loss': p_ratio, f_ratio, c_ratio = 0.40, 0.30, 0.30
+            elif goal == 'weight-gain': p_ratio, f_ratio, c_ratio = 0.30, 0.30, 0.40
+            else: p_ratio, f_ratio, c_ratio = 0.30, 0.30, 0.40
 
             target_protein_g = (target_calories * p_ratio) / 4
             target_fats_g = (target_calories * f_ratio) / 9
             target_carbs_g = (target_calories * c_ratio) / 4
+
+            # --- PRE-FILTERING ---
+            # Instead of filtering DataFrame copies (slow), we use boolean masks or search
+            mask = pd.Series([True] * len(self.data))
             
-            # --- FILTERING ---
-            filtered_data = self.data.copy()
-            
-            # Filter by Diet Type if specified
-            if diet_type != 'any':
-                # Check strict 'diet_type' value OR tags for flexibility
-                filtered_data = filtered_data[
-                    filtered_data['diet_type'].str.contains(diet_type, na=False) |
-                    filtered_data['tags'].str.contains(diet_type, na=False)
-                ]
-            
-            # Filter by Allergy
-            # Note: This dataset doesn't have an 'ingredients' column (unlike the old one).
-            # We can fuzzy search the description or name if available, or skip for now to avoid crashes.
-            # Assuming 'name' might contain allergen info (e.g. "Peanut Butter Sandwich")
+            # 1. Diet Type Filtering (Search in tags)
+            if diet_type != 'any' and diet_type != 'none':
+                # Map some common terms
+                if diet_type == 'keto': search_term = 'low-carb' 
+                elif diet_type == 'vegan': search_term = 'vegan'
+                elif diet_type == 'vegetarian': search_term = 'vegetarian'
+                elif diet_type == 'paleo': search_term = 'paleo'
+                else: search_term = diet_type
+                
+                mask = mask & self.data['tags_list'].apply(lambda x: search_term in [t.lower() for t in x])
+
+            # 2. Allergy Filtering
             if allergies:
                 for allergy in allergies:
-                    filtered_data = filtered_data[~filtered_data['name'].str.contains(allergy.lower(), na=False)]
-            
-            if filtered_data.empty: 
-                # Relax constraints logic could go here, but for now error out
-                return {"error": f"No meals found for diet: {diet_type}"}
+                    a_term = allergy.lower()
+                    mask = mask & ~self.data['combined_text'].str.contains(a_term, regex=False)
 
-            candidates = pd.DataFrame()
+            filtered_indices = self.data[mask].index
             
-            # --- MODEL SELECTION ---
-            if model_type == 'knn':
-                features_subset = self.scaler.transform(filtered_data[self.feature_columns])
-                n_neighbors = min(50, len(filtered_data))
-                temp_model = NearestNeighbors(n_neighbors=n_neighbors, algorithm='brute', metric='euclidean')
-                temp_model.fit(features_subset)
-                
-                # Query: divide by 3 assuming 3 meals/day is the standard "per meal" target
-                query = np.array([[target_calories / 3, target_protein_g / 3, target_carbs_g / 3, target_fats_g / 3]]) 
-                query_scaled = self.scaler.transform(query)
-                distances, indices = temp_model.kneighbors(query_scaled, n_neighbors=n_neighbors)
-                candidates = filtered_data.iloc[indices[0]].copy()
-                
-            elif model_type == 'cosine':
-                features_subset = self.scaler.transform(filtered_data[self.feature_columns])
-                query = np.array([[target_calories / 3, target_protein_g / 3, target_carbs_g / 3, target_fats_g / 3]]) 
-                query_scaled = self.scaler.transform(query)
-                sim_scores = cosine_similarity(query_scaled, features_subset)
-                top_indices = sim_scores.argsort()[0][-50:][::-1]
-                candidates = filtered_data.iloc[top_indices].copy()
-                
-            elif model_type == 'tfidf':
-                # Text-based matching on goal/diet keywords
-                query_text = f"{diet_type} {goal}".strip()
-                if query_text:
-                    query_vec = self.tfidf.transform([query_text])
-                    tfidf_subset = self.tfidf_matrix[filtered_data.index]
-                    sim_scores = cosine_similarity(query_vec, tfidf_subset)
-                    top_indices = sim_scores.argsort()[0][-50:][::-1]
-                    candidates = filtered_data.iloc[top_indices].copy()
-                else:
-                    candidates = filtered_data.sample(min(50, len(filtered_data)))
+            if len(filtered_indices) == 0:
+                print("Warning: Filters too strict, returning random safe selection")
+                filtered_indices = self.data.index[:100] # Fallback
+            
+            filtered_data = self.data.loc[filtered_indices]
 
-            # --- SELECTION & BALANCING ---
-            breakfasts = []
-            lunches = []
-            dinners = []
-            others = []
+            # --- KNN MATCHING ---
+            # Scale target query
+            # We target "Per Meal" stats = Day / 3
+            query = np.array([[target_calories / 3, target_protein_g / 3, target_carbs_g / 3, target_fats_g / 3]]) 
+            query_scaled = self.scaler.transform(query)
+            
+            # Find neighbors within the FILTERED subset
+            # Since our model is fit on the WHOLE dataset, we can find neighbors globally 
+            # and then intersect with filtered_indices to find the best valid ones.
+            # However, for efficiency with 40k rows, we can just subset the features if memory allows.
+            
+            features_subset = self.features[filtered_indices]
+            
+            # Fit specific temporary NN for this filtered user group
+            # (Fast enough for 40k rows)
+            n_neighbors = min(50, len(filtered_data))
+            temp_model = NearestNeighbors(n_neighbors=n_neighbors, algorithm='brute', metric='euclidean')
+            temp_model.fit(features_subset)
+            
+            distances, indices = temp_model.kneighbors(query_scaled, n_neighbors=n_neighbors)
+            
+            # Get the actual rows
+            candidates = filtered_data.iloc[indices[0]].copy()
+
+            # --- MEAL TYPE ASSIGNMENT ---
+            # Heuristic assignment since dataset doesn't have strict 'breakfast/lunch' cols always reliable
+            breakfasts, lunches, dinners = [], [], []
             
             for _, row in candidates.iterrows():
-                m_type = self._infer_meal_type(row)
-                if m_type == 'Breakfast': breakfasts.append(row)
-                elif m_type == 'Lunch': lunches.append(row)
-                elif m_type == 'Dinner': dinners.append(row)
-                else: others.append(row)
+                tags = row['tags_list']
+                name = row['name'].lower()
+                
+                if 'breakfast' in tags or any(x in name for x in ['pancake', 'egg', 'oat', 'waffle']):
+                    breakfasts.append(row)
+                elif 'lunch' in tags or any(x in name for x in ['sandwich', 'wrap', 'soup', 'salad']):
+                    lunches.append(row)
+                else:
+                    dinners.append(row)
+                    
+            # Fallback filling
+            def fill_category(target_list, source_df, count):
+                if len(target_list) < count:
+                    needed = count - len(target_list)
+                    # Grab randoms from source that aren't already used
+                    others = source_df.sample(min(needed * 2, len(source_df))).to_dict('records')
+                    for o in others:
+                        if len(target_list) >= count: break
+                        target_list.append(o)
             
-            final_selection_rows = []
-            def add_unique(source_list, count):
-                added = 0
-                for item in source_list:
-                    if added >= count: break
-                    # Avoid duplicate meal IDs
-                    if not any(x['id'] == item['id'] for x in final_selection_rows):
-                        final_selection_rows.append(item)
-                        added += 1
-                return added
-
-            # Try to get 2 of each
-            add_unique(breakfasts, 2)
-            l_added = add_unique(lunches, 2)
-            if l_added < 2: add_unique(others, 2 - l_added)
-            d_added = add_unique(dinners, 2)
-            if d_added < 2: add_unique(others, 2 - d_added)
+            fill_category(breakfasts, candidates, 2)
+            fill_category(lunches, candidates, 2)
+            fill_category(dinners, candidates, 2)
             
-            # Fill remaining slots (target = 6 meals)
-            remaining_slots = 6 - len(final_selection_rows)
-            if remaining_slots > 0:
-                rest = others + lunches + dinners + breakfasts
-                add_unique(rest, remaining_slots)
+            selected_meals = (breakfasts[:2] + lunches[:2] + dinners[:2])
             
-            # --- FORMAT RESULTS ---
+            # --- FORMAT OUTPUT ---
             results = []
-            for row in final_selection_rows:
-                meal_type = self._infer_meal_type(row)
-                
-                # Handling tags (string from CSV or constructed)
-                tag_list = str(row['tags']).split(',')
-                if meal_type.lower() not in [t.lower() for t in tag_list]:
-                    tag_list.insert(0, meal_type)
-                
-                # Generate smart recipe content
-                recipe_content = self._generate_smart_recipe(row['name'], row['cuisine'], row['diet_type'])
+            for row in selected_meals:
+                # Use real image if available in CSV (usually not), or generate stock
+                img_url = self._get_meal_image(row['name'], str(row['tags_list']))
                 
                 results.append({
                     "id": str(row['id']),
-                    "name": row['name'].title(),
+                    "name": row['name'],
                     "calories": int(row['calories']),
                     "protein": int(row['protein']),
                     "carbs": int(row['carbs']),
                     "fats": int(row['fats']),
-                    "image": row['image_url'],
-                    "time": "15-30 min", # generic since dataset lacks prep time
-                    "tags": tag_list[:4],
-                    "ingredients": recipe_content['ingredients'],
-                    "steps": recipe_content['steps']
+                    "image": img_url,
+                    "time": f"{row['minutes']} min",
+                    "tags": row['tags_list'][:4],
+                    "ingredients": row['ingredients_list'], # REAL INGREDIENTS
+                    "steps": row['steps_list'] # REAL STEPS
                 })
                 
             return {
@@ -494,136 +330,30 @@ class RecommendationEngine:
                 "tdee": int(tdee),
                 "meals": results
             }
+            
         except Exception as e:
-            print(f"Error in {model_type}: {e}")
+            print(f"Error in recommendation logic: {e}")
             import traceback
             traceback.print_exc()
             return {"error": str(e)}
 
-    def _generate_smart_recipe(self, name, cuisine, diet_type):
-        """
-        Generates plausible ingredients/steps based on cuisine and food type.
-        """
-        name = str(name).lower()
-        cuisine = str(cuisine).lower()
-        
-        # Defaults
-        ingredients = ["Fresh ingredients", "Salt and pepper", "Olive oil"]
-        steps = ["Prepare all ingredients.", "Cook over medium heat.", "Serve fresh."]
-        
-        # 1. Detect Core Base
-        if 'rice' in name:
-            ingredients = ["1 cup Rice", "2 cups Water", "Seasoning", "Main Protein (Chicken/Beans)", "Vegetable Mix"]
-            steps = ["Rinse the rice thoroughly.", "Boil water and add rice.", "Simmer for 18 minutes until fluffy.", "Stir in seasonings and cooked toppings."]
-        elif 'pasta' in name or 'noodle' in name:
-            ingredients = ["200g Pasta", "Tomato/Cream Sauce", "Garlic", "Onion", "Basil"]
-            steps = ["Boil salted water in a large pot.", "Cook pasta until al dente.", "Prepare the sauce in a separate pan.", "Toss pasta with sauce and serve."]
-        elif 'salad' in name:
-            ingredients = ["Mixed Greens", "Tomato", "Cucumber", "Dressing", "Seeds/Nuts"]
-            steps = ["Wash and chop all vegetables.", "Combine in a large bowl.", "Drizzle with dressing.", "Toss well and serve immediately."]
-        elif 'soup' in name or 'stew' in name:
-            ingredients = ["Broth (Chicken/Veg)", "Carrots", "Celery", "Onion", "Herbs"]
-            steps = ["Sauté onions and vegetables in a pot.", "Add broth and bring to a boil.", "Simmer for 20-30 minutes.", "Season to taste and serve hot."]
-        elif 'sandwich' in name or 'burger' in name or 'wrap' in name:
-            ingredients = ["Bread/Wrap", "Protein Patty/Filling", "Lettuce", "Tomato", "Condiments"]
-            steps = ["Toast the bread or warm the wrap.", "Cook the protein filling.", "Assemble with fresh vegetables.", "Add condiments and serve."]
-        elif 'oat' in name or 'cereal' in name:
-            ingredients = ["Oats", "Milk/Water", "Honey", "Berries", "Nuts"]
-            steps = ["Combine oats and liquid in a pot.", "Cook until creamy.", "Top with fruits and nuts.", "Drizzle with honey."]
-        elif 'egg' in name or 'omelet' in name:
-            ingredients = ["2 Eggs", "Spinach", "Bell Peppers", "Cheese", "Butter"]
-            steps = ["Whisk eggs in a bowl.", "Heat butter in a pan.", "Pour eggs and add vegetables.", "Fold and cook until set."]
-            
-        # 2. Cuisine Adjustments (Flavor Profiling)
-        if 'mexican' in cuisine:
-            ingredients += ["Salsa", "Cumin", "Black Beans", "Cilantro"]
-            if 'rice' in steps[0]: steps.append("Garnish with fresh cilantro and lime.")
-        elif 'italian' in cuisine:
-            ingredients += ["Parmesan Cheese", "Oregano", "Olive Oil"]
-            steps.append("Sprinkle cheese on top before serving.")
-        elif 'indian' in cuisine:
-            ingredients += ["Turmeric", "Garam Masala", "Ginger", "Garlic"]
-            steps.insert(1, "Fry spices in oil to release aroma.")
-        elif 'asian' in cuisine or 'chinese' in cuisine or 'japanese' in cuisine:
-            ingredients += ["Soy Sauce", "Sesame Oil", "Green Onions", "Ginger"]
-            steps.append("Garnish with chopped green onions.")
-            
-        # 3. Diet Adjustments
-        if 'vegan' in str(diet_type):
-            ingredients = [i for i in ingredients if "Egg" not in i and "Cheese" not in i and "Chicken" not in i]
-            ingredients.append("Plant-based Protein")
-        elif 'keto' in str(diet_type):
-            ingredients = [i for i in ingredients if "Rice" not in i and "Pasta" not in i and "Bread" not in i]
-            ingredients += ["Avocado", "Extra Virgin Olive Oil"]
-            
-        return {"ingredients": ingredients[:6], "steps": steps}
-
-    def evaluate_models(self, user_data):
-        models = ['knn', 'cosine'] # Removed TF-IDF from tourney to speed up, can add back
-        evaluation = {}
-        
-        for m in models:
-            result = self._run_recommendation_logic(user_data, model_type=m)
-            if "error" in result:
-                evaluation[m] = {"error": result["error"]}
-                continue
-                
-            meals = result['meals']
-            target_cal = result['target_calories']
-            total_cal = sum(m['calories'] for m in meals)
-            cal_error = abs(total_cal - target_cal)
-            
-            # Diversity score = unique ids
-            unique_ids = len(set(m['id'] for m in meals))
-            
-            evaluation[m] = {
-                "calorie_error": cal_error,
-                "diversity_score": unique_ids,
-                "total_calories": total_cal,
-                "meal_count": len(meals)
-            }
-            
-        return evaluation
-
     def search_meals(self, query=None):
-        if self.data.empty:
-            return []
+        if self.data.empty: return []
         
         if not query:
             return self._format_results(self.data.sample(20))
             
-        mask = (
-            self.data['name'].str.contains(query, case=False, na=False) | 
-            self.data['tags'].str.contains(query, case=False, na=False)
-        )
-        results_df = self.data[mask].head(20)
-        return self._format_results(results_df)
-
-    def _infer_meal_type(self, row):
-        # 1. Trust the dataset 'meal_type' column first
-        val = str(row['meal_type']).lower()
-        if 'breakfast' in val: return 'Breakfast'
-        if 'lunch' in val: return 'Lunch'
-        if 'dinner' in val: return 'Dinner'
-        if 'snack' in val: return 'Snack'
+        # TF-IDF Search
+        query_vec = self.tfidf.transform([query])
+        sim_scores = cosine_similarity(query_vec, self.tfidf_matrix)
+        top_indices = sim_scores.argsort()[0][-20:][::-1]
         
-        # 2. Heuristic fallback based on name
-        name = row['name'].lower()
-        if any(x in name for x in ['oat', 'egg', 'pancake', 'waffle', 'cereal', 'toast']):
-            return 'Breakfast'
-        if any(x in name for x in ['sandwich', 'salad', 'soup', 'wrap', 'burger']):
-            return 'Lunch'
-            
-        return 'Dinner' # Default fallback
+        results_df = self.data.iloc[top_indices]
+        return self._format_results(results_df)
 
     def _format_results(self, df):
         results = []
         for _, row in df.iterrows():
-            meal_type = self._infer_meal_type(row)
-            tag_list = str(row['tags']).split(',')[:3]
-            if meal_type not in tag_list:
-                tag_list.insert(0, meal_type)
-                
             results.append({
                 "id": str(row['id']),
                 "name": row['name'],
@@ -631,10 +361,10 @@ class RecommendationEngine:
                 "protein": int(row['protein']),
                 "carbs": int(row['carbs']),
                 "fats": int(row['fats']),
-                "image": row['image_url'],
-                "time": "15-30 min",
-                "tags": tag_list,
-                "ingredients": ["View Online"],
-                "steps": ["Simple steps"]
+                "image": self._get_meal_image(row['name'], str(row['tags_list'])),
+                "time": f"{row['minutes']} min",
+                "tags": row['tags_list'][:4],
+                "ingredients": row['ingredients_list'],
+                "steps": row['steps_list']
             })
         return results

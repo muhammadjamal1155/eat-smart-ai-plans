@@ -15,7 +15,7 @@ const RegisterForm = ({ onSwitchToLogin }: { onSwitchToLogin: () => void }) => {
     password: ''
   });
   const [isLoading, setIsLoading] = useState(false);
-  const { login } = useAuth();
+  const { signUp } = useAuth();
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -40,23 +40,20 @@ const RegisterForm = ({ onSwitchToLogin }: { onSwitchToLogin: () => void }) => {
       // Simulate registration delay
       await new Promise(resolve => setTimeout(resolve, 1000));
 
-      // Create user object
-      const newUser = {
-        id: Date.now().toString(),
-        name: formData.name,
-        email: formData.email
-      };
+      // Supabase Signup
+      const { error } = await signUp(formData.email, formData.password, formData.name);
 
-      login(newUser);
+      if (error) throw error;
 
       toast({
         title: "Registration Successful!",
-        description: "Welcome to NutriGuide AI. Let's start your health journey!",
+        description: "Please check your email to verify your account!",
       });
-    } catch (error) {
+      // Optionally switch to login or auto-login (if email confirmation off)
+    } catch (error: any) {
       toast({
         title: "Registration Failed",
-        description: "Please try again later.",
+        description: error.message || "Please try again later.",
         variant: "destructive"
       });
     } finally {

@@ -14,7 +14,7 @@ const LoginForm = ({ onSwitchToRegister }: { onSwitchToRegister: () => void }) =
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { login } = useAuth();
+  const { signIn } = useAuth();
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newEmail = e.target.value;
@@ -61,27 +61,19 @@ const LoginForm = ({ onSwitchToRegister }: { onSwitchToRegister: () => void }) =
       // Simulate login delay
       await new Promise(resolve => setTimeout(resolve, 1000));
 
-      // Demo user login
-      const demoUser = {
-        id: '1',
-        name: 'Demo User',
-        email: email,
-        age: 28,
-        weight: 70,
-        height: 175,
-        goal: 'weight-loss'
-      };
+      // Supabase Login
+      const { error } = await signIn(email, password);
 
-      login(demoUser);
+      if (error) throw error;
 
       toast({
         title: "Welcome back!",
         description: "Successfully logged into NutriGuide AI.",
       });
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Login Failed",
-        description: "Invalid credentials. Please try again.",
+        description: error.message || "Invalid credentials. Please try again.",
         variant: "destructive"
       });
     } finally {

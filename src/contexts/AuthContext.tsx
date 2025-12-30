@@ -1,5 +1,7 @@
 
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { supabase } from '@/lib/supabase';
+import { Session } from '@supabase/supabase-js';
 
 export interface NutritionTargets {
   calories?: number | null;
@@ -51,8 +53,9 @@ export interface User {
 
 interface AuthContextType {
   user: User | null;
-  login: (userData: User) => void;
-  logout: () => void;
+  signIn: (email: string, password: string) => Promise<{ error: any }>;
+  signUp: (email: string, password: string, name: string) => Promise<{ error: any }>;
+  signOut: () => Promise<void>;
   updateUser: (updates: Partial<User>) => Promise<void>;
   updateNutrition: (targets: NutritionTargets) => Promise<void>;
   isAuthenticated: boolean;
@@ -62,86 +65,139 @@ const STORAGE_KEY = 'nutriguide_user';
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const persistUser = (value: User | null) => {
-  if (value) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(value));
-  } else {
-    localStorage.removeItem(STORAGE_KEY);
-  }
-};
-
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem(STORAGE_KEY);
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser) as User);
-      } catch (error) {
-        console.warn('Failed to parse stored user payload, resetting.', error);
-        localStorage.removeItem(STORAGE_KEY);
+    // Check active session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        fetchProfile(session.user);
       }
-    }
+    });
+
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        fetchProfile(session.user);
+      } else {
+        setUser(null);
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  const login = (userData: User) => {
-    setUser(userData);
-    persistUser(userData);
+  const fetchProfile = async (authUser: any) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', authUser.id)
+        .single();
+
+      if (error && error.code !== 'PGRST116') { // PGRST116 is 'row not found'
+        console.error('Error fetching profile:', error);
+      }
+
+      // If data exists, use it. If not, fallback to auth data
+      const profile = data || {};
+
+      const fullUser: User = {
+        id: authUser.id,
+        email: authUser.email || '',
+        name: profile.name || authUser.user_metadata?.name || 'User',
+        age: profile.age,
+        weight: profile.weight,
+        height: profile.height,
+        goal: profile.goal,
+        nutrition: profile.nutrition || {},
+        lifestyle: profile.lifestyle || {},
+        security: { twoFactorEnabled: false, connectedDevices: [], loginHistory: [] }
+      };
+
+      setUser(fullUser);
+    } catch (err) {
+      console.error('Profile fetch failed', err);
+    }
   };
 
-  const logout = () => {
-    setUser(null);
-    persistUser(null);
+  const signIn = async (email: string, password: string) => {
+    return await supabase.auth.signInWithPassword({ email, password });
+  };
+
+  const signUp = async (email: string, password: string, name: string) => {
+    return await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          name,
+        },
+      },
+    });
+  };
+
+  const signOut = async () => {
+    await supabase.auth.signOut();
   };
 
   const updateUser = async (updates: Partial<User>) => {
-    setUser(prev => {
-      if (!prev) return prev;
-      const nextUser: User = {
-        ...prev,
-        ...updates,
-        nutrition: {
-          ...prev.nutrition,
-          ...updates.nutrition,
-        },
-        lifestyle: {
-          ...prev.lifestyle,
-          ...updates.lifestyle,
-        },
-        security: {
-          twoFactorEnabled: false,
-          connectedDevices: [],
-          loginHistory: [],
-          ...prev.security,
-          ...updates.security,
-        },
-      };
-      persistUser(nextUser);
-      return nextUser;
-    });
+    if (!user) return;
+
+    // Local update for immediate UI feedback
+    setUser(prev => prev ? { ...prev, ...updates } : null);
+
+    // Persist to Supabase
+    try {
+      const dbUpdates: any = {};
+      if (updates.name) dbUpdates.name = updates.name;
+      if (updates.age) dbUpdates.age = updates.age;
+      if (updates.weight) dbUpdates.weight = updates.weight;
+      if (updates.height) dbUpdates.height = updates.height;
+      if (updates.goal) dbUpdates.goal = updates.goal;
+      if (updates.lifestyle) dbUpdates.lifestyle = updates.lifestyle;
+      // Note: Nutrition is handled separately or can be added here if passed
+
+      if (Object.keys(dbUpdates).length > 0) {
+        const { error } = await supabase
+          .from('profiles')
+          .update(dbUpdates)
+          .eq('id', user.id);
+
+        if (error) throw error;
+      }
+    } catch (err) {
+      console.error('Failed to update profile:', err);
+      // Ideally revert state here on failure
+    }
   };
 
   const updateNutrition = async (targets: NutritionTargets) => {
-    setUser(prev => {
-      if (!prev) return prev;
-      const nextUser: User = {
-        ...prev,
-        nutrition: {
-          ...prev.nutrition,
-          ...targets,
-        },
-      };
-      persistUser(nextUser);
-      return nextUser;
-    });
+    if (!user) return;
+
+    setUser(prev => prev ? { ...prev, nutrition: { ...prev.nutrition, ...targets } } : null);
+
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ nutrition: targets })
+        .eq('id', user.id);
+
+      if (error) throw error;
+    } catch (err) {
+      console.error('Failed to update nutrition:', err);
+    }
   };
 
   const value = useMemo(
     () => ({
       user,
-      login,
-      logout,
+      signIn,
+      signUp,
+      signOut,
       updateUser,
       updateNutrition,
       isAuthenticated: Boolean(user),

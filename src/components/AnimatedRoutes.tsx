@@ -10,19 +10,13 @@ const Dashboard = lazy(() => import('@/pages/Dashboard'));
 const MealPlans = lazy(() => import('@/pages/MealPlans'));
 const Insights = lazy(() => import('@/pages/Insights'));
 const Analytics = lazy(() => import('@/pages/Analytics'));
-const About = lazy(() => import('@/pages/About'));
-const Contact = lazy(() => import('@/pages/Contact'));
+
 const Account = lazy(() => import('@/pages/Account'));
 const Login = lazy(() => import('@/pages/Login'));
 const Register = lazy(() => import('@/pages/Register'));
 const NotFound = lazy(() => import('@/pages/NotFound'));
-const MobileApp = lazy(() => import('@/pages/MobileApp'));
-const Careers = lazy(() => import('@/pages/Careers'));
-const Press = lazy(() => import('@/pages/Press'));
-const Blog = lazy(() => import('@/pages/Blog'));
-const HelpCenter = lazy(() => import('@/pages/HelpCenter'));
-const PrivacyPolicy = lazy(() => import('@/pages/PrivacyPolicy'));
-const TermsOfService = lazy(() => import('@/pages/TermsOfService'));
+
+
 const NutritionForm = lazy(() => import('@/pages/NutritionForm'));
 const Reminders = lazy(() => import('@/pages/Reminders'));
 const Profile = lazy(() => import('@/pages/Profile'));
@@ -43,18 +37,11 @@ const AnimatedRoutes = () => {
                 <Route path="/analytics" element={<ProtectedRoute><PageTransition><Analytics /></PageTransition></ProtectedRoute>} />
                 <Route path="/profile" element={<ProtectedRoute><PageTransition><Profile /></PageTransition></ProtectedRoute>} />
                 <Route path="/settings" element={<ProtectedRoute><PageTransition><Settings /></PageTransition></ProtectedRoute>} />
-                <Route path="/about" element={<PageTransition><About /></PageTransition>} />
-                <Route path="/contact" element={<PageTransition><Contact /></PageTransition>} />
+
                 <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
                 <Route path="/register" element={<PageTransition><Register /></PageTransition>} />
                 <Route path="/reset-password" element={<PageTransition><ResetPassword /></PageTransition>} />
-                <Route path="/mobile-app" element={<PageTransition><MobileApp /></PageTransition>} />
-                <Route path="/careers" element={<PageTransition><Careers /></PageTransition>} />
-                <Route path="/press" element={<PageTransition><Press /></PageTransition>} />
-                <Route path="/blog" element={<PageTransition><Blog /></PageTransition>} />
-                <Route path="/help-center" element={<PageTransition><HelpCenter /></PageTransition>} />
-                <Route path="/privacy-policy" element={<PageTransition><PrivacyPolicy /></PageTransition>} />
-                <Route path="/terms-of-service" element={<PageTransition><TermsOfService /></PageTransition>} />
+
                 <Route path="/nutrition-form" element={<ProtectedRoute><PageTransition><NutritionForm /></PageTransition></ProtectedRoute>} />
                 <Route path="/reminders" element={<ProtectedRoute><PageTransition><Reminders /></PageTransition></ProtectedRoute>} />
                 <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />

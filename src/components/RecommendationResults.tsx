@@ -70,12 +70,18 @@ const RecommendationResults = ({ data, onBack }: RecommendationResultsProps) => 
     ];
 
     const getFallbackImage = (id: string) => {
-        const index = parseInt(id) % fallbackImages.length;
-        return fallbackImages[index];
+        let numericId = parseInt(id);
+        if (isNaN(numericId)) {
+            // Simple hash for string IDs
+            numericId = id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+        }
+        const index = Math.abs(numericId) % fallbackImages.length;
+        return fallbackImages[index] || fallbackImages[0];
     };
 
     const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>, id: string) => {
         e.currentTarget.src = getFallbackImage(id);
+        e.currentTarget.onerror = null; // Prevent infinite loop
     };
 
     const navigate = useNavigate();

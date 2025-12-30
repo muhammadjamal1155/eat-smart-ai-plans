@@ -57,12 +57,17 @@ const MealPlanCard = ({ mealType, meal, onMealChange, onEdit, onViewDetails }: M
   ];
 
   const getFallbackImage = (id: string) => {
-    const index = parseInt(id) % fallbackImages.length;
-    return fallbackImages[index];
+    let numericId = parseInt(id);
+    if (isNaN(numericId)) {
+      numericId = id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    }
+    const index = Math.abs(numericId) % fallbackImages.length;
+    return fallbackImages[index] || fallbackImages[0];
   };
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>, id: string) => {
     e.currentTarget.src = getFallbackImage(id);
+    e.currentTarget.onerror = null;
   };
 
   if (!meal) {

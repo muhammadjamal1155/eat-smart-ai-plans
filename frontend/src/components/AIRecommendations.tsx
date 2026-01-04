@@ -60,146 +60,97 @@ const AIRecommendations = () => {
   const generateNewRecommendations = async () => {
     setIsGenerating(true);
 
-    // Simulate AI processing
-    await new Promise(resolve => setTimeout(resolve, 1500));
-
-    const newRecommendations: Recommendation[] = [];
-
     try {
       const savedProfile = localStorage.getItem('userProfile');
       const savedMeals = localStorage.getItem('weekMeals');
 
-      if (savedProfile) {
-        const profile = JSON.parse(savedProfile);
+      const profile = savedProfile ? JSON.parse(savedProfile) : {};
+      const meals = savedMeals ? JSON.parse(savedMeals) : {};
 
-        // Goal based recommendation
-        if (profile.goal) {
-          const goalText = profile.goal.replace('-', ' ');
-          newRecommendations.push({
-            id: 'rec-goal',
-            type: 'goal',
-            title: `Focus on ${goalText}`,
-            description: `Your current plan is optimized for ${goalText}. Stick to your daily calorie target of ${Math.round(profile.target_calories)} kcal.`,
-            impact: 'high',
-            category: 'Wellness',
-            actionText: 'View Goal Details'
-          });
-        }
+      const response = await fetch('http://127.0.0.1:5000/insights/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ profile, meals })
+      });
 
-        // Hydration recommendation
-        if (profile.waterIntake) {
-          newRecommendations.push({
-            id: 'rec-water',
-            type: 'habit',
-            title: 'Hydration Goal',
-            description: `Don't forget to drink ${profile.waterIntake}L of water daily to support your metabolism and energy levels.`,
-            impact: 'medium',
-            category: 'Health',
-            actionText: 'Set Reminders'
-          });
-        }
-      }
+      if (!response.ok) throw new Error('Failed to analyze insights');
 
-      if (savedMeals) {
-        const weekMeals = JSON.parse(savedMeals);
-        let totalMeals = 0;
-        let uniqueIngredients = new Set();
+      const data = await response.json();
 
-        Object.values(weekMeals).forEach((day: any) => {
-          ['breakfast', 'lunch', 'dinner'].forEach(type => {
-            if (day[type]) {
-              totalMeals++;
-              if (day[type].ingredients) {
-                day[type].ingredients.forEach((ing: string) => uniqueIngredients.add(ing));
-              }
-            }
-          });
-        });
-
-        if (totalMeals < 15) {
-          newRecommendations.push({
-            id: 'rec-plan',
-            type: 'meal',
-            title: 'Complete Your Week',
-            description: `You have only planned ${totalMeals} meals. Try to plan at least 15 meals for a complete week.`,
-            impact: 'high',
-            category: 'Efficiency',
-            actionText: 'Go to Meal Planner'
-          });
-        } else {
-          newRecommendations.push({
-            id: 'rec-variety',
-            type: 'nutrition',
-            title: 'Great Variety!',
-            description: `You have a diverse menu with over ${uniqueIngredients.size} different ingredients this week.`,
-            impact: 'low',
-            category: 'Nutrition',
-            actionText: 'View Grocery List'
-          });
-        }
-      }
-
-      if (newRecommendations.length === 0) {
-        newRecommendations.push({
-          id: 'rec-default',
-          type: 'goal',
-          title: 'Get Started',
-          description: 'Complete your nutrition profile and add meals to your plan to get personalized insights.',
-          impact: 'high',
-          category: 'Getting Started',
-          actionText: 'Update Profile'
+      if (data.recommendations && Array.isArray(data.recommendations)) {
+        setRecommendations(data.recommendations);
+        toast({
+          title: "New Insights Generated!",
+          description: "Your personal nutritionist has analyzed your plan.",
         });
       }
 
     } catch (error) {
       console.error("Error generating recommendations:", error);
+      toast({
+        title: "Analysis Failed",
+        description: "Could not connect to the AI nutritionist.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsGenerating(false);
     }
-
-    setRecommendations(prev => [...newRecommendations, ...prev.slice(0, 2)]); // Keep some old ones
-    setIsGenerating(false);
-
-    toast({
-      title: "New Recommendations Generated!",
-      description: "AI has analyzed your recent data and created personalized suggestions.",
-    });
   };
 
   const handleRecommendationAction = (recommendation: Recommendation) => {
-    switch (recommendation.actionText) {
-      case 'View Protein-Rich Meals':
-      case 'Find High-Fiber Foods':
-      case 'View Goal Details':
-      case 'Go to Meal Planner':
-        toast({
-          title: "Redirecting to Meal Plans",
-          description: `Searching for ${recommendation.actionText.toLowerCase().replace('view ', '').replace('find ', '')}...`,
-        });
-        window.location.href = '/meal-plans'; // Navigate to meal plans page
-        break;
-      case 'Create Prep Plan':
-        toast({
-          title: "Redirecting to Meal Plans",
-          description: "Start building your prep plan!",
-        });
-        window.location.href = '/meal-plans'; // Navigate to meal plans page
-        break;
-      case 'Set Reminders':
-        toast({
-          title: "Navigating to Reminders",
-          description: "Reminder functionality is coming soon!",
-        });
-        window.location.href = '/reminders';
-        break;
-      case 'Update Profile':
-        window.location.href = '/#nutrition-form';
-        break;
-      default:
-        toast({
-          title: "Action Started",
-          description: `Working on: ${recommendation.title}`,
-        });
-        break;
+    // Dynamic handling based on recommendation type or text content
+    const actionLower = recommendation.actionText.toLowerCase();
+
+    if (actionLower.includes('meal') || actionLower.includes('plan') || recommendation.type === 'meal') {
+      toast({
+        title: "Redirecting to Meal Plans",
+        description: "Opening your meal planner...",
+      });
+      window.location.href = '/meal-plans';
+      return;
     }
+
+    if (actionLower.includes('track') || actionLower.includes('water') || actionLower.includes('reminder') || recommendation.type === 'habit') {
+      toast({
+        title: "Habit Tracking",
+        description: "Opening hydration & habit tracker...",
+      });
+      // Ideally this would go to a specific tracker page, defaulting to meal plans or dashboard for now
+      window.location.href = '/meal-plans';
+      return;
+    }
+
+    if (actionLower.includes('goal') || actionLower.includes('calor') || recommendation.type === 'goal') {
+      toast({
+        title: "Redirecting to Profile",
+        description: "Let's review your goals.",
+      });
+      window.location.href = '/#nutrition-form';
+      return;
+    }
+
+    if (actionLower.includes('grocery') || actionLower.includes('food') || recommendation.type === 'nutrition') {
+      toast({
+        title: "Redirecting to Groceries",
+        description: "Checking your grocery list...",
+      });
+      // Scroll to grocery section if on same page, or redirect
+      const grocerySection = document.getElementById('grocery-list');
+      if (grocerySection) {
+        grocerySection.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        // Fallback if we split pages later
+        window.location.href = '/insights';
+      }
+      return;
+    }
+
+    // Default fallback
+    toast({
+      title: "Action Started",
+      description: `Navigating to help you with: ${recommendation.title}`,
+    });
+    window.location.href = '/meal-plans';
   };
 
   const getImpactColor = (impact: string) => {
@@ -226,8 +177,8 @@ const AIRecommendations = () => {
   };
 
   return (
-    <Card className="shadow-lg border border-border/60 bg-card/95 backdrop-blur-sm transition-colors">
-      <CardHeader className="border-b border-border/70 pb-4">
+    <Card className="shadow-lg border border-border/60 bg-card/95 backdrop-blur-sm transition-colors overflow-hidden">
+      <CardHeader className="border-b border-border/70 pb-4 bg-muted/20">
         <div className="flex justify-between items-center">
           <CardTitle className="flex items-center space-x-2">
             <Brain className="w-5 h-5 text-forest-500" />
@@ -240,52 +191,53 @@ const AIRecommendations = () => {
             className="btn-primary"
           >
             <Sparkles className="w-4 h-4 mr-2" />
-            {isGenerating ? 'Generating...' : 'Refresh'}
+            {isGenerating ? 'Analyzing...' : 'Refresh Insights'}
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {recommendations.map((rec) => (
-          <div
-            key={rec.id}
-            className="border border-border/70 rounded-lg bg-background/60 dark:bg-background/40 p-3 hover:shadow-md transition-all"
-          >
-            <div className="space-y-3">
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex items-center space-x-2 min-w-0 flex-1">
-                  {getTypeIcon(rec.type)}
-                  <h4 className="font-semibold text-foreground text-sm truncate">{rec.title}</h4>
-                </div>
-                <Badge
-                  variant="outline"
-                  className={`${getImpactColor(rec.impact)} text-xs whitespace-nowrap backdrop-blur-sm`}
-                >
-                  {rec.impact}
-                </Badge>
-              </div>
-
-              <div className="flex justify-end">
-                <Badge
-                  variant="secondary"
-                  className="text-xs bg-forest-100 text-forest-700 dark:bg-forest-900/60 dark:text-forest-100 border border-border/60"
-                >
-                  {rec.category}
-                </Badge>
-              </div>
-            </div>
-
-            <p className="text-muted-foreground text-sm mb-3 mt-3">{rec.description}</p>
-
-            <Button
-              size="sm"
-              variant="outline"
-              className="w-full border-border/70 hover:bg-forest-100/60 dark:hover:bg-forest-900/30"
-              onClick={() => handleRecommendationAction(rec)}
+      <CardContent className="p-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {recommendations.map((rec) => (
+            <div
+              key={rec.id}
+              className="group relative flex flex-col justify-between p-5 border border-border/70 rounded-xl bg-background/50 hover:bg-background/80 transition-all duration-300 hover:shadow-md hover:border-forest-200 dark:hover:border-forest-800 h-full"
             >
-              {rec.actionText}
-            </Button>
-          </div>
-        ))}
+              <div className={`absolute top-0 left-0 w-1 h-full rounded-l-xl opacity-80 ${rec.impact === 'high' ? 'bg-red-500' :
+                rec.impact === 'medium' ? 'bg-yellow-500' : 'bg-green-500'
+                }`} />
+
+              <div className="space-y-3 mb-4">
+                <div className="flex justify-between items-start">
+                  <div className="p-2 rounded-lg bg-muted/50 text-muted-foreground group-hover:text-forest-600 group-hover:bg-forest-50 dark:group-hover:bg-forest-900/20 transition-colors">
+                    {getTypeIcon(rec.type)}
+                  </div>
+                  <Badge variant="outline" className="text-[10px] uppercase tracking-wider font-semibold opacity-70">
+                    {rec.category}
+                  </Badge>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold text-foreground leading-tight mb-1 line-clamp-2 min-h-[2.5rem]">
+                    {rec.title}
+                  </h4>
+                  <p className="text-sm text-muted-foreground line-clamp-3">
+                    {rec.description}
+                  </p>
+                </div>
+              </div>
+
+              <Button
+                size="sm"
+                variant="ghost"
+                className="w-full justify-between group-hover:bg-primary/5 group-hover:text-primary transition-colors text-xs"
+                onClick={() => handleRecommendationAction(rec)}
+              >
+                <span className="truncate mr-2">{rec.actionText}</span>
+                <Sparkles className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+              </Button>
+            </div>
+          ))}
+        </div>
       </CardContent>
     </Card>
   );

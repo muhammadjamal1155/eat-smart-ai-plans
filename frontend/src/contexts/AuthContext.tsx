@@ -141,7 +141,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    try {
+      await supabase.auth.signOut();
+    } catch (error) {
+      console.error("Error signing out:", error);
+    } finally {
+      // Force local state update immediately
+      setUser(null);
+      localStorage.removeItem(STORAGE_KEY); // Clean up any local storage
+    }
   };
 
   const updateUser = async (updates: Partial<User>) => {

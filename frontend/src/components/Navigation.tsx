@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/use-auth';
 import { Utensils, User, LogOut, Menu, X } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
@@ -15,11 +15,12 @@ import {
 import { Button } from './ui/button';
 
 const Navigation = () => {
-  const { user, logout } = useAuth();
+  const { user, signOut } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const location = useLocation();
+  const navigate = useNavigate();
   const isMobile = useIsMobile();
 
   useEffect(() => {
@@ -62,7 +63,8 @@ const Navigation = () => {
 
   const handleLogout = async () => {
     try {
-      await logout();
+      await signOut();
+      navigate('/login'); // Use client-side routing instead of hard reload
     } catch (error) {
       console.error("Logout failed:", error);
     }
@@ -100,8 +102,8 @@ const Navigation = () => {
                   <Link
                     to="/dashboard"
                     className={`px-3 py-2 text-sm font-medium transition-colors ${isActivePath('/dashboard')
-                        ? 'text-primary border-b-2 border-primary'
-                        : 'text-foreground hover:text-primary'
+                      ? 'text-primary border-b-2 border-primary'
+                      : 'text-foreground hover:text-primary'
                       }`}
                   >
                     Dashboard
@@ -109,8 +111,8 @@ const Navigation = () => {
                   <Link
                     to="/meal-plans"
                     className={`px-3 py-2 text-sm font-medium transition-colors ${isActivePath('/meal-plans')
-                        ? 'text-primary border-b-2 border-primary'
-                        : 'text-foreground hover:text-primary'
+                      ? 'text-primary border-b-2 border-primary'
+                      : 'text-foreground hover:text-primary'
                       }`}
                   >
                     Meal Plans
@@ -118,8 +120,8 @@ const Navigation = () => {
                   <Link
                     to="/insights"
                     className={`px-3 py-2 text-sm font-medium transition-colors ${isActivePath('/insights')
-                        ? 'text-primary border-b-2 border-primary'
-                        : 'text-foreground hover:text-primary'
+                      ? 'text-primary border-b-2 border-primary'
+                      : 'text-foreground hover:text-primary'
                       }`}
                   >
                     AI Insights
@@ -127,8 +129,8 @@ const Navigation = () => {
                   <Link
                     to="/analytics"
                     className={`px-3 py-2 text-sm font-medium transition-colors ${isActivePath('/analytics')
-                        ? 'text-primary border-b-2 border-primary'
-                        : 'text-foreground hover:text-primary'
+                      ? 'text-primary border-b-2 border-primary'
+                      : 'text-foreground hover:text-primary'
                       }`}
                   >
                     Analytics
@@ -160,8 +162,8 @@ const Navigation = () => {
                   <Link
                     to="/help-center"
                     className={`px-3 py-2 text-sm font-medium transition-colors ${isActivePath('/help-center')
-                        ? 'text-primary border-b-2 border-primary'
-                        : 'text-foreground hover:text-primary'
+                      ? 'text-primary border-b-2 border-primary'
+                      : 'text-foreground hover:text-primary'
                       }`}
                   >
                     Help Center
@@ -171,8 +173,8 @@ const Navigation = () => {
               <Link
                 to="/about"
                 className={`px-3 py-2 text-sm font-medium transition-colors ${isActivePath('/about')
-                    ? 'text-primary border-b-2 border-primary'
-                    : 'text-foreground hover:text-primary'
+                  ? 'text-primary border-b-2 border-primary'
+                  : 'text-foreground hover:text-primary'
                   }`}
               >
                 About
@@ -180,8 +182,8 @@ const Navigation = () => {
               <Link
                 to="/contact"
                 className={`px-3 py-2 text-sm font-medium transition-colors ${isActivePath('/contact')
-                    ? 'text-primary border-b-2 border-primary'
-                    : 'text-foreground hover:text-primary'
+                  ? 'text-primary border-b-2 border-primary'
+                  : 'text-foreground hover:text-primary'
                   }`}
               >
                 Contact
@@ -302,8 +304,8 @@ const Navigation = () => {
                 <Link
                   to="/dashboard"
                   className={`block px-4 py-4 rounded-lg text-base font-medium transition-all duration-200 touch-manipulation ${isActivePath('/dashboard')
-                      ? 'text-primary bg-primary/10 shadow-sm'
-                      : 'text-foreground hover:text-primary hover:bg-accent active:scale-95'
+                    ? 'text-primary bg-primary/10 shadow-sm'
+                    : 'text-foreground hover:text-primary hover:bg-accent active:scale-95'
                     }`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
@@ -312,8 +314,8 @@ const Navigation = () => {
                 <Link
                   to="/meal-plans"
                   className={`block px-4 py-4 rounded-lg text-base font-medium transition-all duration-200 touch-manipulation ${isActivePath('/meal-plans')
-                      ? 'text-primary bg-primary/10 shadow-sm'
-                      : 'text-foreground hover:text-primary hover:bg-accent active:scale-95'
+                    ? 'text-primary bg-primary/10 shadow-sm'
+                    : 'text-foreground hover:text-primary hover:bg-accent active:scale-95'
                     }`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
@@ -322,8 +324,8 @@ const Navigation = () => {
                 <Link
                   to="/insights"
                   className={`block px-4 py-4 rounded-lg text-base font-medium transition-all duration-200 touch-manipulation ${isActivePath('/insights')
-                      ? 'text-primary bg-primary/10 shadow-sm'
-                      : 'text-foreground hover:text-primary hover:bg-accent active:scale-95'
+                    ? 'text-primary bg-primary/10 shadow-sm'
+                    : 'text-foreground hover:text-primary hover:bg-accent active:scale-95'
                     }`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
@@ -332,8 +334,8 @@ const Navigation = () => {
                 <Link
                   to="/analytics"
                   className={`block px-4 py-4 rounded-lg text-base font-medium transition-all duration-200 touch-manipulation ${isActivePath('/analytics')
-                      ? 'text-primary bg-primary/10 shadow-sm'
-                      : 'text-foreground hover:text-primary hover:bg-accent active:scale-95'
+                    ? 'text-primary bg-primary/10 shadow-sm'
+                    : 'text-foreground hover:text-primary hover:bg-accent active:scale-95'
                     }`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
@@ -377,8 +379,8 @@ const Navigation = () => {
             <Link
               to="/about"
               className={`block px-4 py-4 rounded-lg text-base font-medium transition-all duration-200 touch-manipulation ${isActivePath('/about')
-                  ? 'text-primary bg-primary/10 shadow-sm'
-                  : 'text-foreground hover:text-primary hover:bg-accent active:scale-95'
+                ? 'text-primary bg-primary/10 shadow-sm'
+                : 'text-foreground hover:text-primary hover:bg-accent active:scale-95'
                 }`}
               onClick={() => setIsMobileMenuOpen(false)}
             >
@@ -387,8 +389,8 @@ const Navigation = () => {
             <Link
               to="/contact"
               className={`block px-4 py-4 rounded-lg text-base font-medium transition-all duration-200 touch-manipulation ${isActivePath('/contact')
-                  ? 'text-primary bg-primary/10 shadow-sm'
-                  : 'text-foreground hover:text-primary hover:bg-accent active:scale-95'
+                ? 'text-primary bg-primary/10 shadow-sm'
+                : 'text-foreground hover:text-primary hover:bg-accent active:scale-95'
                 }`}
               onClick={() => setIsMobileMenuOpen(false)}
             >
@@ -397,8 +399,8 @@ const Navigation = () => {
             <Link
               to="/help-center"
               className={`block px-4 py-4 rounded-lg text-base font-medium transition-all duration-200 touch-manipulation ${isActivePath('/help-center')
-                  ? 'text-primary bg-primary/10 shadow-sm'
-                  : 'text-foreground hover:text-primary hover:bg-accent active:scale-95'
+                ? 'text-primary bg-primary/10 shadow-sm'
+                : 'text-foreground hover:text-primary hover:bg-accent active:scale-95'
                 }`}
               onClick={() => setIsMobileMenuOpen(false)}
             >

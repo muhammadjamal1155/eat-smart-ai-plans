@@ -31,7 +31,7 @@ const renderAllergies = (allergies?: LifestylePreferences['allergies']) => {
 };
 
 const Account = () => {
-  const { user, logout } = useAuth();
+  const { user, signOut } = useAuth();
   usePageTitle('Account');
 
   if (!user) {
@@ -98,7 +98,7 @@ const Account = () => {
                 <Button asChild variant="outline" size="lg">
                   <Link to="/dashboard">View dashboard</Link>
                 </Button>
-                <Button variant="ghost" size="lg" onClick={logout}>
+                <Button variant="ghost" size="lg" onClick={signOut}>
                   Log out
                 </Button>
               </div>

@@ -1,12 +1,16 @@
 from flask import Flask
 from flask_cors import CORS
 from routes.api import api
+from routes.admin import admin_bp
+from routes.chat import chat_bp
 
 app = Flask(__name__)
 CORS(app)
 
 # Register Blueprints
 app.register_blueprint(api)
+app.register_blueprint(admin_bp)
+app.register_blueprint(chat_bp)
 
 @app.route('/')
 def home():

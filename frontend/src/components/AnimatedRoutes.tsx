@@ -25,6 +25,11 @@ const ResetPassword = lazy(() => import('@/pages/ResetPassword'));
 const About = lazy(() => import('@/pages/About'));
 const Contact = lazy(() => import('@/pages/Contact'));
 
+// Admin Imports
+const AdminLayout = lazy(() => import('@/layouts/AdminLayout'));
+const AdminDashboard = lazy(() => import('@/pages/admin/AdminDashboard'));
+const AdminMealList = lazy(() => import('@/pages/admin/AdminMealList'));
+
 const AnimatedRoutes = () => {
     const location = useLocation();
 
@@ -48,6 +53,13 @@ const AnimatedRoutes = () => {
 
                 <Route path="/nutrition-form" element={<ProtectedRoute><PageTransition><NutritionForm /></PageTransition></ProtectedRoute>} />
                 <Route path="/reminders" element={<ProtectedRoute><PageTransition><Reminders /></PageTransition></ProtectedRoute>} />
+
+                {/* Admin Routes */}
+                <Route path="/admin" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
+                    <Route index element={<PageTransition><AdminDashboard /></PageTransition>} />
+                    <Route path="meals" element={<PageTransition><AdminMealList /></PageTransition>} />
+                </Route>
+
                 <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
             </Routes>
         </AnimatePresence>

@@ -1,0 +1,13 @@
+import requests
+import json
+
+url = "http://localhost:5000/chat"
+payload = {"message": "What is a good substitute for eggs?"}
+headers = {'Content-Type': 'application/json'}
+
+try:
+    response = requests.post(url, json=payload, headers=headers)
+    print(f"Status Code: {response.status_code}")
+    print(f"Response Body: {response.text}")
+except Exception as e:
+    print(f"Error: {e}")

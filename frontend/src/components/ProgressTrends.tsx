@@ -1,5 +1,7 @@
 
 import { useState, useEffect } from 'react';
+import { useAuth } from '@/hooks/use-auth';
+import { analyticsService } from '@/services/analytics';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
@@ -64,6 +66,7 @@ import { Plus } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 const ProgressTrends = () => {
+  const { user } = useAuth();
   const [selectedMetric, setSelectedMetric] = useState<'weight' | 'calories' | 'macros'>('weight');
   const [selectedRange, setSelectedRange] = useState<'day' | 'month' | 'quarter'>('day');
   const [trendData, setTrendData] = useState<any>(null);
@@ -87,8 +90,28 @@ const ProgressTrends = () => {
 
     const targetCalories = userProfile?.target_calories || 2000;
 
-    const savedWeights = localStorage.getItem('weightEntries');
-    const weightEntries: WeightEntry[] = savedWeights ? JSON.parse(savedWeights) : [];
+    // Load Weight Entries from Backend
+    let weightEntries: WeightEntry[] = [];
+    if (user?.id && selectedMetric === 'weight') {
+      try {
+        const history = await analyticsService.getHistory(user.id, 90);
+        // Map backend history to WeightEntry format
+        weightEntries = history.map((h: any) => ({
+          date: h.date,
+          weight: h.weight,
+          target: 70, // Mock target or fetch from profile
+          bodyFat: 0
+        })).filter((w: any) => w.weight); // Only include entries with weight
+      } catch (error) {
+        console.error("Failed to load history", error);
+        toast({ title: "Error", description: "Failed to load progress history.", variant: "destructive" });
+      }
+    } else {
+      // Fallback to local storage if no user or just for consistency with old behavior? 
+      // Let's rely on backend if user exists.
+      const savedWeights = localStorage.getItem('weightEntries');
+      if (savedWeights) weightEntries = JSON.parse(savedWeights);
+    }
 
     // Sort weight entries by date
     weightEntries.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
@@ -164,36 +187,53 @@ const ProgressTrends = () => {
     fetchData();
   }, [selectedMetric, selectedRange]);
 
-  const handleAddWeight = () => {
+  const handleAddWeight = async () => {
     if (!newWeight || !newDate) {
       toast({ title: "Error", description: "Please enter both weight and date.", variant: "destructive" });
       return;
     }
 
-    const savedWeights = localStorage.getItem('weightEntries');
-    const weightEntries: WeightEntry[] = savedWeights ? JSON.parse(savedWeights) : [];
-
-    const newEntry: WeightEntry = {
-      date: newDate,
-      weight: parseFloat(newWeight),
-      target: 70, // Mock target, ideally from profile
-      bodyFat: 0 // Optional
-    };
-
-    // Check if entry for date exists and update it, else add new
-    const existingIndex = weightEntries.findIndex(e => e.date === newDate);
-    if (existingIndex >= 0) {
-      weightEntries[existingIndex] = newEntry;
+    if (user?.id) {
+      try {
+        await analyticsService.logDailyStats({
+          user_id: user.id,
+          date: newDate,
+          weight: parseFloat(newWeight)
+        });
+        toast({ title: "Weight Logged", description: "Your progress has been saved to the cloud." });
+        setIsWeightDialogOpen(false);
+        setNewWeight('');
+        fetchData(); // Refresh chart
+      } catch (error) {
+        toast({ title: "Error", description: "Failed to save weight entry.", variant: "destructive" });
+      }
     } else {
-      weightEntries.push(newEntry);
+      // Fallback to local storage
+      const savedWeights = localStorage.getItem('weightEntries');
+      const weightEntries: WeightEntry[] = savedWeights ? JSON.parse(savedWeights) : [];
+
+      const newEntry: WeightEntry = {
+        date: newDate,
+        weight: parseFloat(newWeight),
+        target: 70, // Mock target, ideally from profile
+        bodyFat: 0 // Optional
+      };
+
+      // Check if entry for date exists and update it, else add new
+      const existingIndex = weightEntries.findIndex(e => e.date === newDate);
+      if (existingIndex >= 0) {
+        weightEntries[existingIndex] = newEntry;
+      } else {
+        weightEntries.push(newEntry);
+      }
+
+      localStorage.setItem('weightEntries', JSON.stringify(weightEntries));
+
+      toast({ title: "Weight Logged (Local)", description: "Your progress has been updated locally." });
+      setIsWeightDialogOpen(false);
+      setNewWeight('');
+      fetchData(); // Refresh chart
     }
-
-    localStorage.setItem('weightEntries', JSON.stringify(weightEntries));
-
-    toast({ title: "Weight Logged", description: "Your progress has been updated." });
-    setIsWeightDialogOpen(false);
-    setNewWeight('');
-    fetchData(); // Refresh chart
   };
 
   const weightTrend = trendData?.weightTrend || [];

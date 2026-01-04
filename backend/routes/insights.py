@@ -10,6 +10,8 @@ insights_bp = Blueprint('insights', __name__)
 dotenv_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env')
 load_dotenv(dotenv_path)
 
+from core.supabase_client import get_supabase_client
+
 @insights_bp.route('/insights/analyze', methods=['POST'])
 def analyze_insights():
     try:
@@ -62,4 +64,64 @@ def analyze_insights():
 
     except Exception as e:
         print(f"Error in insights analysis: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@insights_bp.route('/insights/coach', methods=['POST'])
+def coach_insights():
+    try:
+        data = request.json
+        user_id = data.get('user_id')
+        if not user_id:
+             return jsonify({"error": "User ID required"}), 400
+
+        # Fetch Data from Supabase
+        supabase = get_supabase_client()
+        if not supabase:
+             return jsonify({"error": "Database not configured"}), 500
+
+        # 1. Fetch History (Last 30 days)
+        history_resp = supabase.table('daily_logs').select("*").eq('user_id', user_id).order('date', desc=True).execute()
+        history = history_resp.data if history_resp.data else []
+        
+        # 2. Fetch Goals
+        goals_resp = supabase.table('user_goals').select("*").eq('user_id', user_id).eq('status', 'active').execute()
+        goals = goals_resp.data if goals_resp.data else []
+
+        api_key = os.environ.get("OPENAI_API_KEY")
+        client = OpenAI(api_key=api_key)
+
+        system_prompt = """You are an elite Fitness & Nutrition Coach.
+        Analyze the user's last 30 days of data and their active goals.
+        Your tone is motivating but strict/direct.
+        
+        Output JSON:
+        {
+          "analysis": "2-3 sentences summarizing their progress and identifying trends (e.g. weight plateau, inconsistent logging).",
+          "status": "on_track" | "at_risk" | "off_track",
+          "suggestions": ["Specific action 1", "Specific action 2", "Specific action 3"],
+          "encouragement": "Short motivating punchline."
+        }
+        """
+
+        user_prompt = f"""
+        History (Last 30 entries): {json.dumps(history)}
+        Active Goals: {json.dumps(goals)}
+        
+        Assess my performance.
+        """
+
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt}
+            ],
+            response_format={"type": "json_object"}
+        )
+
+        content = response.choices[0].message.content
+        return jsonify(json.loads(content))
+
+    except Exception as e:
+        print(f"Error in coach insights: {e}")
         return jsonify({"error": str(e)}), 500

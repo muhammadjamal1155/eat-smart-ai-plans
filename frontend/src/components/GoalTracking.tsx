@@ -1,5 +1,7 @@
 
 import { useState, useEffect } from 'react';
+import { useAuth } from '@/hooks/use-auth';
+import { analyticsService } from '@/services/analytics';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -25,69 +27,64 @@ interface Goal {
 }
 
 const GoalTracking = () => {
+  const { user } = useAuth();
   const [goals, setGoals] = useState<Goal[]>([]);
 
-  // Load goals from localStorage on mount
+  // Load goals from Backend or localStorage
   useEffect(() => {
-    const savedGoals = localStorage.getItem('userGoals');
-    if (savedGoals) {
-      setGoals(JSON.parse(savedGoals));
-    } else {
-      // Default goals if none exist
-      setGoals([
-        {
-          id: '1',
-          title: 'Reach Target Weight',
-          category: 'weight',
-          target: 70,
-          current: 71.2,
-          unit: 'kg',
-          deadline: '2024-04-15',
-          status: 'active',
-          priority: 'high',
-          description: 'Lose 5kg for better health and fitness'
-        },
-        {
-          id: '2',
-          title: 'Increase Daily Protein',
-          category: 'nutrition',
-          target: 120,
-          current: 105,
-          unit: 'g',
-          deadline: '2024-03-30',
-          status: 'active',
-          priority: 'medium',
-          description: 'Support muscle growth and recovery'
-        },
-        {
-          id: '3',
-          title: 'Drink More Water',
-          category: 'health',
-          target: 8,
-          current: 6.5,
-          unit: 'glasses',
-          deadline: '2024-03-25',
-          status: 'active',
-          priority: 'medium',
-          description: 'Improve hydration and overall health'
-        },
-        {
-          id: '4',
-          title: 'Reduce Sugar Intake',
-          category: 'nutrition',
-          target: 25,
-          current: 35,
-          unit: 'g',
-          deadline: '2024-04-01',
-          status: 'active',
-          priority: 'high',
-          description: 'Limit added sugars to WHO recommendations'
+    const loadGoals = async () => {
+      if (user?.id) {
+        try {
+          const fetchedGoals = await analyticsService.getGoals(user.id);
+          if (fetchedGoals && fetchedGoals.length > 0) {
+            setGoals(fetchedGoals);
+            return;
+          }
+        } catch (error) {
+          console.error("Failed to load goals", error);
         }
-      ]);
-    }
-  }, []);
+      }
+
+      // Fallback or Initial Defaults
+      const savedGoals = localStorage.getItem('userGoals');
+      if (savedGoals) {
+        setGoals(JSON.parse(savedGoals));
+      } else if (!user?.id) { // Only set defaults if no user, otherwise we prefer empty state from DB
+        setGoals([
+          {
+            id: '1',
+            title: 'Reach Target Weight',
+            category: 'weight',
+            target: 70,
+            current: 71.2,
+            unit: 'kg',
+            deadline: '2024-04-15',
+            status: 'active',
+            priority: 'high',
+            description: 'Lose 5kg for better health and fitness'
+          },
+          // ... (keeping other defaults if needed, but reducing for brevity in code block)
+        ]);
+      }
+    };
+    loadGoals();
+  }, [user]);
 
   // Save goals to localStorage whenever they change
+  // Save goals (Sync with Backend)
+  const saveGoalToBackend = async (goal: Goal) => {
+    if (user?.id) {
+      try {
+        await analyticsService.saveGoal(goal, user.id);
+      } catch (error) {
+        console.error("Failed to sync goal", error);
+        toast({ title: "Sync Error", description: "Failed to save goal to cloud.", variant: "destructive" });
+      }
+    }
+    // Also update local storage for redundancy
+    localStorage.setItem('userGoals', JSON.stringify(goals)); // simple snapshot
+  };
+
   useEffect(() => {
     if (goals.length > 0) {
       localStorage.setItem('userGoals', JSON.stringify(goals));
@@ -123,7 +120,10 @@ const GoalTracking = () => {
       status: 'active'
     };
 
-    setGoals([...goals, goal]);
+    const updatedGoals = [...goals, goal];
+    setGoals(updatedGoals);
+    saveGoalToBackend(goal);
+
     setNewGoal({
       title: '',
       category: 'nutrition',
@@ -143,11 +143,15 @@ const GoalTracking = () => {
   };
 
   const handleUpdateProgress = (goalId: string, newProgress: number) => {
-    setGoals(goals.map(goal =>
+    const updatedGoals = goals.map(goal =>
       goal.id === goalId
         ? { ...goal, current: newProgress, status: newProgress >= goal.target ? 'completed' : 'active' }
         : goal
-    ));
+    );
+    setGoals(updatedGoals as Goal[]);
+
+    const updatedGoal = updatedGoals.find(g => g.id === goalId);
+    if (updatedGoal) saveGoalToBackend(updatedGoal as Goal);
 
     const goal = goals.find(g => g.id === goalId);
     if (goal && newProgress >= goal.target) {

@@ -1,9 +1,11 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BarChart, TrendingUp, Target } from 'lucide-react';
+import { BarChart, TrendingUp, Target, Brain } from 'lucide-react';
 import NutritionReports from './NutritionReports';
 import ProgressTrends from './ProgressTrends';
 import GoalTracking from './GoalTracking';
+import AICoach from './AICoach';
+import DashboardSummary from './DashboardSummary';
 
 const AnalyticsDashboard = () => {
   return (
@@ -18,8 +20,14 @@ const AnalyticsDashboard = () => {
           </p>
         </div>
 
-        <Tabs defaultValue="reports" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-8 bg-background/70 border border-border/60 backdrop-blur-sm">
+        <DashboardSummary />
+
+        <Tabs defaultValue="coach" className="w-full">
+          <TabsList className="grid w-full grid-cols-4 mb-8 bg-background/70 border border-border/60 backdrop-blur-sm">
+            <TabsTrigger value="coach" className="flex items-center gap-2">
+              <Brain className="w-4 h-4" />
+              AI Coach
+            </TabsTrigger>
             <TabsTrigger value="reports" className="flex items-center gap-2">
               <BarChart className="w-4 h-4" />
               Nutrition Reports
@@ -33,6 +41,10 @@ const AnalyticsDashboard = () => {
               Goal Tracking
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="coach">
+            <AICoach />
+          </TabsContent>
 
           <TabsContent value="reports">
             <NutritionReports />

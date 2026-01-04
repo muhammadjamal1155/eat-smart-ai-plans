@@ -5,13 +5,13 @@ import json
 from dotenv import load_dotenv
 
 # Load environment variables
-load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
+load_dotenv(os.path.join(os.path.dirname(__file__), '..', '..', '.env'))
 
 SUPABASE_URL = os.environ.get("VITE_SUPABASE_URL")
 # Use Service Key (Admin) if available, otherwise Anon Key
 SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_KEY") or os.environ.get("VITE_SUPABASE_ANON_KEY")
 
-DATA_FILE = os.path.join(os.path.dirname(__file__), 'data', 'healthy_eating.csv')
+DATA_FILE = os.path.join(os.path.dirname(__file__), '..', 'data', 'healthy_eating.csv')
 
 def seed_meals():
     if not SUPABASE_URL or not SUPABASE_KEY:

@@ -22,6 +22,8 @@ const Reminders = lazy(() => import('@/pages/Reminders'));
 const Profile = lazy(() => import('@/pages/Profile'));
 const Settings = lazy(() => import('@/pages/Settings'));
 const ResetPassword = lazy(() => import('@/pages/ResetPassword'));
+const About = lazy(() => import('@/pages/About'));
+const Contact = lazy(() => import('@/pages/Contact'));
 
 const AnimatedRoutes = () => {
     const location = useLocation();
@@ -41,6 +43,8 @@ const AnimatedRoutes = () => {
                 <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
                 <Route path="/register" element={<PageTransition><Register /></PageTransition>} />
                 <Route path="/reset-password" element={<PageTransition><ResetPassword /></PageTransition>} />
+                <Route path="/about" element={<PageTransition><About /></PageTransition>} />
+                <Route path="/contact" element={<PageTransition><Contact /></PageTransition>} />
 
                 <Route path="/nutrition-form" element={<ProtectedRoute><PageTransition><NutritionForm /></PageTransition></ProtectedRoute>} />
                 <Route path="/reminders" element={<ProtectedRoute><PageTransition><Reminders /></PageTransition></ProtectedRoute>} />

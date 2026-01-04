@@ -1,4 +1,9 @@
-from recommendation_engine import RecommendationEngine
+import sys
+import os
+# Add parent directory to path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from core.recommendation_engine import RecommendationEngine
 import pandas as pd
 
 def test_engine():

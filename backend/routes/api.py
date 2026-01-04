@@ -1,38 +1,30 @@
-from flask import Flask, request, jsonify
-from flask_cors import CORS
-import os
-import json
-from recommendation_engine import RecommendationEngine
+from flask import Blueprint, request, jsonify
+from services.recommendation_service import RecommendationService
 
-app = Flask(__name__)
-CORS(app)
+api = Blueprint('api', __name__)
 
-# Initialize Recommendation Engine
-engine = RecommendationEngine()
-
-@app.route('/')
-def home():
-    return "Eat Smart AI Plans API is running!"
-
-@app.route('/recommend', methods=['POST'])
+@api.route('/recommend', methods=['POST'])
 def recommend():
     data = request.json
+    service = RecommendationService.get_instance()
     
-    # Use the engine to get recommendations
-    recommendations = engine.recommend(data)
+    # Use the service to get recommendations
+    recommendations = service.get_recommendations(data)
     
     if "error" in recommendations:
         return jsonify(recommendations), 500
 
     return jsonify(recommendations)
     
-@app.route('/meals', methods=['GET'])
+@api.route('/meals', methods=['GET'])
 def get_meals():
     query = request.args.get('query', '')
-    meals = engine.search_meals(query)
+    tag = request.args.get('tag', 'all')
+    service = RecommendationService.get_instance()
+    meals = service.search_meals(query, tag)
     return jsonify(meals)
 
-@app.route('/api/reset-password', methods=['POST'])
+@api.route('/api/reset-password', methods=['POST'])
 def reset_password():
     data = request.json
     email = data.get('email')
@@ -41,7 +33,6 @@ def reset_password():
         return jsonify({"error": "Email is required"}), 400
         
     # In a real application, you would generate a token and send an email here.
-    # For now, we will log it to the console to simulate the action.
     print(f"----------------------------------------------------------------")
     print(f"SIMULATION: Password reset requested for {email}")
     print(f"Email would be sent to: {email}")
@@ -50,7 +41,7 @@ def reset_password():
     
     return jsonify({"message": "Password reset link sent (simulated)", "status": "success"})
 
-@app.route('/api/email-grocery-list', methods=['POST'])
+@api.route('/api/email-grocery-list', methods=['POST'])
 def email_grocery_list():
     data = request.json
     email = data.get('email')
@@ -68,6 +59,3 @@ def email_grocery_list():
     print(f"----------------------------------------------------------------")
     
     return jsonify({"message": "Grocery list sent (simulated)", "status": "success"})
-
-if __name__ == '__main__':
-    app.run(debug=True)

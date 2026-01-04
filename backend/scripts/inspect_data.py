@@ -2,7 +2,7 @@ import pandas as pd
 import os
 
 try:
-    data_path = os.path.join(os.path.dirname(__file__), 'data', 'small_data.csv')
+    data_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'small_data.csv')
     df = pd.read_csv(data_path)
     
     print("\nFirst 10 rows of 'image_url':")

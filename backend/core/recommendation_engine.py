@@ -36,7 +36,7 @@ class RecommendationEngine:
             # (Keeping logic commented or secondary if you want to migrate later)
             
             # 2. Load Local Dataset (Food.com small_data.csv)
-            data_path = os.path.join(os.path.dirname(__file__), 'data', 'small_data.csv')
+            data_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'small_data.csv')
             
             if not os.path.exists(data_path):
                 print(f"Dataset not found at {data_path}.")
@@ -337,19 +337,61 @@ class RecommendationEngine:
             traceback.print_exc()
             return {"error": str(e)}
 
-    def search_meals(self, query=None):
+    def search_meals(self, query=None, tag=None):
         if self.data.empty: return []
         
+        # Start with full dataset
+        filtered_df = self.data
+
+        # Apply Tag Filter if provided
+        if tag and tag.lower() != 'all':
+            tag_lower = tag.lower()
+            # Check if tag is in the tags list (case-insensitive partial match for robustness)
+            mask = filtered_df['tags_list'].apply(lambda tags: any(tag_lower in t.lower() for t in tags))
+            filtered_df = filtered_df[mask]
+        
+        if filtered_df.empty:
+            return []
+
         if not query:
-            return self._format_results(self.data.sample(20))
+            # Return random sample from filtered results
+            n = min(20, len(filtered_df))
+            return self._format_results(filtered_df.sample(n))
             
-        # TF-IDF Search
+        # TF-IDF Search within filtered results
+        # Note: self.tfidf_matrix is for the WHOLE dataset.
+        # We need to filter indices.
+        
+        # Optim optimization: If we are just filtering by tag without query, logic above handles it.
+        # If we have query AND tag, doing cosine sim on whole matrix is fast, then we just pick those that match the filter.
+        
         query_vec = self.tfidf.transform([query])
         sim_scores = cosine_similarity(query_vec, self.tfidf_matrix)
-        top_indices = sim_scores.argsort()[0][-20:][::-1]
         
-        results_df = self.data.iloc[top_indices]
-        return self._format_results(results_df)
+        # Get enough candidates to likely satisfy the filter
+        # e.g. top 100, then filter by tag
+        top_indices = sim_scores.argsort()[0][::-1]
+        
+        results = []
+        count = 0
+        tag_lower = tag.lower() if tag else None
+        
+        for idx in top_indices:
+            if count >= 20: break
+            
+            # Check if this index is in our filtered_df (if tag applied)
+            # Or simpler: access row by iloc[idx] then check tag
+            row = self.data.iloc[idx]
+            
+            if tag_lower and tag_lower != 'all':
+                if not any(tag_lower in t.lower() for t in row['tags_list']):
+                    continue
+            
+            results.append(row)
+            count += 1
+            
+        # Convert list of rows back to DataFrame-like structure or just format directly
+        return self._format_results(pd.DataFrame(results))
 
     def _format_results(self, df):
         results = []

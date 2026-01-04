@@ -87,7 +87,9 @@ const MealSearchDialog = ({ onSelectMeal, mealType, isOpen, onOpenChange }: Meal
             });
           }
         } else {
-          const response = await fetch(`http://localhost:5000/meals?query=${searchTerm}`);
+          // Pass selected tags to backend logic (except 'all' is handled as default/empty there)
+          const tagParam = selectedFilter !== 'all' ? `&tag=${selectedFilter}` : '';
+          const response = await fetch(`http://localhost:5000/meals?query=${searchTerm}${tagParam}`);
           if (response.ok) {
             const data = await response.json();
             setMeals(data);
@@ -109,11 +111,7 @@ const MealSearchDialog = ({ onSelectMeal, mealType, isOpen, onOpenChange }: Meal
     return () => clearTimeout(debounce);
   }, [searchTerm, isOpen, selectedFilter]);
 
-  const filteredMeals = meals.filter(meal => {
-    if (selectedFilter === 'recommended') return true; // Already filtered by backend
-    const matchesFilter = selectedFilter === 'all' || meal.tags.some(tag => tag.toLowerCase().includes(selectedFilter));
-    return matchesFilter;
-  });
+  const filteredMeals = meals;
 
   const handleSelectMeal = (meal: Meal) => {
     onSelectMeal(meal);

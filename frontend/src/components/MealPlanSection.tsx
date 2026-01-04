@@ -11,6 +11,7 @@ import {
 import { Input } from '@/components/ui/input';
 import MealPlanCard from './MealPlanCard';
 import MealSearchDialog from './MealSearchDialog';
+import CookingModeDialog from './CookingModeDialog'; // Import the new component
 import { toast } from '@/hooks/use-toast';
 import {
   DndContext, DragOverlay, useDraggable, useDroppable,
@@ -107,6 +108,8 @@ const MealPlanSection = () => {
   const [isBrowseMealsOpen, setIsBrowseMealsOpen] = useState(false);
   const [activeMealSlot, setActiveMealSlot] = useState<{ day: string; mealType: keyof DayMeals } | null>(null);
   const [selectedMealDetails, setSelectedMealDetails] = useState<Meal | null>(null);
+  const [isCookingModeOpen, setIsCookingModeOpen] = useState(false); // State for cooking mode
+  const [cookingMeal, setCookingMeal] = useState<Meal | null>(null);
 
   const handleOpenBrowseMeals = (day: string, mealType: keyof DayMeals) => {
     setActiveMealSlot({ day, mealType });
@@ -401,9 +404,21 @@ const MealPlanSection = () => {
       <Dialog open={!!selectedMealDetails} onOpenChange={(open) => !open && setSelectedMealDetails(null)}>
         <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold flex items-center gap-2">
-              <ChefHat className="w-6 h-6 text-primary" />
-              {selectedMealDetails?.name}
+            <DialogTitle className="text-2xl font-bold flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <ChefHat className="w-6 h-6 text-primary" />
+                {selectedMealDetails?.name}
+              </div>
+              <Button
+                onClick={() => {
+                  setCookingMeal(selectedMealDetails);
+                  setIsCookingModeOpen(true);
+                  setSelectedMealDetails(null);
+                }}
+                className="bg-green-600 hover:bg-green-700 text-white"
+              >
+                Start Cooking Mode <Utensils className="ml-2 w-4 h-4" />
+              </Button>
             </DialogTitle>
             <DialogDescription>
               Ready in {selectedMealDetails?.time || `${selectedMealDetails?.cookTime} min`} • {selectedMealDetails?.calories} Calories
@@ -452,6 +467,12 @@ const MealPlanSection = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <CookingModeDialog
+        open={isCookingModeOpen}
+        onOpenChange={setIsCookingModeOpen}
+        meal={cookingMeal}
+      />
     </section>
   );
 };

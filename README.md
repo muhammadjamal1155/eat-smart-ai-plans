@@ -51,23 +51,28 @@ cd eat-smart-ai-plans
 ### 2. Backend Setup (Python)
 The backend runs on port `5000`.
 
-1.  Navigate to the project root.
+1.  Navigate to the backend directory:
+    ```bash
+    cd backend
+    ```
 2.  Activate the virtual environment:
     *   **Windows**:
         ```powershell
-        .\server\venv\Scripts\activate
+        ..\venv\Scripts\activate
         ```
     *   **Mac/Linux**:
         ```bash
-        source server/venv/bin/activate
+        source ../venv/bin/activate
         ```
+    *(Note: The virtual environment is located in the project root)*
+
 3.  Install dependencies (if needed):
     ```bash
-    pip install -r server/requirements.txt
+    pip install -r requirements.txt
     ```
 4.  Start the server:
     ```bash
-    python server/app.py
+    python app.py
     ```
     > The server will start at `http://127.0.0.1:5000`.
 
@@ -75,11 +80,15 @@ The backend runs on port `5000`.
 The frontend runs on port `8080`.
 
 1.  Open a new terminal window in the project root.
-2.  Install Node dependencies:
+2.  Navigate to the frontend directory:
+    ```bash
+    cd frontend
+    ```
+3.  Install Node dependencies:
     ```bash
     npm install
     ```
-3.  Start the development server:
+4.  Start the development server:
     ```bash
     npm run dev
     ```
@@ -96,16 +105,21 @@ The frontend runs on port `8080`.
 ## 📂 Project Structure
 
 ```
-├── server/                 # Python Flask Backend
+├── backend/                # Python Flask Backend
 │   ├── app.py             # API Entry Point
-│   ├── recommendation_engine.py # AI Logic
+│   ├── core/              # Core Logic (Recommendation Engine)
+│   ├── routes/            # API Routes
+│   ├── services/          # Business Logic Services
+│   ├── scripts/           # Utility Scripts
 │   └── data/              # Dataset (CSV/JSON)
-├── src/                    # React Frontend
-│   ├── components/        # Reusable UI Components
-│   ├── pages/             # Route Pages (Dashboard, etc.)
-│   ├── contexts/          # Global State (Auth)
-│   └── lib/               # Utilities & Helpers
-└── public/                 # Static Assets
+├── frontend/               # React Frontend
+│   ├── src/               # Source Code
+│   │   ├── components/    # Reusable UI Components
+│   │   ├── pages/         # Route Pages
+│   │   ├── contexts/      # Global State
+│   │   └── lib/           # Utilities
+│   └── public/            # Static Assets
+└── venv/                   # Python Virtual Environment
 ```
 
 ## 📄 License

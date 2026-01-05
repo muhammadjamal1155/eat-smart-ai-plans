@@ -275,7 +275,7 @@ class RecommendationEngine:
             
             # Fit specific temporary NN for this filtered user group
             # (Fast enough for 40k rows)
-            n_neighbors = min(50, len(filtered_data))
+            n_neighbors = min(80, len(filtered_data))
             temp_model = NearestNeighbors(n_neighbors=n_neighbors, algorithm='brute', metric='euclidean')
             temp_model.fit(features_subset)
             
@@ -284,62 +284,134 @@ class RecommendationEngine:
             # Get the actual rows
             candidates = filtered_data.iloc[indices[0]].copy()
 
-            # --- MEAL TYPE ASSIGNMENT ---
-            # Heuristic assignment since dataset doesn't have strict 'breakfast/lunch' cols always reliable
-            breakfasts, lunches, dinners = [], [], []
+            # --- AI-DRIVEN WEEKLY SELECTION ---
+            week_plan = {}
+            weekly_reasoning = ""
             
-            for _, row in candidates.iterrows():
-                tags = row['tags_list']
-                name = row['name'].lower()
-                
-                if 'breakfast' in tags or any(x in name for x in ['pancake', 'egg', 'oat', 'waffle']):
-                    breakfasts.append(row)
-                elif 'lunch' in tags or any(x in name for x in ['sandwich', 'wrap', 'soup', 'salad']):
-                    lunches.append(row)
-                else:
-                    dinners.append(row)
+            try:
+                ai_result = AIService.get_instance().generate_weekly_plan(user_data, candidates)
+                if ai_result:
+                    days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
                     
-            # Fallback filling
-            def fill_category(target_list, source_df, count):
-                if len(target_list) < count:
-                    needed = count - len(target_list)
-                    # Grab randoms from source that aren't already used
-                    others = source_df.sample(min(needed * 2, len(source_df))).to_dict('records')
-                    for o in others:
-                        if len(target_list) >= count: break
-                        target_list.append(o)
+                    def format_row(row):
+                         return {
+                            "id": str(row['id']),
+                            "name": row['name'],
+                            "calories": int(row['calories']),
+                            "protein": int(row['protein']),
+                            "carbs": int(row['carbs']),
+                            "fats": int(row['fats']),
+                            "image": self._get_meal_image(row['name'], str(row['tags_list'])),
+                            "time": f"{row['minutes']} min",
+                            "tags": row['tags_list'][:4],
+                            "ingredients": row['ingredients_list'],
+                            "steps": row['steps_list']
+                        }
+
+                    def get_meal_by_id(mid, meal_type_hint):
+                        # 1. Try fetching by ID
+                        try:
+                            if mid:
+                                target_id = int(float(str(mid)))
+                                match = candidates[candidates['id'] == target_id]
+                                if not match.empty: 
+                                    row = match.iloc[0]
+                                    return format_row(row)
+                        except Exception as e:
+                            print(f"Error parsing ID {mid}: {e}")
+                        
+                        # 2. Fallback: Find strictly by tag/type in candidates, or just random
+                        filtered = [r for _, r in candidates.iterrows() if meal_type_hint.lower() in str(r['tags_list']).lower()]
+                        if not filtered:
+                            filtered = [r for _, r in candidates.iterrows()]
+                        
+                        if filtered:
+                            import random
+                            row = random.choice(filtered)
+                            return format_row(row)
+                        
+                        return None 
+
+                    for day in days:
+                        day_plan = ai_result.get(day)
+                        if day_plan:
+                            week_plan[day] = {
+                                "breakfast": get_meal_by_id(day_plan.get("breakfast_id"), "breakfast"),
+                                "lunch": get_meal_by_id(day_plan.get("lunch_id"), "lunch"),
+                                "dinner": get_meal_by_id(day_plan.get("dinner_id"), "dinner")
+                            }
+                    
+                    weekly_reasoning = ai_result.get("reasoning", "")
+                    print(f"Weekly AI Plan Generated: {weekly_reasoning}")
+                else:
+                    print("AI returned None, falling back.")
+
+            except Exception as e:
+                print(f"AI Weekly Generation failed: {e}")
+
+            # Gather unique meals for the "Preview" list
+            unique_meals_map = {}
+            if week_plan:
+                for day, day_meals in week_plan.items():
+                    for m_type in ['breakfast', 'lunch', 'dinner']:
+                        meal = day_meals.get(m_type)
+                        if meal:
+                            unique_meals_map[meal['id']] = meal
             
-            fill_category(breakfasts, candidates, 2)
-            fill_category(lunches, candidates, 2)
-            fill_category(dinners, candidates, 2)
+            # Convert to list for frontend "meals" array (used for visual cards)
+            # Limit to maybe 9 to show variety but not overwhelm? Or all.
+            preview_meals = list(unique_meals_map.values())
             
-            selected_meals = (breakfasts[:2] + lunches[:2] + dinners[:2])
-            
-            # --- FORMAT OUTPUT ---
-            results = []
-            for row in selected_meals:
-                # Use real image if available in CSV (usually not), or generate stock
-                img_url = self._get_meal_image(row['name'], str(row['tags_list']))
+            # --- FALLBACK IF WEEK PLAN FAILED ---
+            if not week_plan or not preview_meals:
+                # ... (Heuristic Logic Reuse)
+                # For brevity, let's just pick top 3 from candidates if AI failed completely
+                # This ensures we always return *something*
                 
-                results.append({
-                    "id": str(row['id']),
-                    "name": row['name'],
-                    "calories": int(row['calories']),
-                    "protein": int(row['protein']),
-                    "carbs": int(row['carbs']),
-                    "fats": int(row['fats']),
-                    "image": img_url,
-                    "time": f"{row['minutes']} min",
-                    "tags": row['tags_list'][:4],
-                    "ingredients": row['ingredients_list'], # REAL INGREDIENTS
-                    "steps": row['steps_list'] # REAL STEPS
-                })
+                # ... (Basic Heuristic Implementation Inline)
+                breakfasts = [r for _, r in candidates.iterrows() if 'breakfast' in str(r['tags_list'])]
+                lunches = [r for _, r in candidates.iterrows() if 'lunch' in str(r['tags_list'])]
+                dinners = [r for _, r in candidates.iterrows() if 'dinner' not in str(r['tags_list']) and 'lunch' not in str(r['tags_list'])]
                 
+                # Fill if empty
+                if not breakfasts: breakfasts = [candidates.iloc[0]]
+                if not lunches: lunches = [candidates.iloc[1]] if len(candidates)>1 else [candidates.iloc[0]]
+                if not dinners: dinners = [candidates.iloc[2]] if len(candidates)>2 else [candidates.iloc[0]]
+                
+                def fmt(row):
+                   return {
+                        "id": str(row['id']),
+                        "name": row['name'],
+                        "calories": int(row['calories']),
+                        "protein": int(row['protein']),
+                        "carbs": int(row['carbs']),
+                        "fats": int(row['fats']),
+                        "image": self._get_meal_image(row['name'], str(row['tags_list'])),
+                        "time": f"{row['minutes']} min",
+                        "tags": row['tags_list'][:4],
+                        "ingredients": row['ingredients_list'],
+                        "steps": row['steps_list']
+                    }
+
+                preview_meals = [fmt(breakfasts[0]), fmt(lunches[0]), fmt(dinners[0])]
+                
+                # Construct a basic rotating week plan for fallback
+                days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+                week_plan = {}
+                for day in days:
+                    week_plan[day] = {
+                        "breakfast": preview_meals[0],
+                        "lunch": preview_meals[1],
+                        "dinner": preview_meals[2]
+                    }
+
             return {
                 "target_calories": int(target_calories),
                 "bmr": int(bmr),
                 "tdee": int(tdee),
-                "meals": results
+                "week_plan": week_plan, 
+                "ai_reasoning": weekly_reasoning,
+                "meals": preview_meals # Shows all unique meals selected
             }
             
         except Exception as e:

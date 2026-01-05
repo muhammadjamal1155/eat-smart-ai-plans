@@ -47,7 +47,7 @@ const GroceryListGenerator = () => {
   };
 
   const categories = ['All', ...Object.keys(categoryConfig)];
-  const [selectedCategory, setSelectedCategory] = useState('Produce');
+  const [selectedCategory, setSelectedCategory] = useState('All');
 
   const generateFromMealPlan = async () => {
     setIsGenerating(true);
@@ -68,72 +68,96 @@ const GroceryListGenerator = () => {
       }
 
       const weekMeals = JSON.parse(savedMeals);
-      const ingredientsMap = new Map<string, GroceryItem>();
-      let idCounter = 1;
-
-      // Enhanced categorization logic
-      const categorizeIngredient = (name: string): string => {
-        const lowerName = name.toLowerCase();
-
-        if (['chicken', 'beef', 'fish', 'salmon', 'steak', 'pork', 'meat', 'egg', 'turkey', 'lamb', 'shrimp', 'tuna'].some(k => lowerName.includes(k))) return 'Meat & Fish';
-        if (['milk', 'cheese', 'yogurt', 'cream', 'butter', 'ghee', 'whey', 'mozzarella', 'cheddar'].some(k => lowerName.includes(k))) return 'Dairy';
-        if (['bread', 'bun', 'tortilla', 'bagel', 'pita', 'muffin', 'toast'].some(k => lowerName.includes(k))) return 'Bakery';
-        if (['apple', 'banana', 'berry', 'spinach', 'lettuce', 'tomato', 'potato', 'onion', 'garlic', 'carrot', 'vegetable', 'fruit', 'pepper', 'cucumber', 'broccoli', 'avocado', 'lemon', 'lime', 'herb', 'cilantro', 'parsley', 'basil'].some(k => lowerName.includes(k))) return 'Produce';
-        if (['rice', 'pasta', 'quinoa', 'oat', 'grain', 'flour', 'noodle', 'couscous'].some(k => lowerName.includes(k))) return 'Grains';
-        if (['coffee', 'tea', 'juice', 'soda', 'water', 'drink'].some(k => lowerName.includes(k))) return 'Beverages';
-        if (['frozen', 'ice cream'].some(k => lowerName.includes(k))) return 'Frozen';
-        if (['oil', 'sauce', 'spice', 'salt', 'sugar', 'honey', 'syrup', 'can', 'jar', 'nut', 'seed', 'bean', 'lentil', 'chickpea', 'stock', 'broth'].some(k => lowerName.includes(k))) return 'Pantry';
-
-        return 'Other';
-      };
+      const allIngredients: string[] = [];
 
       Object.values(weekMeals).forEach((day: any) => {
         ['breakfast', 'lunch', 'dinner'].forEach(type => {
           const meal = day[type];
           if (meal && meal.ingredients) {
-            meal.ingredients.forEach((ing: string) => {
-              const name = ing.trim();
-              const category = categorizeIngredient(name);
-
-              if (!ingredientsMap.has(name)) {
-                ingredientsMap.set(name, {
-                  id: String(idCounter++),
-                  name: name,
-                  category: category,
-                  quantity: '1', // Default
-                  unit: 'item', // Default
-                  checked: false,
-                  source: 'meal-plan'
-                });
-              } else {
-                const existing = ingredientsMap.get(name)!;
-                const currentQty = parseInt(existing.quantity) || 0;
-                existing.quantity = String(currentQty + 1);
-              }
-            });
+            allIngredients.push(...meal.ingredients);
           }
         });
       });
 
-      const newList = Array.from(ingredientsMap.values());
-
-      if (newList.length === 0) {
+      if (allIngredients.length === 0) {
         toast({
           title: "No Ingredients Found",
           description: "Your meal plan seems to be empty.",
           variant: "destructive"
         });
-      } else {
-        // Sort by category then name
-        newList.sort((a, b) => {
-          if (a.category !== b.category) return a.category.localeCompare(b.category);
-          return a.name.localeCompare(b.name);
+        setIsGenerating(false);
+        return;
+      }
+
+      // Call Backend AI
+      try {
+        const response = await fetch('http://localhost:5000/plans/grocery-list', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ingredients: allIngredients })
         });
+
+        if (!response.ok) throw new Error("Failed to generate AI list");
+
+        const data = await response.json();
+        const aiItems = data.items;
+
+        // Map AI items to GroceryItem structure
+        const newList = aiItems.map((item: any, index: number) => ({
+          id: `ai-${index}`,
+          name: item.name,
+          category: item.category || 'Other',
+          quantity: item.quantity || '1',
+          unit: '',
+          checked: false,
+          source: 'meal-plan'
+        }));
 
         setGroceryList(newList);
         toast({
-          title: "Grocery List Updated!",
-          description: `Generated ${newList.length} items from your weekly meal plan.`,
+          title: "Smart List Generated! 🧠",
+          description: `AI consolidated ${allIngredients.length} ingredients into ${newList.length} items.`,
+        });
+
+      } catch (err) {
+        console.warn("AI Generation failed, falling back to basic list", err);
+        // Fallback Logic (simplified from original)
+        const ingredientsMap = new Map<string, GroceryItem>();
+        let idCounter = 1;
+        const categorizeIngredient = (name: string): string => {
+          const lowerName = name.toLowerCase();
+
+          if (['chicken', 'beef', 'fish', 'salmon', 'steak', 'pork', 'meat', 'egg', 'turkey', 'lamb', 'shrimp', 'tuna'].some(k => lowerName.includes(k))) return 'Meat & Fish';
+          if (['milk', 'cheese', 'yogurt', 'cream', 'butter', 'ghee', 'whey', 'mozzarella', 'cheddar'].some(k => lowerName.includes(k))) return 'Dairy';
+          if (['bread', 'bun', 'tortilla', 'bagel', 'pita', 'muffin', 'toast'].some(k => lowerName.includes(k))) return 'Bakery';
+          if (['apple', 'banana', 'berry', 'spinach', 'lettuce', 'tomato', 'potato', 'onion', 'garlic', 'carrot', 'vegetable', 'fruit', 'pepper', 'cucumber', 'broccoli', 'avocado', 'lemon', 'lime', 'herb', 'cilantro', 'parsley', 'basil'].some(k => lowerName.includes(k))) return 'Produce';
+          if (['rice', 'pasta', 'quinoa', 'oat', 'grain', 'flour', 'noodle', 'couscous'].some(k => lowerName.includes(k))) return 'Grains';
+          if (['coffee', 'tea', 'juice', 'soda', 'water', 'drink'].some(k => lowerName.includes(k))) return 'Beverages';
+          if (['frozen', 'ice cream'].some(k => lowerName.includes(k))) return 'Frozen';
+          if (['oil', 'sauce', 'spice', 'salt', 'sugar', 'honey', 'syrup', 'can', 'jar', 'nut', 'seed', 'bean', 'lentil', 'chickpea', 'stock', 'broth'].some(k => lowerName.includes(k))) return 'Pantry';
+
+          return 'Other';
+        };
+
+        allIngredients.forEach(ing => {
+          const name = ing.trim();
+          if (!ingredientsMap.has(name)) {
+            ingredientsMap.set(name, {
+              id: String(idCounter++),
+              name: name,
+              category: categorizeIngredient(name),
+              quantity: '1',
+              unit: 'item',
+              checked: false,
+              source: 'meal-plan'
+            });
+          }
+        });
+        const fallbackList = Array.from(ingredientsMap.values());
+        setGroceryList(fallbackList);
+        toast({
+          title: "Basic List Generated",
+          description: "Used offline generation due to connection issue.",
         });
       }
 
@@ -228,7 +252,7 @@ const GroceryListGenerator = () => {
     : { [selectedCategory]: filteredItems };
 
   return (
-    <Card id="grocery-list" className="shadow-lg border border-border/60 bg-card/95 backdrop-blur-sm transition-colors overflow-hidden">
+    <Card id="grocery-list" className="shadow-lg border border-border/60 bg-card/95 backdrop-blur-sm transition-colors overflow-hidden h-[650px] flex flex-col">
       <CardHeader className="border-b border-border/70 pb-4 bg-muted/20">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 min-h-[40px]">
           <CardTitle className="flex items-center space-x-2">
@@ -292,10 +316,10 @@ const GroceryListGenerator = () => {
           )}
         </div>
       </CardHeader>
-      <CardContent className="pt-6">
-        <Tabs value={selectedCategory} onValueChange={setSelectedCategory}>
+      <CardContent className="pt-6 flex-1 flex flex-col min-h-0">
+        <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="flex-1 flex flex-col min-h-0">
           <TabsList className="flex flex-wrap h-auto gap-3 mb-6 bg-transparent border-none p-0">
-            {categories.filter(category => category !== 'All' && getCategoryCount(category) > 0).map((category) => (
+            {categories.filter(category => getCategoryCount(category) > 0).map((category) => (
               <TabsTrigger
                 key={category}
                 value={category}
@@ -311,7 +335,7 @@ const GroceryListGenerator = () => {
             ))}
           </TabsList>
 
-          <TabsContent value={selectedCategory} className="space-y-6">
+          <TabsContent value={selectedCategory} className="space-y-6 flex-1 overflow-y-auto pr-2 pb-6 min-h-0">
             {Object.keys(groupedItems).length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 <ShoppingCart className="w-12 h-12 mx-auto mb-2 opacity-50" />

@@ -177,7 +177,7 @@ const AIRecommendations = () => {
   };
 
   return (
-    <Card className="shadow-lg border border-border/60 bg-card/95 backdrop-blur-sm transition-colors overflow-hidden">
+    <Card className="shadow-lg border border-border/60 bg-card/95 backdrop-blur-sm transition-colors overflow-hidden h-[650px] flex flex-col">
       <CardHeader className="border-b border-border/70 pb-4 bg-muted/20">
         <div className="flex justify-between items-center">
           <CardTitle className="flex items-center space-x-2">
@@ -195,7 +195,7 @@ const AIRecommendations = () => {
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="p-6">
+      <CardContent className="p-6 flex-1 pb-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {recommendations.map((rec) => (
             <div

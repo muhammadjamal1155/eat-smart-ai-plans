@@ -1,4 +1,3 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
@@ -8,10 +7,13 @@
 @layer base {
   :root {
     /* Backgrounds & Surfaces */
-    --background: 60 5% 96%;    /* Off-white/Cream */
-    --foreground: 82 36% 20%;   /* Dark Green/Brown Text */
+    --background: 60 5% 96%;
+    /* Off-white/Cream */
+    --foreground: 82 36% 20%;
+    /* Dark Green/Brown Text */
 
-    --card: 0 0% 100%;          /* Pure White */
+    --card: 0 0% 100%;
+    /* Pure White */
     --card-foreground: 82 36% 20%;
 
     --popover: 0 0% 100%;
@@ -21,13 +23,15 @@
     --primary: 68 67% 36%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 60 5% 90%;     /* Light Gray */
+    --secondary: 60 5% 90%;
+    /* Light Gray */
     --secondary-foreground: 82 36% 20%;
 
     --muted: 60 5% 90%;
     --muted-foreground: 82 10% 45%;
 
-    --accent: 67 56% 92%;       /* Very light green tint */
+    --accent: 67 56% 92%;
+    /* Very light green tint */
     --accent-foreground: 68 67% 30%;
 
     /* State Colors */
@@ -59,7 +63,7 @@
 
     /* Theme transition */
     --transition-theme: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-    
+
     /* Enhanced gradients */
     --gradient-primary: linear-gradient(135deg, hsl(67 72% 90%), hsl(67 56% 61%), hsl(68 67% 36%));
     --gradient-hero: linear-gradient(to right, hsl(67 72% 90%), hsl(69 61% 77%), hsl(68 67% 36%));
@@ -70,7 +74,7 @@
       radial-gradient(circle at 15% 20%, hsla(68, 67%, 36%, 0.18) 0%, transparent 55%),
       radial-gradient(circle at 85% 5%, hsla(67, 56%, 61%, 0.22) 0%, transparent 60%),
       radial-gradient(circle at 50% 100%, hsla(69, 61%, 77%, 0.24) 0%, transparent 65%);
-    
+
     /* Enhanced shadows */
     --shadow-soft: 0 1px 3px hsla(68, 67%, 36%, 0.12), 0 1px 2px hsla(68, 67%, 36%, 0.06);
     --shadow-medium: 0 4px 6px -1px hsla(68, 67%, 36%, 0.12), 0 2px 4px -1px hsla(68, 67%, 36%, 0.08);
@@ -138,7 +142,7 @@
       radial-gradient(circle at 20% 15%, hsla(67, 56%, 61%, 0.18) 0%, transparent 55%),
       radial-gradient(circle at 80% 0%, hsla(68, 67%, 36%, 0.3) 0%, transparent 60%),
       radial-gradient(circle at 50% 100%, hsla(82, 30%, 18%, 0.35) 0%, transparent 70%);
-    
+
     /* Dark mode shadows with inner glow */
     --shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3), inset 0 1px 0 hsla(67, 56%, 61%, 0.15);
     --shadow-medium: 0 4px 6px -1px rgba(0, 0, 0, 0.45), 0 2px 4px -1px rgba(0, 0, 0, 0.35), inset 0 1px 0 hsla(67, 56%, 61%, 0.15);
@@ -153,13 +157,15 @@
     @apply border-border;
   }
 
-  html, body {
+  html,
+  body {
     margin: 0;
     padding: 0;
   }
 
   body {
-    @apply bg-background text-foreground font-['Inter',sans-serif] transition-colors duration-300;
+    @apply bg-background text-foreground transition-colors duration-300;
+    font-family: 'Inter', sans-serif;
     background-image: var(--page-gradient-base);
     background-attachment: fixed;
     background-repeat: no-repeat;
@@ -197,8 +203,14 @@
     border-color: hsl(var(--border)) !important;
   }
 
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-['Poppins',sans-serif] font-semibold;
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-semibold;
+    font-family: 'Poppins', sans-serif;
   }
 
   /* Focus styles for accessibility */
@@ -208,6 +220,7 @@
 
   /* Reduced motion for accessibility */
   @media (prefers-reduced-motion: reduce) {
+
     *,
     *::before,
     *::after {
@@ -229,7 +242,7 @@
   .hero-gradient {
     background: var(--gradient-hero);
   }
-  
+
   .accent-gradient {
     background: var(--gradient-accent);
   }
@@ -255,11 +268,11 @@
     pointer-events: none;
   }
 
-  .page-surface > * {
+  .page-surface>* {
     position: relative;
     z-index: 1;
   }
-  
+
   .card-hover {
     @apply transition-all duration-300 ease-out hover:shadow-lg hover:scale-[1.02] hover:-translate-y-1;
   }
@@ -271,11 +284,11 @@
   .glass-section {
     @apply bg-background/70 backdrop-blur-sm border border-border/50;
   }
-  
+
   .btn-primary {
     @apply bg-primary hover:bg-primary/90 text-primary-foreground font-medium py-3 px-6 rounded-lg transition-all duration-200 hover:shadow-md focus:ring-2 focus:ring-ring focus:ring-offset-2 hover:scale-[1.02];
   }
-  
+
   .btn-secondary {
     @apply bg-secondary hover:bg-secondary/80 text-secondary-foreground border border-border font-medium py-3 px-6 rounded-lg transition-all duration-200 hover:shadow-md focus:ring-2 focus:ring-ring focus:ring-offset-2 hover:scale-[1.02];
   }
@@ -337,7 +350,7 @@
       transform: scale(0.98);
       transition: transform 0.1s ease;
     }
-    
+
     .btn-primary:active,
     .btn-secondary:active {
       transform: scale(0.96);
@@ -345,8 +358,15 @@
   }
 
   @keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-10px); }
+
+    0%,
+    100% {
+      transform: translateY(0px);
+    }
+
+    50% {
+      transform: translateY(-10px);
+    }
   }
 
   /* Accessibility improvements */
@@ -365,4 +385,41 @@
   .skip-link {
     @apply fixed top-4 left-4 z-50 bg-primary text-primary-foreground px-4 py-2 rounded-md transform -translate-y-16 focus:translate-y-0 transition-transform duration-200;
   }
+}
+
+/* Custom Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.5);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.2);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--primary) / 0.6);
+}
+
+/* Firefox support */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--muted-foreground) / 0.3) transparent;
+}
+
+.dark * {
+  scrollbar-color: hsl(var(--muted-foreground) / 0.2) transparent;
 }

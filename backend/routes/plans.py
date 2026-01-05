@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
 from core.supabase_client import get_supabase_client
+from services.ai_service import AIService
 import datetime
 
 plans_bp = Blueprint('plans', __name__)
@@ -62,4 +63,25 @@ def get_plan():
 
     except Exception as e:
         print(f"Error fetching plan: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@plans_bp.route('/plans/grocery-list', methods=['POST'])
+def generate_grocery_list():
+    try:
+        data = request.json
+        ingredients = data.get('ingredients', [])
+        
+        if not ingredients:
+            return jsonify({"error": "Ingredients list required"}), 400
+            
+        ai_service = AIService.get_instance()
+        generated_items = ai_service.generate_grocery_list(ingredients)
+        
+        if generated_items is None:
+             return jsonify({"error": "AI service unavailable"}), 503
+             
+        return jsonify({"items": generated_items})
+
+    except Exception as e:
+        print(f"Error generating grocery list: {e}")
         return jsonify({"error": str(e)}), 500

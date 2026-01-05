@@ -85,31 +85,31 @@ const RecommendationResults = ({ data, onBack }: RecommendationResultsProps) => 
 
         setIsSaving(true);
         try {
-            // Distribute meals across the week
+            let weekMeals: any = {};
             const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-            const weekMeals: any = {};
 
-            // Simple distribution strategy: Rotate through the recommended meals
-            // Assuming data.meals has at least 1 meal
-            const meals = data.meals;
-            if (!meals || meals.length === 0) {
-                toast({ title: "No meals to save", variant: "destructive" });
-                navigate('/meal-plans');
-                return;
+            // Check if backend provided a full weekly plan (AI Generated Variety)
+            // @ts-ignore - week_plan might not be in the strict 'Meal' interface yet but comes from backend
+            if (data.week_plan) {
+                // @ts-ignore
+                weekMeals = data.week_plan;
+            } else {
+                // FALLBACK: Rotate the generic meals
+                const meals = data.meals;
+                if (!meals || meals.length === 0) {
+                    toast({ title: "No meals to save", variant: "destructive" });
+                    navigate('/meal-plans');
+                    return;
+                }
+
+                days.forEach((day, index) => {
+                    weekMeals[day] = {
+                        breakfast: meals[index % meals.length],
+                        lunch: meals[(index + 1) % meals.length],
+                        dinner: meals[(index + 2) % meals.length]
+                    };
+                });
             }
-
-            days.forEach((day, index) => {
-                // Ensure we have different meals if possible, or repeat if not enough
-                const breakfast = meals[index % meals.length];
-                const lunch = meals[(index + 1) % meals.length];
-                const dinner = meals[(index + 2) % meals.length];
-
-                weekMeals[day] = {
-                    breakfast,
-                    lunch,
-                    dinner
-                };
-            });
 
             await analyticsService.savePlan(user.id, weekMeals);
 

@@ -385,6 +385,8 @@ const NutritionReports = () => {
                         tickLine={false}
                         axisLine={false}
                         padding={{ left: 16, right: 16 }}
+                        interval={0}
+                        tickFormatter={(value) => value.slice(0, 3)}
                       />
                       <YAxis />
                       <Tooltip content={<CustomTooltip />} />

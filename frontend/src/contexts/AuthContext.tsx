@@ -54,8 +54,8 @@ export interface User {
 
 interface AuthContextType {
   user: User | null;
-  signIn: (email: string, password: string) => Promise<{ error: any }>;
-  signUp: (email: string, password: string, name: string) => Promise<{ error: any }>;
+  signIn: (email: string, password: string) => Promise<{ data: { user: any; session: Session | null }; error: any }>;
+  signUp: (email: string, password: string, name: string) => Promise<{ data: { user: any; session: Session | null }; error: any }>;
   signOut: () => Promise<void>;
   updateUser: (updates: Partial<User>) => Promise<void>;
   updateNutrition: (targets: NutritionTargets) => Promise<void>;
@@ -94,6 +94,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const fetchProfile = async (authUser: any) => {
+    let profile: any = {};
+
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -103,30 +105,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (error && error.code !== 'PGRST116') { // PGRST116 is 'row not found'
         console.error('Error fetching profile:', error);
+      } else {
+        profile = data || {};
       }
-
-      // If data exists, use it. If not, fallback to auth data
-      const profile = data || {};
-
-      const fullUser: User = {
-        id: authUser.id,
-        email: authUser.email || '',
-        name: profile.name || authUser.user_metadata?.name || 'User',
-        age: profile.age,
-        weight: profile.weight,
-        height: profile.height,
-        gender: profile.gender,
-        goal: profile.goal,
-        nutrition: profile.nutrition || {},
-        lifestyle: profile.lifestyle || {},
-        timezone: profile.timezone,
-        avatarColor: profile.avatarColor,
-        security: { twoFactorEnabled: false, connectedDevices: [], loginHistory: [] }
-      };
-
-      setUser(fullUser);
     } catch (err) {
       console.error('Profile fetch failed', err);
+    }
+
+    // Always create user object, falling back to auth data if profile fetch failed
+    const fullUser: User = {
+      id: authUser.id,
+      email: authUser.email || '',
+      name: profile.name || authUser.user_metadata?.name || 'User',
+      age: profile.age,
+      weight: profile.weight,
+      height: profile.height,
+      gender: profile.gender,
+      goal: profile.goal,
+      nutrition: profile.nutrition || {},
+      lifestyle: profile.lifestyle || {},
+      timezone: profile.timezone,
+      avatarColor: profile.avatarColor,
+      security: { twoFactorEnabled: false, connectedDevices: [], loginHistory: [] }
+    };
+
+    // Only update state if data actually changed to prevent loops
+    if (JSON.stringify(fullUser) !== JSON.stringify(user)) {
+      setUser(fullUser);
     }
   };
 

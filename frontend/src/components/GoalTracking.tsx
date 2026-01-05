@@ -27,7 +27,7 @@ interface Goal {
 }
 
 const GoalTracking = () => {
-  const { user } = useAuth();
+  const { user, updateNutrition } = useAuth();
   const [goals, setGoals] = useState<Goal[]>([]);
 
   // Load goals from Backend or localStorage
@@ -123,6 +123,51 @@ const GoalTracking = () => {
     const updatedGoals = [...goals, goal];
     setGoals(updatedGoals);
     saveGoalToBackend(goal);
+
+    // --- SMART LOGIC: Update Nutrition Targets based on Weight Goal ---
+    if (goal.category === 'weight' && user?.weight && user?.height && user?.age && user?.gender) {
+      // Mifflin-St Jeor Equation
+      let bmr = 10 * user.weight + 6.25 * user.height - 5 * user.age;
+      bmr += user.gender.toLowerCase() === 'male' ? 5 : -161;
+
+      // Activity Factor (Default to Moderate 1.55 if unknown, or infer)
+      // ideally we get this from user.lifestyle.activityLevel
+      const activityLevel = user.lifestyle?.activityLevel || 'moderate';
+      const multipliers: { [key: string]: number } = {
+        'sedentary': 1.2, 'light': 1.375, 'moderate': 1.55, 'active': 1.725, 'very-active': 1.9
+      };
+      const activityMultiplier = multipliers[activityLevel] || 1.55;
+      const tdee = Math.round(bmr * activityMultiplier);
+
+      let newCalories = tdee;
+      if (goal.target < user.weight) {
+        newCalories -= 500; // Deficit for weight loss
+      } else if (goal.target > user.weight) {
+        newCalories += 500; // Surplus for gain
+      }
+
+      // Calculate Macros (Standard 30/35/35 split or similar)
+      // Protein 2g/kg (approx 0.9g/lb) is good for retaining muscle in deficit
+      let protein = Math.round(user.weight * 2);
+      if (protein > 200) protein = 200; // Cap for safety/realism unless very active
+
+      // Remaining calories for fats/carbs
+      const remainingCals = newCalories - (protein * 4);
+      const fats = Math.round((remainingCals * 0.35) / 9);
+      const carbs = Math.round((remainingCals * 0.65) / 4);
+
+      updateNutrition({
+        calories: newCalories,
+        protein: protein,
+        carbs: carbs,
+        fats: fats
+      });
+
+      toast({
+        title: "Plan Updated! 🎯",
+        description: `New Daily Target: ${newCalories} kcal to reach your goal.`,
+      });
+    }
 
     setNewGoal({
       title: '',

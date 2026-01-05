@@ -87,23 +87,36 @@ def coach_insights():
         goals_resp = supabase.table('user_goals').select("*").eq('user_id', user_id).eq('status', 'active').execute()
         goals = goals_resp.data if goals_resp.data else []
 
+        # 3. Fetch User Profile (CRITICAL for context like "Gain Weight" vs "Lose Weight")
+        try:
+            profile_resp = supabase.table('profiles').select("*").eq('id', user_id).execute()
+            profile = profile_resp.data[0] if profile_resp.data and len(profile_resp.data) > 0 else {}
+        except Exception as e:
+            print(f"Warning: Could not fetch profile for context: {e}")
+            profile = {}
+            
+        primary_goal = profile.get('goal', 'general fitness') # e.g. 'muscle-gain', 'weight-loss'
+
         api_key = os.environ.get("OPENAI_API_KEY")
         client = OpenAI(api_key=api_key)
 
-        system_prompt = """You are an elite Fitness & Nutrition Coach.
-        Analyze the user's last 30 days of data and their active goals.
+        system_prompt = f"""You are an elite Fitness & Nutrition Coach.
+        The user's PRIMARY GOAL is: "{primary_goal.upper()}".
+        Analyze the user's last 30 days of data and their active goals in this context.
+        Alert them if their calorie/macro intake is contradictory to this goal (e.g. eating too little for gain, or too much for loss).
         Your tone is motivating but strict/direct.
         
         Output JSON:
-        {
-          "analysis": "2-3 sentences summarizing their progress and identifying trends (e.g. weight plateau, inconsistent logging).",
+        {{
+          "analysis": "2-3 sentences summarizing their progress and identifying trends.",
           "status": "on_track" | "at_risk" | "off_track",
           "suggestions": ["Specific action 1", "Specific action 2", "Specific action 3"],
           "encouragement": "Short motivating punchline."
-        }
+        }}
         """
 
         user_prompt = f"""
+        User Goal: {primary_goal}
         History (Last 30 entries): {json.dumps(history)}
         Active Goals: {json.dumps(goals)}
         

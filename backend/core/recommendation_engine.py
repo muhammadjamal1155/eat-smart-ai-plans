@@ -92,8 +92,9 @@ class RecommendationEngine:
                 self.data['tags'].astype(str)
             ).str.lower()
             
-            # Drop rows with broken nutrition
-            self.data = self.data[self.data['calories'] > 0].copy()
+            # Drop rows with broken nutrition or very low calories (snacks/drinks)
+            # We want main meals for the planner, so filter out < 200 cal items
+            self.data = self.data[self.data['calories'] > 200].copy()
             self.data.reset_index(drop=True, inplace=True)
             
             self._prepare_features()

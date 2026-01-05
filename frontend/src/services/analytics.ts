@@ -54,4 +54,35 @@ export const analyticsService = {
         if (!response.ok) throw new Error('Failed to fetch summary');
         return response.json();
     },
+
+    async logMeal(userId: string, meal: { calories: number; protein: number; carbs: number; fats: number; name?: string }) {
+        const response = await fetch(`${API_URL}/analytics/log-meal`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                user_id: userId,
+                ...meal
+            }),
+        });
+        if (!response.ok) throw new Error('Failed to log meal');
+        return response.json();
+    },
+
+    async savePlan(userId: string, planData: any) {
+        const response = await fetch(`${API_URL}/plans`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_id: userId, plan_data: planData })
+        });
+        if (!response.ok) throw new Error('Failed to save plan');
+        return response.json();
+    },
+
+    async getPlan(userId: string) {
+        const response = await fetch(`${API_URL}/plans?user_id=${userId}`);
+        if (!response.ok) throw new Error('Failed to fetch plan');
+        return response.json();
+    }
 };

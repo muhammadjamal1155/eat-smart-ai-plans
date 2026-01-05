@@ -38,6 +38,56 @@ def log_analytics():
         print(f"Error logging analytics: {e}")
         return jsonify({"error": str(e)}), 500
 
+@analytics_bp.route('/analytics/log-meal', methods=['POST'])
+def log_meal():
+    supabase = get_supabase_client()
+    if not supabase:
+        return jsonify({"error": "Database not configured"}), 503
+
+    try:
+        data = request.json
+        user_id = data.get('user_id')
+        if not user_id:
+            return jsonify({"error": "User ID required"}), 400
+            
+        date = data.get('date', datetime.date.today().isoformat())
+        
+        # 1. Fetch existing entry for today
+        existing_resp = supabase.table('daily_logs').select('*').eq('user_id', user_id).eq('date', date).execute()
+        existing_data = existing_resp.data[0] if existing_resp.data else {}
+        
+        # 2. Add new values to existing (handle None as 0)
+        # Assuming existing keys might be numeric or None
+        def safe_add(key, increment):
+            current = float(existing_data.get(key) or 0)
+            added = float(increment or 0)
+            return current + added
+
+        entry = {
+            "user_id": user_id,
+            "date": date,
+            "calories": safe_add('calories', data.get('calories')),
+            "protein": safe_add('protein', data.get('protein')),
+            "carbs": safe_add('carbs', data.get('carbs')),
+            "fats": safe_add('fats', data.get('fats')),
+            "water_intake": float(existing_data.get('water_intake') or 0) # Preserve water
+        }
+        
+        if existing_data.get('id'):
+            entry['id'] = existing_data['id']
+        
+        # 3. Upsert
+        response = supabase.table('daily_logs').upsert(entry).execute()
+        
+        if response.error:
+             return jsonify({"error": str(response.error)}), 500
+
+        return jsonify({"message": "Meal logged", "data": response.data})
+
+    except Exception as e:
+        print(f"Error logging meal: {e}")
+        return jsonify({"error": str(e)}), 500
+
 @analytics_bp.route('/analytics/history', methods=['GET'])
 def get_history():
     supabase = get_supabase_client()

@@ -32,7 +32,13 @@ interface MealPlanCardProps {
   onViewDetails?: () => void;
 }
 
+import { useAuth } from '@/hooks/use-auth';
+import { analyticsService } from '@/services/analytics';
+import { Check, Plus } from 'lucide-react';
+
 const MealPlanCard = ({ mealType, meal, onMealChange, onEdit, onViewDetails }: MealPlanCardProps) => {
+  const { user } = useAuth();
+  const [isLogging, setIsLogging] = useState(false);
 
   const handleRemoveMeal = () => {
     onMealChange(null);
@@ -40,6 +46,34 @@ const MealPlanCard = ({ mealType, meal, onMealChange, onEdit, onViewDetails }: M
       title: "Meal Removed",
       description: `${meal?.name || 'Meal'} has been removed from your ${mealType} plan.`,
     });
+  };
+
+  const handleLogMeal = async (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click
+    if (!meal || !user?.id) {
+      if (!user?.id) toast({ title: "Login Required", description: "Please login to log meals.", variant: "destructive" });
+      return;
+    }
+
+    setIsLogging(true);
+    try {
+      await analyticsService.logMeal(user.id, {
+        calories: meal.calories,
+        protein: meal.protein,
+        carbs: meal.carbs,
+        fats: meal.fats,
+        name: meal.name
+      });
+      toast({
+        title: "Meal Logged!",
+        description: `${meal.name} added to your daily totals.`,
+      });
+    } catch (error) {
+      console.error(error);
+      toast({ title: "Error", description: "Failed to log meal.", variant: "destructive" });
+    } finally {
+      setIsLogging(false);
+    }
   };
 
   const handleMealSelect = (selectedMeal: Meal) => {
@@ -59,9 +93,6 @@ const MealPlanCard = ({ mealType, meal, onMealChange, onEdit, onViewDetails }: M
             <h4 className="font-semibold text-foreground capitalize mb-2 text-sm">{mealType}</h4>
             <p className="text-muted-foreground text-sm mb-4">No meal planned</p>
           </div>
-          {/* If no meal, we typically use the parent's add button, but if this card is rendered, it might have its own trigger if desired. 
-              However, the parent usually handles the "Add" state. 
-              If we want this card to be clickable to add, we can use onEdit here too. */}
           <Button variant="outline" size="sm" onClick={onEdit}>
             Add Meal
           </Button>
@@ -144,14 +175,25 @@ const MealPlanCard = ({ mealType, meal, onMealChange, onEdit, onViewDetails }: M
             </div>
           </div>
 
-          {onViewDetails && (
+          <div className="flex gap-2">
+            {onViewDetails && (
+              <Button
+                className="flex-1 bg-[#C5D86D] text-black hover:bg-[#B5C85D] h-8 text-xs font-medium"
+                onClick={onViewDetails}
+              >
+                View Recipe
+              </Button>
+            )}
             <Button
-              className="w-full mt-2 bg-[#C5D86D] text-black hover:bg-[#B5C85D] h-8 text-xs font-medium"
-              onClick={onViewDetails}
+              className="flex-1 h-8 text-xs font-medium"
+              variant="outline"
+              onClick={handleLogMeal}
+              disabled={isLogging}
             >
-              View Recipe
+              {isLogging ? <span className="animate-spin">..</span> : <Plus className="w-3 h-3 mr-1" />}
+              Log
             </Button>
-          )}
+          </div>
         </div>
       </CardContent>
     </Card>

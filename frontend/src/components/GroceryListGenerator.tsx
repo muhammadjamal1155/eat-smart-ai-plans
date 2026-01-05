@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useAuth } from '@/hooks/use-auth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -18,6 +19,7 @@ interface GroceryItem {
 }
 
 const GroceryListGenerator = () => {
+  const { user } = useAuth();
   const [groceryList, setGroceryList] = useState<GroceryItem[]>([
     { id: '1', name: 'Greek Yogurt', category: 'Dairy', quantity: '2', unit: 'containers', checked: false, source: 'meal-plan' },
     { id: '2', name: 'Mixed Berries', category: 'Produce', quantity: '1', unit: 'bag', checked: false, source: 'meal-plan' },
@@ -249,22 +251,29 @@ const GroceryListGenerator = () => {
             </Button>
             <Button
               onClick={async () => {
-                // ... (keep email logic same for now, just simplified button)
-                const userStr = localStorage.getItem('nutriplan-user');
-                let email = '';
-                if (userStr) email = JSON.parse(userStr).email;
-                else email = prompt("Enter your email address:") || '';
-                if (!email) return;
+                if (!user?.email) {
+                  toast({
+                    title: "Email Missing",
+                    description: "Please complete your profile or login.",
+                    variant: "destructive"
+                  });
+                  return;
+                }
 
+                const email = user.email;
                 const items = groceryList.map(item => `${item.name} (${item.category})`);
+
                 try {
+                  toast({ title: "Sending Email...", description: `Sending to ${email}` });
                   await fetch('http://localhost:5000/api/email-grocery-list', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email, items })
                   });
                   toast({ title: "Email Sent", description: `Sent to ${email}` });
-                } catch (e) { toast({ title: "Error", description: "Failed to send email." }); }
+                } catch (e) {
+                  toast({ title: "Error", description: "Failed to send email.", variant: "destructive" });
+                }
               }}
               size="sm"
               variant="outline"

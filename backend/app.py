@@ -1,10 +1,15 @@
 from flask import Flask
 from flask_cors import CORS
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 from routes.api import api
 from routes.admin import admin_bp
 from routes.chat import chat_bp
 from routes.insights import insights_bp
 from routes.analytics import analytics_bp
+from routes.plans import plans_bp
 
 app = Flask(__name__)
 CORS(app)
@@ -15,6 +20,7 @@ app.register_blueprint(admin_bp)
 app.register_blueprint(chat_bp)
 app.register_blueprint(insights_bp)
 app.register_blueprint(analytics_bp)
+app.register_blueprint(plans_bp)
 
 @app.route('/')
 def home():

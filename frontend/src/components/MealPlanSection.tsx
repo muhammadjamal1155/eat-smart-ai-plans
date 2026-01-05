@@ -94,8 +94,12 @@ const initialWeekMeals: Record<string, DayMeals> = daysOfWeek.reduce((acc, day) 
   return acc;
 }, {} as Record<string, DayMeals>);
 
+import { useAuth } from '@/hooks/use-auth';
+import { analyticsService } from '@/services/analytics';
+
 // ---------------- Component ----------------
 const MealPlanSection = () => {
+  const { user } = useAuth();
   const [weekMeals, setWeekMeals] = useState<Record<string, DayMeals>>(() => {
     try {
       const saved = localStorage.getItem('weekMeals');
@@ -116,10 +120,47 @@ const MealPlanSection = () => {
     setIsBrowseMealsOpen(true);
   };
 
-  // Save meals to localStorage whenever they change
+  // Load from backend on mount
+  useEffect(() => {
+    const loadPlan = async () => {
+      if (!user?.id) return;
+      try {
+        const savedPlan = await analyticsService.getPlan(user.id);
+        if (savedPlan && savedPlan.plan_data) {
+          setWeekMeals(savedPlan.plan_data);
+          // Also sync to local storage just in case
+          localStorage.setItem('weekMeals', JSON.stringify(savedPlan.plan_data));
+        }
+      } catch (e) {
+        console.error("Failed to load plan", e);
+      }
+    };
+    loadPlan();
+  }, [user?.id]);
+
+  // Save meals to localStorage AND Backend
   useEffect(() => {
     localStorage.setItem('weekMeals', JSON.stringify(weekMeals));
-  }, [weekMeals]);
+
+    // Debounce save to backend to avoid hitting API on every drag pixel (if drag updates state live)
+    // Actually dnd-kit updates on END, so it's one update per drop.
+    // But typing search query shouldn't trigger save. Search query doesn't update weekMeals.
+    // So direct save is fine.
+    const saveToBackend = async () => {
+      if (user?.id) {
+        try {
+          await analyticsService.savePlan(user.id, weekMeals);
+        } catch (e) {
+          console.error("Failed to save plan", e);
+        }
+      }
+    };
+
+    // We can debounce with a simple timeout if needed, but for now simple invocation
+    const timeout = setTimeout(saveToBackend, 1000);
+    return () => clearTimeout(timeout);
+
+  }, [weekMeals, user?.id]);
 
   const [searchQuery, setSearchQuery] = useState('');
 

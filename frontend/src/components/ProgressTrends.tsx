@@ -83,12 +83,29 @@ const ProgressTrends = () => {
 
     await new Promise(resolve => setTimeout(resolve, 400));
 
-    const savedWeekMeals = localStorage.getItem('weekMeals');
+    // Load Week Meals from Backend
+    let weekMeals: Record<string, DayMeals> = {};
     const savedProfile = localStorage.getItem('userProfile');
-    const weekMeals: Record<string, DayMeals> = savedWeekMeals ? JSON.parse(savedWeekMeals) : {};
-    const userProfile = savedProfile ? JSON.parse(savedProfile) : null;
+    const userProfile = user || (savedProfile ? JSON.parse(savedProfile) : null);
 
-    const targetCalories = userProfile?.target_calories || 2000;
+    // Default to local storage
+    const savedWeekMeals = localStorage.getItem('weekMeals');
+    if (savedWeekMeals) {
+      try { weekMeals = JSON.parse(savedWeekMeals); } catch (e) { }
+    }
+
+    if (user?.id) {
+      try {
+        const dbResponse = await analyticsService.getPlan(user.id);
+        if (dbResponse && dbResponse.plan_data) {
+          weekMeals = dbResponse.plan_data;
+        }
+      } catch (error) {
+        console.warn("Failed to load cloud plan for trends, using local", error);
+      }
+    }
+
+    const targetCalories = userProfile?.nutrition?.calories || 2000;
 
     // Load Weight Entries from Backend
     let weightEntries: WeightEntry[] = [];
@@ -96,11 +113,13 @@ const ProgressTrends = () => {
       try {
         const history = await analyticsService.getHistory(user.id, 90);
         // Map backend history to WeightEntry format
+        // Map backend history to WeightEntry format
+        // Don't hardcode bodyFat to 0, use undefined if missing so chart ignores it
         weightEntries = history.map((h: any) => ({
           date: h.date,
           weight: h.weight,
           target: 70, // Mock target or fetch from profile
-          bodyFat: 0
+          bodyFat: h.bodyFat // Pass undefined if not present
         })).filter((w: any) => w.weight); // Only include entries with weight
       } catch (error) {
         console.error("Failed to load history", error);
@@ -216,8 +235,7 @@ const ProgressTrends = () => {
         date: newDate,
         weight: parseFloat(newWeight),
         target: 70, // Mock target, ideally from profile
-        bodyFat: 0 // Optional
-      };
+      } as WeightEntry;
 
       // Check if entry for date exists and update it, else add new
       const existingIndex = weightEntries.findIndex(e => e.date === newDate);
@@ -330,12 +348,13 @@ const ProgressTrends = () => {
                       tickLine={false}
                       axisLine={false}
                       padding={{ left: 16, right: 16 }}
+                      tickFormatter={(value) => new Date(value).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                     />
-                    <YAxis />
+                    <YAxis domain={['auto', 'auto']} />
                     <Tooltip content={<CustomTooltip />} />
                     <Legend />
-                    <Line type="monotone" dataKey="weight" stroke="#10B981" />
-                    <Line type="monotone" dataKey="target" stroke="#3B82F6" />
+                    <Line type="monotone" dataKey="weight" stroke="#10B981" animationDuration={500} dot={{ r: 4 }} activeDot={{ r: 6 }} />
+                    <Line type="monotone" dataKey="target" stroke="#3B82F6" strokeDasharray="5 5" />
                     <Line type="monotone" dataKey="bodyFat" stroke="#F59E0B" />
                   </LineChart>
                 </ResponsiveContainer>

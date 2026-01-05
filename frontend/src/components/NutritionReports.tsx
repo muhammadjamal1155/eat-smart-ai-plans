@@ -35,6 +35,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { analyticsService } from "@/services/analytics";
+import { useAuth } from "@/contexts/AuthContext";
 
 // ---------- Types ----------
 interface Meal {
@@ -77,32 +79,47 @@ const NutritionReports = () => {
   const reportRef = useRef<HTMLDivElement>(null);
 
   // ---------- Fetch Report Data ----------
+  const { user } = useAuth();
+
+  // ---------- Fetch Report Data ----------
   useEffect(() => {
     const fetchData = async () => {
+      if (!user) return;
       setIsLoading(true);
       setReportData(null);
 
       try {
-        await new Promise((resolve) => setTimeout(resolve, 800)); // simulate API delay
+        // Fetch real plan data from backend
+        let weekMeals: Record<string, DayMeals> = {};
 
-        const savedWeekMeals = localStorage.getItem("weekMeals");
-        const savedProfile = localStorage.getItem("userProfile");
+        // Try to load from Local Storage first as a fallback/default
+        const localMeals = localStorage.getItem("weekMeals");
+        if (localMeals) {
+          try {
+            weekMeals = JSON.parse(localMeals);
+          } catch (e) { console.error("Error parsing local meals", e); }
+        }
 
-        const weekMeals: Record<string, DayMeals> = savedWeekMeals
-          ? JSON.parse(savedWeekMeals)
-          : {};
+        try {
+          const dbResponse = await analyticsService.getPlan(user.id);
+          // If backend has data, overwrite the local fallback
+          if (dbResponse && dbResponse.plan_data) {
+            weekMeals = dbResponse.plan_data;
+          }
+        } catch (err) {
+          console.warn("Cloud plan fetch failed, using local data if available", err);
+        }
 
-        const userProfile = savedProfile ? JSON.parse(savedProfile) : null;
-
-        // Default targets if no profile
+        // Default targets from profile using optional chaining on the user object
         const targets = {
-          calories: userProfile?.target_calories || 2000,
-          protein: userProfile?.target_protein || 150,
-          carbs: userProfile?.target_carbs || 250,
-          fats: userProfile?.target_fats || 70,
-          water: userProfile?.waterIntake || 2.5,
+          calories: user?.nutrition?.calories || 2000,
+          protein: user?.nutrition?.protein || 150,
+          carbs: user?.nutrition?.carbs || 250,
+          fats: user?.nutrition?.fats || 70,
+          water: user?.lifestyle?.hydrationGoal || 2.5,
           workouts: 5
         };
+
 
         // Build weekly breakdown
         const dailyBreakdown = daysOfWeek.map((day) => {
@@ -222,7 +239,7 @@ const NutritionReports = () => {
     };
 
     fetchData();
-  }, [selectedPeriod]);
+  }, [selectedPeriod, user]);
 
   // ---------- PDF Download ----------
   const handleDownloadReport = () => {

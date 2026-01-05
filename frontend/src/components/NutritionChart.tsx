@@ -46,7 +46,7 @@ const NutritionChart = ({ type, data, title }: NutritionChartProps) => {
         <LineChart data={data}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="day" />
-          <YAxis />
+          <YAxis domain={['auto', 'auto']} />
           <Tooltip content={<CustomTooltip />} />
           <Legend />
           {visibleDataKeys.map(key => (
@@ -67,7 +67,7 @@ const NutritionChart = ({ type, data, title }: NutritionChartProps) => {
       <BarChart data={data}>
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="nutrient" />
-        <YAxis />
+        <YAxis domain={['auto', 'auto']} />
         <Tooltip />
         <Legend />
         {visibleDataKeys.map(key => (

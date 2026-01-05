@@ -43,21 +43,22 @@ const getIcon = (type: Achievement['icon']) => {
 
 const AchievementCard = memo(({ achievement = defaultAchievement }: AchievementCardProps) => {
   return (
-    <Card className="shadow-soft border border-border bg-gradient-to-br from-accent to-accent/50">
-      <CardContent className="p-6 text-center space-y-3">
-        <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center mx-auto">
+    <Card className="shadow-soft border border-border bg-gradient-to-br from-accent/20 to-accent/5">
+      <CardContent className="p-4 text-center space-y-2">
+        <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center mx-auto text-primary">
           {getIcon(achievement.icon)}
         </div>
-        <h4 className="font-semibold text-card-foreground">{achievement.title}</h4>
-        <p className="text-sm text-muted-foreground">
+        <h4 className="font-semibold text-card-foreground text-sm">{achievement.title}</h4>
+        <p className="text-xs text-muted-foreground line-clamp-2">
           {achievement.message}
         </p>
         {achievement.action && (
-          <Button 
-            className="w-full btn-primary mt-3 interactive" 
+          <Button
+            className="w-full h-8 text-xs mt-2"
+            variant="outline"
             onClick={achievement.action.onClick}
           >
-            <Calendar className="w-4 h-4 mr-2" />
+            <Calendar className="w-3 h-3 mr-1.5" />
             {achievement.action.label}
           </Button>
         )}

@@ -1,5 +1,6 @@
 
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -122,9 +123,9 @@ const LoginForm = ({ onSwitchToRegister }: { onSwitchToRegister: () => void }) =
             />
             {passwordError && <p className="text-sm text-destructive">{passwordError}</p>}
             <div className="text-right">
-              <a href="/reset-password" className="text-sm text-primary hover:underline">
+              <Link to="/reset-password" className="text-sm text-primary hover:underline">
                 Forgot password?
-              </a>
+              </Link>
             </div>
           </div>
 

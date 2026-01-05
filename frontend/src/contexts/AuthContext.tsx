@@ -39,6 +39,7 @@ export interface User {
   age?: number;
   weight?: number;
   height?: number;
+  gender?: string;
   goal?: string;
   nutrition?: NutritionTargets;
   lifestyle?: LifestylePreferences;
@@ -58,7 +59,9 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   updateUser: (updates: Partial<User>) => Promise<void>;
   updateNutrition: (targets: NutritionTargets) => Promise<void>;
+  login: (userData: User) => void;
   isAuthenticated: boolean;
+  resetPassword: (email: string) => Promise<{ error: any }>;
 }
 
 const STORAGE_KEY = 'nutriguide_user';
@@ -112,9 +115,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         age: profile.age,
         weight: profile.weight,
         height: profile.height,
+        gender: profile.gender,
         goal: profile.goal,
         nutrition: profile.nutrition || {},
         lifestyle: profile.lifestyle || {},
+        timezone: profile.timezone,
+        avatarColor: profile.avatarColor,
         security: { twoFactorEnabled: false, connectedDevices: [], loginHistory: [] }
       };
 
@@ -137,6 +143,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           name,
         },
       },
+    });
+  };
+
+  const resetPassword = async (email: string) => {
+    return await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/update-password`,
     });
   };
 
@@ -165,8 +177,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (updates.age) dbUpdates.age = updates.age;
       if (updates.weight) dbUpdates.weight = updates.weight;
       if (updates.height) dbUpdates.height = updates.height;
+      if (updates.gender) dbUpdates.gender = updates.gender;
       if (updates.goal) dbUpdates.goal = updates.goal;
       if (updates.lifestyle) dbUpdates.lifestyle = updates.lifestyle;
+      if (updates.timezone) dbUpdates.timezone = updates.timezone;
+      if (updates.avatarColor) dbUpdates.avatar_color = updates.avatarColor; // Assuming avatarColor maps to avatar_color in DB
       // Note: Nutrition is handled separately or can be added here if passed
 
       if (Object.keys(dbUpdates).length > 0) {
@@ -200,6 +215,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const login = (userData: User) => {
+    setUser(userData);
+  };
+
   const value = useMemo(
     () => ({
       user,
@@ -208,6 +227,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       signOut,
       updateUser,
       updateNutrition,
+      login,
+      resetPassword,
       isAuthenticated: Boolean(user),
     }),
     [user],

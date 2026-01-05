@@ -10,6 +10,7 @@ import random
 import requests
 import json
 from dotenv import load_dotenv
+from services.ai_service import AIService
 
 # Load environment variables from root .env
 dotenv_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env')
@@ -178,6 +179,16 @@ class RecommendationEngine:
         if "error" not in result:
             result["model_used"] = best_model
             result["model_confidence"] = "High"
+            
+            # --- AI ENHANCEMENT ---
+            try:
+                ai_meta = AIService.get_instance().generate_plan_metadata(user_data)
+                result.update(ai_meta)
+            except Exception as e:
+                print(f"AI Service failed: {e}")
+                # Fallback handled in AIService, but just in case
+                result["ai_insight"] = "Your plan is ready!"
+                result["strategy_tip"] = "Stay consistent."
             
         return result
 

@@ -10,38 +10,35 @@ import { toast } from '@/hooks/use-toast';
 import { Mail, ArrowLeft } from 'lucide-react';
 import { usePageTitle } from '@/hooks/use-page-title';
 
+import { useAuth } from '@/hooks/use-auth';
+
 const ResetPassword = () => {
     usePageTitle('Reset Password');
     const [email, setEmail] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
+    const { resetPassword } = useAuth();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
 
         try {
-            const response = await fetch('http://localhost:5000/api/reset-password', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email }),
-            });
+            const { error } = await resetPassword(email);
 
-            if (response.ok) {
+            if (!error) {
                 setIsSubmitted(true);
                 toast({
                     title: "Reset link sent",
-                    description: "Check your email (and server console) for instructions.",
+                    description: "Check your email for instructions to reset your password.",
                 });
             } else {
-                throw new Error('Failed to send reset link');
+                throw error;
             }
-        } catch (error) {
+        } catch (error: any) {
             toast({
                 title: "Error",
-                description: "Something went wrong. Please try again.",
+                description: error.message || "Failed to send reset link. Please try again.",
                 variant: "destructive"
             });
         } finally {

@@ -8,53 +8,53 @@
 @layer base {
   :root {
     /* Backgrounds & Surfaces */
-    --background: 67 72% 90%;
-    --foreground: 82 36% 20%;
+    --background: 60 5% 96%;    /* Off-white/Cream */
+    --foreground: 82 36% 20%;   /* Dark Green/Brown Text */
 
-    --card: 69 61% 77%;
+    --card: 0 0% 100%;          /* Pure White */
     --card-foreground: 82 36% 20%;
 
-    --popover: 69 61% 77%;
+    --popover: 0 0% 100%;
     --popover-foreground: 82 36% 20%;
 
-    /* Primary Color Palette */
+    /* Primary Color Palette (Keep Brand Green) */
     --primary: 68 67% 36%;
-    --primary-foreground: 67 72% 94%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 67 56% 61%;
-    --secondary-foreground: 82 36% 18%;
+    --secondary: 60 5% 90%;     /* Light Gray */
+    --secondary-foreground: 82 36% 20%;
 
-    --muted: 69 61% 77%;
-    --muted-foreground: 82 20% 32%;
+    --muted: 60 5% 90%;
+    --muted-foreground: 82 10% 45%;
 
-    --accent: 67 56% 61%;
-    --accent-foreground: 82 36% 18%;
+    --accent: 67 56% 92%;       /* Very light green tint */
+    --accent-foreground: 68 67% 30%;
 
     /* State Colors */
-    --destructive: 356 72% 48%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
 
-    --success: 68 67% 36%;
-    --success-foreground: 67 72% 94%;
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
 
-    --warning: 55 74% 50%;
-    --warning-foreground: 82 36% 18%;
+    --warning: 48 96% 89%;
+    --warning-foreground: 38 92% 50%;
 
     /* Form Elements */
-    --border: 67 45% 75%;
-    --input: 67 45% 75%;
+    --border: 60 5% 90%;
+    --input: 60 5% 90%;
     --ring: 68 67% 36%;
 
-    --radius: 0.75rem;
+    --radius: 1rem;
 
     /* Sidebar */
-    --sidebar-background: 69 61% 77%;
+    --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 82 36% 20%;
     --sidebar-primary: 68 67% 36%;
-    --sidebar-primary-foreground: 67 72% 94%;
-    --sidebar-accent: 67 56% 61%;
-    --sidebar-accent-foreground: 82 36% 18%;
-    --sidebar-border: 67 45% 75%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 60 5% 90%;
+    --sidebar-accent-foreground: 82 36% 20%;
+    --sidebar-border: 60 5% 90%;
     --sidebar-ring: 68 67% 36%;
 
     /* Theme transition */

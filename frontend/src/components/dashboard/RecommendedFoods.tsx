@@ -63,9 +63,9 @@ const FoodCard = memo(({ food }: { food: Food }) => {
         <span>{food.calories} cal</span>
         <span>{food.protein}g protein</span>
       </div>
-      <div className="flex flex-wrap gap-1">
+      <div className="flex flex-wrap gap-2 mt-auto">
         {food.benefits.map((benefit) => (
-          <Badge key={benefit} variant="secondary" className="text-xs">
+          <Badge key={benefit} variant="secondary" className="text-[10px] px-2 py-0.5 whitespace-nowrap bg-accent/30 text-accent-foreground border-accent">
             {benefit}
           </Badge>
         ))}

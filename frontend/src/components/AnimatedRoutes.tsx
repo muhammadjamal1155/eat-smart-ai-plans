@@ -51,7 +51,7 @@ const AnimatedRoutes = () => {
                 <Route path="/about" element={<PageTransition><About /></PageTransition>} />
                 <Route path="/contact" element={<PageTransition><Contact /></PageTransition>} />
 
-                <Route path="/nutrition-form" element={<ProtectedRoute><PageTransition><NutritionForm /></PageTransition></ProtectedRoute>} />
+                <Route path="/nutrition-form" element={<PageTransition><NutritionForm /></PageTransition>} />
                 <Route path="/reminders" element={<ProtectedRoute><PageTransition><Reminders /></PageTransition></ProtectedRoute>} />
 
                 {/* Admin Routes */}

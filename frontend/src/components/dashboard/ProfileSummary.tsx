@@ -2,7 +2,7 @@ import React, { memo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { ArrowDown, ArrowUp, Droplet, Flame, User } from 'lucide-react';
+import { ArrowDown, ArrowUp, Droplet, Flame, User, Mail } from 'lucide-react';
 import type { LifestylePreferences, NutritionTargets } from '@/contexts/AuthContext';
 
 interface UserProfile {
@@ -33,14 +33,19 @@ const ProfileSummary = memo(({ user }: ProfileSummaryProps) => {
 
   return (
     <Card className="border border-border/80 bg-card/90 shadow-lg shadow-primary/5">
-      <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <CardTitle className="flex items-center gap-2 text-card-foreground">
-          <User className="h-5 w-5 text-primary" />
-          Profile Summary
-        </CardTitle>
-        <div className="flex flex-wrap items-center gap-2 text-xs">
-          <Badge variant="outline">{user?.email || 'member@nutriguide.ai'}</Badge>
-          <Badge variant="secondary">{formatGoal(user?.goal)}</Badge>
+      <CardHeader className="pb-2">
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2 text-card-foreground text-base sm:text-lg">
+            <User className="h-5 w-5 text-primary" />
+            Profile Summary
+          </CardTitle>
+          <Badge variant="secondary" className="whitespace-nowrap">{formatGoal(user?.goal)}</Badge>
+        </div>
+        <div className="flex items-center gap-2 pt-1">
+          <Mail className="h-5 w-5 text-primary" />
+          <span className="text-xs sm:text-sm text-foreground font-bold tracking-tight">
+            {user?.email || 'member@nutriguide.ai'}
+          </span>
         </div>
       </CardHeader>
       <CardContent className="space-y-5">

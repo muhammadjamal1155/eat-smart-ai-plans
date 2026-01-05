@@ -84,6 +84,8 @@ const Navigation = () => {
     return location.pathname === path;
   };
 
+  const isAuthPage = ['/login', '/register', '/nutrition-form'].includes(location.pathname);
+
   return (
     <nav className={`bg-background/80 backdrop-blur-md shadow-soft border-b border-border fixed top-0 w-full z-50 transition-all duration-300 ${isVisible ? 'translate-y-0' : '-translate-y-full'
       }`}>
@@ -96,6 +98,8 @@ const Navigation = () => {
                 <span className="ml-2 text-xl font-bold text-foreground">NutriPlan</span>
               </Link>
             </div>
+
+            {/* Desktop Navigation */}
             <div className="hidden lg:ml-6 lg:flex lg:space-x-8">
               {user ? (
                 <>
@@ -137,57 +141,64 @@ const Navigation = () => {
                   </Link>
                 </>
               ) : (
+                !isAuthPage && (
+                  <>
+                    <Link
+                      to="/#features"
+                      onClick={() => handleHashScroll('#features')}
+                      className="text-foreground hover:text-primary px-3 py-2 text-sm font-medium transition-colors"
+                    >
+                      Features
+                    </Link>
+                    <Link
+                      to="/#meal-plans"
+                      onClick={() => handleHashScroll('#meal-plans')}
+                      className="text-foreground hover:text-primary px-3 py-2 text-sm font-medium transition-colors"
+                    >
+                      Meal Plans
+                    </Link>
+                    <Link
+                      to="/#insights"
+                      onClick={() => handleHashScroll('#insights')}
+                      className="text-foreground hover:text-primary px-3 py-2 text-sm font-medium transition-colors"
+                    >
+                      AI Insights
+                    </Link>
+                    <Link
+                      to="/help-center"
+                      className={`px-3 py-2 text-sm font-medium transition-colors ${isActivePath('/help-center')
+                        ? 'text-primary border-b-2 border-primary'
+                        : 'text-foreground hover:text-primary'
+                        }`}
+                    >
+                      Help Center
+                    </Link>
+                  </>
+                )
+              )}
+
+              {!isAuthPage && (
                 <>
                   <Link
-                    to="/#features"
-                    onClick={() => handleHashScroll('#features')}
-                    className="text-foreground hover:text-primary px-3 py-2 text-sm font-medium transition-colors"
-                  >
-                    Features
-                  </Link>
-                  <Link
-                    to="/#meal-plans"
-                    onClick={() => handleHashScroll('#meal-plans')}
-                    className="text-foreground hover:text-primary px-3 py-2 text-sm font-medium transition-colors"
-                  >
-                    Meal Plans
-                  </Link>
-                  <Link
-                    to="/#insights"
-                    onClick={() => handleHashScroll('#insights')}
-                    className="text-foreground hover:text-primary px-3 py-2 text-sm font-medium transition-colors"
-                  >
-                    AI Insights
-                  </Link>
-                  <Link
-                    to="/help-center"
-                    className={`px-3 py-2 text-sm font-medium transition-colors ${isActivePath('/help-center')
+                    to="/about"
+                    className={`px-3 py-2 text-sm font-medium transition-colors ${isActivePath('/about')
                       ? 'text-primary border-b-2 border-primary'
                       : 'text-foreground hover:text-primary'
                       }`}
                   >
-                    Help Center
+                    About
+                  </Link>
+                  <Link
+                    to="/contact"
+                    className={`px-3 py-2 text-sm font-medium transition-colors ${isActivePath('/contact')
+                      ? 'text-primary border-b-2 border-primary'
+                      : 'text-foreground hover:text-primary'
+                      }`}
+                  >
+                    Contact
                   </Link>
                 </>
               )}
-              <Link
-                to="/about"
-                className={`px-3 py-2 text-sm font-medium transition-colors ${isActivePath('/about')
-                  ? 'text-primary border-b-2 border-primary'
-                  : 'text-foreground hover:text-primary'
-                  }`}
-              >
-                About
-              </Link>
-              <Link
-                to="/contact"
-                className={`px-3 py-2 text-sm font-medium transition-colors ${isActivePath('/contact')
-                  ? 'text-primary border-b-2 border-primary'
-                  : 'text-foreground hover:text-primary'
-                  }`}
-              >
-                Contact
-              </Link>
             </div>
           </div>
 
@@ -246,14 +257,16 @@ const Navigation = () => {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <>
-                <Link to="/login" className="text-foreground hover:text-primary px-3 py-2 text-sm font-medium interactive">
-                  Login
-                </Link>
-                <Link to="/register" className="btn-primary px-4 py-2 text-sm font-medium rounded-md">
-                  Register
-                </Link>
-              </>
+              !isAuthPage && (
+                <>
+                  <Link to="/login" className="text-foreground hover:text-primary px-3 py-2 text-sm font-medium interactive">
+                    Login
+                  </Link>
+                  <Link to="/register" className="btn-primary px-4 py-2 text-sm font-medium rounded-md">
+                    Register
+                  </Link>
+                </>
+              )
             )}
           </div>
 
@@ -343,69 +356,76 @@ const Navigation = () => {
                 </Link>
               </>
             ) : (
+              !isAuthPage && (
+                <>
+                  <Link
+                    to="/#features"
+                    onClick={() => {
+                      handleHashScroll('#features');
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="block px-4 py-4 rounded-lg text-base font-medium transition-all duration-200 touch-manipulation text-foreground hover:text-primary hover:bg-accent active:scale-95"
+                  >
+                    Features
+                  </Link>
+                  <Link
+                    to="/#meal-plans"
+                    onClick={() => {
+                      handleHashScroll('#meal-plans');
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="block px-4 py-4 rounded-lg text-base font-medium transition-all duration-200 touch-manipulation text-foreground hover:text-primary hover:bg-accent active:scale-95"
+                  >
+                    Meal Plans
+                  </Link>
+                  <Link
+                    to="/#insights"
+                    onClick={() => {
+                      handleHashScroll('#insights');
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="block px-4 py-4 rounded-lg text-base font-medium transition-all duration-200 touch-manipulation text-foreground hover:text-primary hover:bg-accent active:scale-95"
+                  >
+                    AI Insights
+                  </Link>
+                  <Link
+                    to="/help-center"
+                    className={`block px-4 py-4 rounded-lg text-base font-medium transition-all duration-200 touch-manipulation ${isActivePath('/help-center')
+                      ? 'text-primary bg-primary/10 shadow-sm'
+                      : 'text-foreground hover:text-primary hover:bg-accent active:scale-95'
+                      }`}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Help Center
+                  </Link>
+                </>
+              )
+            )}
+            {!isAuthPage && (
               <>
                 <Link
-                  to="/#features"
-                  onClick={() => {
-                    handleHashScroll('#features');
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className="block px-4 py-4 rounded-lg text-base font-medium transition-all duration-200 touch-manipulation text-foreground hover:text-primary hover:bg-accent active:scale-95"
+                  to="/about"
+                  className={`block px-4 py-4 rounded-lg text-base font-medium transition-all duration-200 touch-manipulation ${isActivePath('/about')
+                    ? 'text-primary bg-primary/10 shadow-sm'
+                    : 'text-foreground hover:text-primary hover:bg-accent active:scale-95'
+                    }`}
+                  onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  Features
+                  About
                 </Link>
                 <Link
-                  to="/#meal-plans"
-                  onClick={() => {
-                    handleHashScroll('#meal-plans');
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className="block px-4 py-4 rounded-lg text-base font-medium transition-all duration-200 touch-manipulation text-foreground hover:text-primary hover:bg-accent active:scale-95"
+                  to="/contact"
+                  className={`block px-4 py-4 rounded-lg text-base font-medium transition-all duration-200 touch-manipulation ${isActivePath('/contact')
+                    ? 'text-primary bg-primary/10 shadow-sm'
+                    : 'text-foreground hover:text-primary hover:bg-accent active:scale-95'
+                    }`}
+                  onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  Meal Plans
-                </Link>
-                <Link
-                  to="/#insights"
-                  onClick={() => {
-                    handleHashScroll('#insights');
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className="block px-4 py-4 rounded-lg text-base font-medium transition-all duration-200 touch-manipulation text-foreground hover:text-primary hover:bg-accent active:scale-95"
-                >
-                  AI Insights
+                  Contact
                 </Link>
               </>
             )}
-            <Link
-              to="/about"
-              className={`block px-4 py-4 rounded-lg text-base font-medium transition-all duration-200 touch-manipulation ${isActivePath('/about')
-                ? 'text-primary bg-primary/10 shadow-sm'
-                : 'text-foreground hover:text-primary hover:bg-accent active:scale-95'
-                }`}
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              About
-            </Link>
-            <Link
-              to="/contact"
-              className={`block px-4 py-4 rounded-lg text-base font-medium transition-all duration-200 touch-manipulation ${isActivePath('/contact')
-                ? 'text-primary bg-primary/10 shadow-sm'
-                : 'text-foreground hover:text-primary hover:bg-accent active:scale-95'
-                }`}
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Contact
-            </Link>
-            <Link
-              to="/help-center"
-              className={`block px-4 py-4 rounded-lg text-base font-medium transition-all duration-200 touch-manipulation ${isActivePath('/help-center')
-                ? 'text-primary bg-primary/10 shadow-sm'
-                : 'text-foreground hover:text-primary hover:bg-accent active:scale-95'
-                }`}
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Help Center
-            </Link>          </div>
+          </div>
           {user ? (
             <div className="pt-4 pb-3 border-t border-border">
               <div className="mt-3 px-2 space-y-1">
@@ -442,24 +462,26 @@ const Navigation = () => {
               </div>
             </div>
           ) : (
-            <div className="pt-4 pb-3 border-t border-border">
-              <div className="mt-3 px-2 space-y-1">
-                <Link
-                  to="/login"
-                  className="block px-4 py-4 rounded-lg text-base font-medium transition-all duration-200 touch-manipulation text-foreground hover:text-primary hover:bg-accent active:scale-95"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Login
-                </Link>
-                <Link
-                  to="/register"
-                  className="block px-4 py-4 rounded-lg text-base font-medium transition-all duration-200 touch-manipulation btn-primary"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Register
-                </Link>
+            !isAuthPage && (
+              <div className="pt-4 pb-3 border-t border-border">
+                <div className="mt-3 px-2 space-y-1">
+                  <Link
+                    to="/login"
+                    className="block px-4 py-4 rounded-lg text-base font-medium transition-all duration-200 touch-manipulation text-foreground hover:text-primary hover:bg-accent active:scale-95"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    to="/register"
+                    className="block px-4 py-4 rounded-lg text-base font-medium transition-all duration-200 touch-manipulation btn-primary"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Register
+                  </Link>
+                </div>
               </div>
-            </div>
+            )
           )}
         </div>
       </div>

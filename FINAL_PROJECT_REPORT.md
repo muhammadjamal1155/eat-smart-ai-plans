@@ -126,6 +126,7 @@ Finally, I would like to thank my family and friends for their encouragement and
 *   Figure 6.2: System Latency Analysis under Load
 *   Figure 6.3: Screenshot of Main User Dashboard
 *   Figure 6.4: Screenshot of Generated Meal Plan Card
+*   Figure 6.5: Screenshot of Analytics Page
 
 ---
 
@@ -313,13 +314,31 @@ The system is designed for self-service. The intuitive "Wizard-style" form guide
 The system employs a **Micro-service Architecture** (albeit a monorepo structure for development ease).
 
 1.  **The Client Layer (Frontend):** A React Single-Page Application (SPA) running in the user's browser. It handles all presentation logic, state management, and interaction.
+### 3.4.1 High-Level Architecture Diagram
+The system employs a **Micro-service Architecture** (albeit a monorepo structure for development ease).
+
+1.  **The Client Layer (Frontend):** A React Single-Page Application (SPA) running in the user's browser. It handles all presentation logic, state management, and interaction.
 2.  **The API Layer (Backend):** A Python Flask server acting as the gateway. It validates requests, handles CORS, and routes data to the core services.
 3.  **The Core Services Layer:**
     *   `RecommendationEngine`: The AI brain containing the loaded model and dataset.
     *   `AnalyticsService`: A module for computing statistical summaries.
 4.  **The Data Layer:** A read-only CSV file (`small_data.csv`) loaded into a Pandas DataFrame structure used for high-speed vector queries.
 
-![High Level Software Architecture Diagram](report_images/architecture_diagram.png)
+```mermaid
+graph TD
+    Client[React Frontend] <-->|HTTP/JSON| API[Flask API Layer]
+    subgraph Backend Services
+    API -->|Internal Call| Engine[Recommendation Engine]
+    API -->|Internal Call| Analytics[Analytics Service]
+    end
+    subgraph Data Persistence
+    Engine -.->|Read| CSV[(CSV Dataset)]
+    Engine -.->|Read/Write| Pandas[In-Memory DataFrame]
+    end
+    style Client fill:#f9f,stroke:#333,stroke-width:2px
+    style API fill:#bbf,stroke:#333,stroke-width:2px
+    style Engine fill:#bfb,stroke:#333,stroke-width:2px
+```
 *(Figure 3.1: High Level Software Architecture Diagram)*
 
 ### 3.4.2 Sequence Diagram: The Recommendation Flow
@@ -336,7 +355,17 @@ The system employs a **Micro-service Architecture** (albeit a monorepo structure
 ### 3.4.3 Application User Flow
 The following diagram illustrates the user journey through the application, from initial login to the generation of the actionable grocery list.
 
-![User Flow Chart](report_images/user_flow_chart.png)
+```mermaid
+graph LR
+    A[User Login] --> B[Nutrition Form]
+    B -->|Input: Age, Weight, Goal| C[AI Recommendation Engine]
+    C -->|Output: JSON Plan| D[Dashboard Display]
+    D --> E[Interactive Meal Plans]
+    E --> F[Generate Grocery List]
+    style A fill:#f9f,stroke:#333,stroke-width:2px
+    style C fill:#bbf,stroke:#333,stroke-width:2px
+    style F fill:#bfb,stroke:#333,stroke-width:2px
+```
 *(Figure 3.2: User Flow Diagram showing the critical path)*
 
 ## 3.5 Data Modeling
@@ -363,6 +392,41 @@ Internally, recipes are stored as objects (represented as Rows in DataFrame) wit
 *   `nutrition_vector`: A normalized array `[cal, prot, carb, fat]`.
 *   `tfidf_vector`: A sparse matrix representation of the recipe's text tags and ingredients.
 *   `metadata`: JSON object containing `steps`, `image_url` (inferred), and `prep_time`.
+
+### 3.5.3 Entity Relationship Diagram (ERD)
+The following diagram represents the logical relationships between the core entities in the system.
+
+```mermaid
+erDiagram
+    USER {
+        int id
+        float weight
+        float height
+        int age
+        string gender
+        string goal
+        string[] allergies
+    }
+    RECIPE {
+        int id
+        string name
+        float[] nutrition_vector
+        object metadata
+        string[] ingredients
+    }
+    MEAL_PLAN {
+        date start_date
+        USER owner
+    }
+    DAILY_PLAN {
+        date day
+        MEAL_PLAN plan_id
+    }
+    USER ||--o{ MEAL_PLAN : generates
+    MEAL_PLAN ||--|{ DAILY_PLAN : contains
+    DAILY_PLAN ||--|{ RECIPE : includes
+```
+*(Figure 3.3: Entity Relationship Diagram of the Data Model)*
 
 ## 3.6 User Interface (UI) Design
 
@@ -557,11 +621,14 @@ The system was load-tested to ensure it could handle concurrent users. As shown 
 
 The user interface successfully renders the data. The following screenshots demonstrate the functional application.
 
-![User Dashboard Screenshot](report_images/dashboard.png)
+![User Dashboard Screenshot](report_images/real_dashboard.png)
 *(Figure 6.3: Screenshot of Main User Dashboard showing weekly summary)*
 
-![Meal Plan Grid Screenshot](report_images/meal_plan_grid.png)
+![Meal Plan Grid Screenshot](report_images/real_meal_plan.png)
 *(Figure 6.4: Screenshot of Generated Meal Plan Card with Nutritional Breakdown)*
+
+![Analytics Page Screenshot](report_images/real_analytics.png)
+*(Figure 6.5: Screenshot of Analytics Page showing performance metrics)*
 
 ## 6.4 Discussion of Findings
 

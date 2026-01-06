@@ -228,24 +228,116 @@ const MealPlanSection = () => {
   const [isDownloading, setIsDownloading] = useState(false);
   const mealPlanRef = useRef<HTMLDivElement>(null);
 
-  const handleDownloadPlan = () => {
+  const handleDownloadPlan = async () => {
     if (!mealPlanRef.current) return;
 
     setIsDownloading(true);
     toast({
-      title: "Download Started",
-      description: "Your meal plan PDF is being generated...",
+      title: "Generating PDF...",
+      description: "Preparing your full meal plan for download.",
     });
 
-    html2canvas(mealPlanRef.current, { scale: 2 }).then((canvas) => {
+    try {
+      // 1. Create a deep clone of the element
+      const originalElement = mealPlanRef.current;
+      const clone = originalElement.cloneNode(true) as HTMLElement;
+
+      // 2. Style the clone to be fully expanded and off-screen
+      clone.style.position = 'absolute';
+      clone.style.left = '-9999px';
+      clone.style.top = '0';
+      clone.style.width = '1200px'; // Fixed width for consistent layout
+      clone.style.height = 'auto';
+      clone.style.overflow = 'visible'; // Ensure no scrollbars
+      clone.style.zIndex = '-1';
+      clone.style.backgroundColor = '#f0fdf4'; // Light green background for consistency
+
+      // Remove any max-height or scroll constraints
+      clone.classList.remove('overflow-x-hidden');
+
+      // --- CLEANUP UI FOR PDF ---
+      const toolbar = clone.querySelector('input')?.closest('.flex.flex-wrap.gap-2.mb-4');
+      if (toolbar) toolbar.remove();
+
+      const addButtons = clone.querySelectorAll('button');
+      addButtons.forEach(btn => {
+        if (btn.textContent?.includes('Add') || btn.querySelector('.lucide-plus')) {
+          // Keep layout
+        }
+      });
+
+      const cardActionButtons = clone.querySelectorAll('.flex.gap-1.flex-shrink-0');
+      cardActionButtons.forEach(el => el.remove());
+
+      const bottomButtons = clone.querySelectorAll('.gap-2 > button');
+      bottomButtons.forEach(btn => {
+        if (btn.textContent?.includes('View') || btn.textContent?.includes('Log')) {
+          btn.closest('.flex.gap-2')?.remove();
+        }
+      });
+
+      const hoverOverlays = clone.querySelectorAll('.absolute.inset-0.bg-black\\/0');
+      hoverOverlays.forEach(el => el.remove());
+
+      // 3. Append to body so it renders
+      document.body.appendChild(clone);
+
+      // 4. Wait a moment for images to re-paint/load in the clone
+      await new Promise(resolve => setTimeout(resolve, 800));
+
+      // 5. Capture with html2canvas
+      const canvas = await html2canvas(clone, {
+        scale: 2, // High resolution
+        useCORS: true, // Allow cross-origin images
+        logging: false,
+        width: 1200, // Match the clone width
+        windowWidth: 1200,
+        backgroundColor: '#f0fdf4'
+      });
+
+      // 6. Generate Multi-Page PDF
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF('p', 'mm', 'a4');
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-      pdf.save('meal-plan.pdf');
+
+      const imgWidth = 210; // A4 Width in mm
+      const pageHeight = 297; // A4 Height in mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      let heightLeft = imgHeight;
+      let position = 0;
+
+      // First Page
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      // Add new pages until content is exhausted
+      while (heightLeft > 0) {
+        position -= pageHeight; // Shift visual window down (move image up)
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      pdf.save('Eat-Smart-Meal-Plan.pdf');
+
+      // 7. Cleanup
+      document.body.removeChild(clone);
+
+      toast({
+        title: "Download Complete",
+        description: "Your comprehensive meal plan PDF is ready.",
+      });
+
+    } catch (error) {
+      console.error("PDF Generation failed", error);
+      toast({
+        title: "Download Failed",
+        description: "Could not generate PDF. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
       setIsDownloading(false);
-    });
+    }
   };
 
   // ---------------- Share ----------------

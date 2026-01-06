@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ShoppingCart, Download, Check, Plus, Trash2, Mail, Apple, Beef, Milk, Wheat, Cookie, Coffee, Snowflake, Archive } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { getApiUrl } from '@/lib/api';
+import { jsPDF } from 'jspdf';
 
 interface GroceryItem {
   id: string;
@@ -191,35 +192,148 @@ const GroceryListGenerator = () => {
   };
 
   const downloadList = () => {
-    // Group by category for download
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 20;
+
+    // Color Palette
+    const colors = {
+      primary: [44, 98, 56], // Forest Green
+      secondary: [76, 175, 80], // Lighter Green
+      text: [33, 33, 33], // Dark Gray
+      lightText: [100, 100, 100], // Light Gray
+      accent: [240, 240, 240], // Light Background
+      white: [255, 255, 255]
+    };
+
+    // Helper to get category color
+    const getCategoryColor = (category: string) => {
+      switch (category) {
+        case 'Produce': return [34, 197, 94]; // Green-500
+        case 'Meat & Fish': return [239, 68, 68]; // Red-500
+        case 'Dairy': return [59, 130, 246]; // Blue-500
+        case 'Bakery': return [245, 158, 11]; // Amber-500
+        case 'Grains': return [202, 138, 4]; // Yellow-600
+        case 'Pantry': return [100, 116, 139]; // Slate-500
+        default: return [107, 114, 128]; // Gray-500
+      }
+    };
+
+    // --- Header ---
+    doc.setFillColor(colors.primary[0], colors.primary[1], colors.primary[2]);
+    doc.rect(0, 0, pageWidth, 40, 'F');
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(24);
+    doc.setTextColor(colors.white[0], colors.white[1], colors.white[2]);
+    doc.text("My Smart Grocery List", margin, 20);
+
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.text(`Generated on ${new Date().toLocaleDateString()}`, margin, 32);
+
+    doc.setFontSize(10);
+    doc.text("Eat Smart AI", pageWidth - margin - 25, 20);
+    doc.text("www.eatsmart.ai", pageWidth - margin - 30, 28);
+
+    // --- Content ---
+    let yPos = 55;
+
+    // Group items for layout
     const grouped: Record<string, GroceryItem[]> = {};
     groceryList.forEach(item => {
       if (!grouped[item.category]) grouped[item.category] = [];
       grouped[item.category].push(item);
     });
 
-    let text = "My Smart Grocery List\n\n";
     Object.keys(grouped).sort().forEach(cat => {
-      text += `--- ${cat} ---\n`;
+      const catColor = getCategoryColor(cat);
+
+      // Check for page break needed for category header + at least one item
+      if (yPos > pageHeight - 40) {
+        doc.addPage();
+        yPos = 30; // Reset Y on new page
+      }
+
+      // Category Header
+      doc.setFillColor(catColor[0], catColor[1], catColor[2]);
+      doc.rect(margin, yPos, 4, 8, 'F'); // Colored accent bar
+
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(catColor[0], catColor[1], catColor[2]);
+      doc.text(cat.toUpperCase(), margin + 8, yPos + 6);
+
+      // Line separator
+      doc.setDrawColor(230, 230, 230);
+      doc.line(margin, yPos + 10, pageWidth - margin, yPos + 10);
+
+      yPos += 20;
+
+      // Items
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(colors.text[0], colors.text[1], colors.text[2]);
+
       grouped[cat].forEach(item => {
-        text += `[${item.checked ? 'x' : ' '}] ${item.name}\n`;
+        if (yPos > pageHeight - 20) {
+          doc.addPage();
+          yPos = 30;
+        }
+
+        // Checkbox style
+        const boxSize = 5;
+        doc.setDrawColor(150, 150, 150);
+        doc.setLineWidth(0.5);
+
+        if (item.checked) {
+          doc.setFillColor(240, 240, 240);
+          doc.rect(margin, yPos - 4, boxSize, boxSize, 'FD');
+          doc.setFont("zapfdingbats"); // Use ZapfDingbats for checkmark if available, or just draw lines
+          doc.setFontSize(10);
+          doc.setTextColor(colors.primary[0], colors.primary[1], colors.primary[2]);
+          doc.text("4", margin + 0.5, yPos); // approx checkmark in zapfdingbats
+          // Fallback to plotting lines if zapfdingbats not desired:
+          // doc.line(margin, yPos, margin + 2, yPos + 2); etc.
+        } else {
+          doc.rect(margin, yPos - 4, boxSize, boxSize);
+        }
+
+        // Reset font for text
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(11);
+        doc.setTextColor(colors.text[0], colors.text[1], colors.text[2]);
+
+        const quantityText = item.quantity && item.quantity !== '1' ? `${item.quantity} ${item.unit || ''} ` : '';
+        const itemText = `${quantityText}${item.name}`;
+
+        doc.text(itemText, margin + 10, yPos);
+
+        // Optional dot leader or spacing
+        // doc.setDrawColor(240, 240, 240);
+        // doc.line(margin, yPos + 2, pageWidth - margin, yPos + 2);
+
+        yPos += 10;
       });
-      text += "\n";
+
+      yPos += 5; // Spacing after category
     });
 
-    const blob = new Blob([text], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'grocery-list.txt';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    // --- Footer (Page Numbers) ---
+    const pageCount = doc.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(9);
+      doc.setTextColor(150, 150, 150);
+      doc.text(`Page ${i} of ${pageCount}`, pageWidth / 2, pageHeight - 10, { align: 'center' });
+    }
+
+    doc.save('Eat-Smart-Grocery-List.pdf');
 
     toast({
       title: "Download Started",
-      description: "Your grocery list has been downloaded.",
+      description: "Your enhanced grocery list is downloading!",
     });
   };
 

@@ -333,6 +333,12 @@ The system employs a **Micro-service Architecture** (albeit a monorepo structure
 8.  **Engine** selects 21 meals and returns JSON structure.
 9.  **Client** receives JSON and renders the Dashboard.
 
+### 3.4.3 Application User Flow
+The following diagram illustrates the user journey through the application, from initial login to the generation of the actionable grocery list.
+
+![User Flow Chart](report_images/user_flow_chart.png)
+*(Figure 3.2: User Flow Diagram showing the critical path)*
+
 ## 3.5 Data Modeling
 
 ### 3.5.1 The Input Schema
@@ -359,6 +365,9 @@ Internally, recipes are stored as objects (represented as Rows in DataFrame) wit
 *   `metadata`: JSON object containing `steps`, `image_url` (inferred), and `prep_time`.
 
 ## 3.6 User Interface (UI) Design
+
+![Website Landing Page Mockup](report_images/landing_page.png)
+*(Figure 3.3: Landing Page Design showing the modern aesthetic)*
 
 The UI follows the **Material Design** philosophy, utilizing cards and shadows to create depth. A "Dark Mode" aesthetic was chosen to convey a modern, premium feel. The layout is responsive, collapsing the side navigation into a hamburger menu on mobile devices. Color theory is applied: Green for "Success/Healthy", Orange for "Action Required", and Soft Gray for backgrounds to reduce eye strain.
 
@@ -548,10 +557,10 @@ The system was load-tested to ensure it could handle concurrent users. As shown 
 
 The user interface successfully renders the data. The following screenshots demonstrate the functional application.
 
-![Website Functionality Placeholder: Dashboard Layout]
+![User Dashboard Screenshot](report_images/dashboard.png)
 *(Figure 6.3: Screenshot of Main User Dashboard showing weekly summary)*
 
-![Website Functionality Placeholder: Meal Plan Card]
+![Meal Plan Grid Screenshot](report_images/meal_plan_grid.png)
 *(Figure 6.4: Screenshot of Generated Meal Plan Card with Nutritional Breakdown)*
 
 ## 6.4 Discussion of Findings

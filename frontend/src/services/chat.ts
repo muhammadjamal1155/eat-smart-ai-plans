@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:5000'; // Adjust if environment variable available
+import { getApiUrl } from "@/lib/api";
 
 export interface ChatResponse {
     response: string;
@@ -8,7 +8,7 @@ export interface ChatResponse {
 export const chatService = {
     async sendMessage(message: string, context?: any): Promise<ChatResponse> {
         try {
-            const response = await fetch(`${API_URL}/chat`, {
+            const response = await fetch(getApiUrl('/chat'), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

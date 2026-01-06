@@ -16,6 +16,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"; // Assuming you have these or use native select
+import { getApiUrl } from "@/lib/api";
 
 // --- Constants ---
 
@@ -218,7 +219,7 @@ export default function NutritionForm() {
         allergies: formData.foodAllergies ? formData.foodAllergies.split(',').map(s => s.trim()) : []
       };
 
-      const response = await fetch('http://127.0.0.1:5000/recommend', {
+      const response = await fetch(getApiUrl('/recommend'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),

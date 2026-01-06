@@ -7,6 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ShoppingCart, Download, Check, Plus, Trash2, Mail, Apple, Beef, Milk, Wheat, Cookie, Coffee, Snowflake, Archive } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { getApiUrl } from '@/lib/api';
 
 interface GroceryItem {
   id: string;
@@ -91,7 +92,7 @@ const GroceryListGenerator = () => {
 
       // Call Backend AI
       try {
-        const response = await fetch('http://localhost:5000/plans/grocery-list', {
+        const response = await fetch(getApiUrl('/plans/grocery-list'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ ingredients: allIngredients })
@@ -289,7 +290,7 @@ const GroceryListGenerator = () => {
 
                 try {
                   toast({ title: "Sending Email...", description: `Sending to ${email}` });
-                  await fetch('http://localhost:5000/api/email-grocery-list', {
+                  await fetch(getApiUrl('/api/email-grocery-list'), {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email, items })

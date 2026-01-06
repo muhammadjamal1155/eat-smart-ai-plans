@@ -1,8 +1,8 @@
-const API_URL = 'http://localhost:5000'; // Adjust if environment variable available
+import { getApiUrl } from "@/lib/api";
 
 export const analyticsService = {
     async logDailyStats(data: any) {
-        const response = await fetch(`${API_URL}/analytics/log`, {
+        const response = await fetch(getApiUrl('/analytics/log'), {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -14,13 +14,13 @@ export const analyticsService = {
     },
 
     async getHistory(userId: string, days: number = 30) {
-        const response = await fetch(`${API_URL}/analytics/history?user_id=${userId}&days=${days}`);
+        const response = await fetch(getApiUrl(`/analytics/history?user_id=${userId}&days=${days}`));
         if (!response.ok) throw new Error('Failed to fetch history');
         return response.json();
     },
 
     async saveGoal(goal: any, userId: string) {
-        const response = await fetch(`${API_URL}/goals`, {
+        const response = await fetch(getApiUrl('/goals'), {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -32,13 +32,13 @@ export const analyticsService = {
     },
 
     async getGoals(userId: string) {
-        const response = await fetch(`${API_URL}/goals?user_id=${userId}`);
+        const response = await fetch(getApiUrl(`/goals?user_id=${userId}`));
         if (!response.ok) throw new Error('Failed to fetch goals');
         return response.json();
     },
 
     async getCoachInsights(userId: string) {
-        const response = await fetch(`${API_URL}/insights/coach`, {
+        const response = await fetch(getApiUrl('/insights/coach'), {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -50,13 +50,13 @@ export const analyticsService = {
     },
 
     async getAnalyticsSummary(userId: string) {
-        const response = await fetch(`${API_URL}/analytics/summary?user_id=${userId}`);
+        const response = await fetch(getApiUrl(`/analytics/summary?user_id=${userId}`));
         if (!response.ok) throw new Error('Failed to fetch summary');
         return response.json();
     },
 
     async logMeal(userId: string, meal: { calories: number; protein: number; carbs: number; fats: number; name?: string }) {
-        const response = await fetch(`${API_URL}/analytics/log-meal`, {
+        const response = await fetch(getApiUrl('/analytics/log-meal'), {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -71,7 +71,7 @@ export const analyticsService = {
     },
 
     async savePlan(userId: string, planData: any) {
-        const response = await fetch(`${API_URL}/plans`, {
+        const response = await fetch(getApiUrl('/plans'), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ user_id: userId, plan_data: planData })
@@ -81,7 +81,7 @@ export const analyticsService = {
     },
 
     async getPlan(userId: string) {
-        const response = await fetch(`${API_URL}/plans?user_id=${userId}`);
+        const response = await fetch(getApiUrl(`/plans?user_id=${userId}`));
         if (!response.ok) throw new Error('Failed to fetch plan');
         return response.json();
     }

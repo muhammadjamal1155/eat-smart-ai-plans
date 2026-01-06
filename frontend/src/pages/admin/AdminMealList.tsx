@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
+import { getApiUrl } from "@/lib/api";
 
 interface AdminMeal {
     id: string;
@@ -48,7 +49,7 @@ export default function AdminMealList() {
     // Fetch meals
     useEffect(() => {
         setLoading(true);
-        fetch(`http://localhost:5000/admin/meals?page=${page}&search=${debouncedSearch}`)
+        fetch(getApiUrl(`/admin/meals?page=${page}&search=${debouncedSearch}`))
             .then(res => res.json())
             .then(data => {
                 setMeals(data.meals || []);

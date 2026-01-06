@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Brain, Sparkles, TrendingUp, Clock, Target, Lightbulb } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { getApiUrl } from '@/lib/api';
 
 interface Recommendation {
   id: string;
@@ -67,7 +68,7 @@ const AIRecommendations = () => {
       const profile = savedProfile ? JSON.parse(savedProfile) : {};
       const meals = savedMeals ? JSON.parse(savedMeals) : {};
 
-      const response = await fetch('http://127.0.0.1:5000/insights/analyze', {
+      const response = await fetch(getApiUrl('/insights/analyze'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ profile, meals })

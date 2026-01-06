@@ -15,6 +15,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
+import { getApiUrl } from '@/lib/api';
 
 // Mock Data for "CRM" and "Finance" aspects until backend support exists
 const MOCK_REVENUE = {
@@ -42,7 +43,7 @@ export default function AdminDashboard() {
 
     useEffect(() => {
         // In a real app, use SWR or React Query
-        fetch('http://localhost:5000/admin/stats')
+        fetch(getApiUrl('/admin/stats'))
             .then(res => res.json())
             .then(data => {
                 setStats(data);

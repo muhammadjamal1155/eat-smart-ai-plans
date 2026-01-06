@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
+import { getApiUrl } from '@/lib/api';
 
 interface Meal {
   id: string;
@@ -60,7 +61,7 @@ const MealSearchDialog = ({ onSelectMeal, mealType, isOpen, onOpenChange }: Meal
           const userProfileStr = localStorage.getItem('userProfile');
           if (userProfileStr) {
             const userProfile = JSON.parse(userProfileStr);
-            const response = await fetch('http://localhost:5000/recommend', {
+            const response = await fetch(getApiUrl('/recommend'), {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
@@ -89,7 +90,7 @@ const MealSearchDialog = ({ onSelectMeal, mealType, isOpen, onOpenChange }: Meal
         } else {
           // Pass selected tags to backend logic (except 'all' is handled as default/empty there)
           const tagParam = selectedFilter !== 'all' ? `&tag=${selectedFilter}` : '';
-          const response = await fetch(`http://localhost:5000/meals?query=${searchTerm}${tagParam}`);
+          const response = await fetch(getApiUrl(`/meals?query=${searchTerm}${tagParam}`));
           if (response.ok) {
             const data = await response.json();
             setMeals(data);

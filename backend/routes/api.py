@@ -92,3 +92,63 @@ def email_grocery_list():
     except Exception as e:
         print(f"Failed to send email: {e}")
         return jsonify({"error": str(e)}), 500
+
+@api.route('/api/contact', methods=['POST'])
+def contact_us():
+    data = request.json
+    name = data.get('name')
+    email = data.get('email')
+    subject = data.get('subject')
+    message = data.get('message')
+
+    if not all([name, email, subject, message]):
+        return jsonify({"error": "All fields are required"}), 400
+
+    try:
+        smtp_server = os.environ.get('SMTP_SERVER', 'smtp.gmail.com')
+        smtp_port = int(os.environ.get('SMTP_PORT', 587))
+        smtp_user = os.environ.get('SMTP_EMAIL')
+        smtp_password = os.environ.get('SMTP_PASSWORD')
+
+        # Construct email body
+        email_body = f"""
+New Contact Form Submission
+
+From: {name} <{email}>
+Subject: {subject}
+
+Message:
+{message}
+        """
+
+        if not smtp_user or not smtp_password:
+             print("SMTP Credentials missing. Logging contact message to console.")
+             print("--- CONTACT FORM MESSAGE ---")
+             print(email_body)
+             print("----------------------------")
+             return jsonify({"message": "Message received (Console Logged)", "status": "success"})
+
+        msg = MIMEMultipart()
+        msg['From'] = smtp_user
+        msg['To'] = smtp_user # Send to self/admin
+        msg['Cc'] = email # Send copy to user
+        msg['Reply-To'] = email
+        msg['Subject'] = f"Contact Form: {subject} - {name}"
+
+        msg.attach(MIMEText(email_body, 'plain'))
+
+        server = smtplib.SMTP(smtp_server, smtp_port)
+        server.starttls()
+        server.login(smtp_user, smtp_password)
+        text = msg.as_string()
+        
+        # Send to both admin and user
+        recipients = [smtp_user, email]
+        server.sendmail(smtp_user, recipients, text)
+        server.quit()
+        
+        return jsonify({"message": "Message sent successfully", "status": "success"})
+
+    except Exception as e:
+        print(f"Failed to send contact email: {e}")
+        return jsonify({"error": "Failed to send message"}), 500

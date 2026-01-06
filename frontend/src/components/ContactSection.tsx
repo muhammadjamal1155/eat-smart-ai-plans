@@ -10,19 +10,70 @@ import { Contact, Mail, MessageSquare, Phone, Facebook, Twitter, Instagram, Link
 
 const ContactSection = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    subject: 'general',
+    message: ''
+  });
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { id, value } = e.target;
+    setFormData(prev => ({ ...prev, [id]: value }));
+  };
+
+  const handleSelectChange = (value: string) => {
+    setFormData(prev => ({ ...prev, subject: value }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-    // Simulate form submission
-    setTimeout(() => {
-      setIsSubmitting(false);
-      toast({
-        title: "Message Sent!",
-        description: "Thank you for your feedback. We'll get back to you within 24 hours.",
+
+    try {
+      // In a real staging/prod environment, use relative path '/api/contact' or strict env var
+      // For local dev, hardcoded localhost:5000 is common if proxy isn't set up perfectly
+      const response = await fetch('http://localhost:5000/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: `${formData.firstName} ${formData.lastName}`,
+          email: formData.email,
+          subject: formData.subject,
+          message: formData.message
+        }),
       });
-    }, 2000);
+
+      const result = await response.json();
+
+      if (response.ok) {
+        toast({
+          title: "Message Sent!",
+          description: "Thank you for getting in touch. We'll respond shortly.",
+        });
+        setFormData({
+          firstName: '',
+          lastName: '',
+          email: '',
+          subject: 'general',
+          message: ''
+        });
+      } else {
+        throw new Error(result.error || 'Failed to send message');
+      }
+    } catch (error) {
+      console.error('Contact error:', error);
+      toast({
+        title: "Message Failed",
+        description: "Something went wrong. Please try again later.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const socialLinks = [
@@ -59,22 +110,41 @@ const ContactSection = () => {
                   <div className="grid md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="firstName">First Name</Label>
-                      <Input id="firstName" placeholder="Your first name" required />
+                      <Input
+                        id="firstName"
+                        value={formData.firstName}
+                        onChange={handleInputChange}
+                        placeholder="Your first name"
+                        required
+                      />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="lastName">Last Name</Label>
-                      <Input id="lastName" placeholder="Your last name" required />
+                      <Input
+                        id="lastName"
+                        value={formData.lastName}
+                        onChange={handleInputChange}
+                        placeholder="Your last name"
+                        required
+                      />
                     </div>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="email">Email</Label>
-                    <Input id="email" type="email" placeholder="your.email@example.com" required />
+                    <Input
+                      id="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      placeholder="your.email@example.com"
+                      required
+                    />
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="subject">Subject</Label>
-                    <Select>
+                    <Select onValueChange={handleSelectChange} value={formData.subject}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select a topic" />
                       </SelectTrigger>
@@ -87,19 +157,21 @@ const ContactSection = () => {
                       </SelectContent>
                     </Select>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="message">Message</Label>
-                    <Textarea 
-                      id="message" 
+                    <Textarea
+                      id="message"
+                      value={formData.message}
+                      onChange={handleInputChange}
                       placeholder="Tell us how we can help you..."
                       className="min-h-32"
                       required
                     />
                   </div>
-                  
-                  <Button 
-                    type="submit" 
+
+                  <Button
+                    type="submit"
                     className="w-full btn-primary text-lg py-3"
                     disabled={isSubmitting}
                   >
@@ -127,7 +199,7 @@ const ContactSection = () => {
                     <div className="text-muted-foreground">muhammadjamal8698320@gmail.com</div>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center space-x-3">
                   <Phone className="w-5 h-5 text-forest-500" />
                   <div>
@@ -135,7 +207,7 @@ const ContactSection = () => {
                     <div className="text-muted-foreground">+923225307540</div>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center space-x-3">
                   <Contact className="w-5 h-5 text-forest-500" />
                   <div>

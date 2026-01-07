@@ -136,11 +136,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signIn = async (email: string, password: string) => {
-    return await supabase.auth.signInWithPassword({ email, password });
+    const response = await supabase.auth.signInWithPassword({ email, password });
+    if (response.data.user && !response.error) {
+      await fetchProfile(response.data.user);
+    }
+    return response;
   };
 
   const signUp = async (email: string, password: string, name: string) => {
-    return await supabase.auth.signUp({
+    const response = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -149,6 +153,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         },
       },
     });
+    if (response.data.user && !response.error) {
+      await fetchProfile(response.data.user);
+    }
+    return response;
   };
 
   const resetPassword = async (email: string) => {

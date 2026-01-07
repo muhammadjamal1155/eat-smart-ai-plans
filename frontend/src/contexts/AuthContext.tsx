@@ -166,6 +166,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Force local state update immediately
       setUser(null);
       localStorage.removeItem(STORAGE_KEY); // Clean up any local storage
+
+      // Manually clear Supabase auth tokens from local storage to ensure persistence is cleared
+      const keysToRemove: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('sb-') && key.endsWith('-auth-token')) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach(key => localStorage.removeItem(key));
     }
   };
 

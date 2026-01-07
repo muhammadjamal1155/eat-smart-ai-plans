@@ -120,6 +120,8 @@ const MealPlanSection = () => {
     setIsBrowseMealsOpen(true);
   };
 
+  const [loadedUserId, setLoadedUserId] = useState<string | null>(null);
+
   // Load from backend on mount
   useEffect(() => {
     const loadPlan = async () => {
@@ -133,6 +135,8 @@ const MealPlanSection = () => {
         }
       } catch (e) {
         console.error("Failed to load plan", e);
+      } finally {
+        setLoadedUserId(user.id);
       }
     };
     loadPlan();
@@ -147,7 +151,8 @@ const MealPlanSection = () => {
     // But typing search query shouldn't trigger save. Search query doesn't update weekMeals.
     // So direct save is fine.
     const saveToBackend = async () => {
-      if (user?.id) {
+      // Only save if we have successfully loaded the plan for the CURRENT user
+      if (user?.id && loadedUserId === user.id) {
         try {
           await analyticsService.savePlan(user.id, weekMeals);
         } catch (e) {
@@ -160,7 +165,7 @@ const MealPlanSection = () => {
     const timeout = setTimeout(saveToBackend, 1000);
     return () => clearTimeout(timeout);
 
-  }, [weekMeals, user?.id]);
+  }, [weekMeals, user?.id, loadedUserId]);
 
   const [searchQuery, setSearchQuery] = useState('');
 

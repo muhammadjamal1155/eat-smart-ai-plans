@@ -1,0 +1,12 @@
+--- Checking Profiles Table (Limit 5) ---
+Found 2 profiles.
+- ID: f5618dd8-0173-4269-85ed-f06d7616881d, Name: Muhammad Jamal
+- ID: 79feb2fc-c4ca-440d-8758-f308c5430bd1, Name: Muhammad Jamal
+
+--- Checking Meal Plans Table (Limit 5) ---
+Found 5 plans.
+- UserID: 79feb2fc-c4ca-440d-8758-f308c5430bd1, Updated: 2026-01-07T15:49:07.80603+00:00
+- UserID: 1e277960-4a7b-4f65-9b2d-863afc42b824, Updated: 2026-01-05T22:07:15.300747+00:00
+- UserID: f5618dd8-0173-4269-85ed-f06d7616881d, Updated: 2026-01-05T21:44:02.995035+00:00
+- UserID: 1, Updated: 2026-01-05T21:12:31.417411+00:00
+- UserID: test_user_plans, Updated: 2026-01-05T03:02:23.911644+00:00

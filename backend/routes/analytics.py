@@ -1,10 +1,12 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, g
 from core.supabase_client import get_supabase_client
+from core.auth import require_auth
 import datetime
 
 analytics_bp = Blueprint('analytics', __name__)
 
 @analytics_bp.route('/analytics/log', methods=['POST'])
+@require_auth
 def log_analytics():
     supabase = get_supabase_client()
     if not supabase:
@@ -12,7 +14,7 @@ def log_analytics():
 
     try:
         data = request.json
-        user_id = data.get('user_id')
+        user_id = g.user_id
         
         # We expect data to contain 'weight', 'calories', 'protein', 'carbs', 'fats', 'date'
         # Adjust table name 'user_analytics' or 'daily_logs' as per your schema preference
@@ -39,6 +41,7 @@ def log_analytics():
         return jsonify({"error": str(e)}), 500
 
 @analytics_bp.route('/analytics/log-meal', methods=['POST'])
+@require_auth
 def log_meal():
     supabase = get_supabase_client()
     if not supabase:
@@ -46,9 +49,7 @@ def log_meal():
 
     try:
         data = request.json
-        user_id = data.get('user_id')
-        if not user_id:
-            return jsonify({"error": "User ID required"}), 400
+        user_id = g.user_id
             
         date = data.get('date', datetime.date.today().isoformat())
         
@@ -89,17 +90,15 @@ def log_meal():
         return jsonify({"error": str(e)}), 500
 
 @analytics_bp.route('/analytics/history', methods=['GET'])
+@require_auth
 def get_history():
     supabase = get_supabase_client()
     if not supabase:
         return jsonify({"error": "Database not configured"}), 503
 
     try:
-        user_id = request.args.get('user_id')
+        user_id = g.user_id
         days = int(request.args.get('days', 30))
-        
-        if not user_id:
-            return jsonify({"error": "User ID required"}), 400
 
         # Calculate start date
         start_date = (datetime.date.today() - datetime.timedelta(days=days)).isoformat()
@@ -123,6 +122,7 @@ def get_history():
         return jsonify({"error": str(e)}), 500
 
 @analytics_bp.route('/goals', methods=['POST'])
+@require_auth
 def update_goals():
     supabase = get_supabase_client()
     if not supabase:
@@ -140,10 +140,8 @@ def update_goals():
         if not goal:
             return jsonify({"error": "Goal data required"}), 400
             
-        # Ensure user_id is set
-        user_id = data.get('user_id')
-        if user_id:
-            goal['user_id'] = user_id
+        # Ensure user_id is set securely
+        goal['user_id'] = g.user_id
             
         response = supabase.table('user_goals').upsert(goal).execute()
         
@@ -154,15 +152,14 @@ def update_goals():
         return jsonify({"error": str(e)}), 500
 
 @analytics_bp.route('/goals', methods=['GET'])
+@require_auth
 def get_goals():
     supabase = get_supabase_client()
     if not supabase:
         return jsonify({"error": "Database not configured"}), 503
 
     try:
-        user_id = request.args.get('user_id')
-        if not user_id:
-            return jsonify({"error": "User ID required"}), 400
+        user_id = g.user_id
 
         response = supabase.table('user_goals')\
             .select('*')\
@@ -176,15 +173,14 @@ def get_goals():
         return jsonify({"error": str(e)}), 500
 
 @analytics_bp.route('/analytics/summary', methods=['GET'])
+@require_auth
 def get_analytics_summary():
     supabase = get_supabase_client()
     if not supabase:
         return jsonify({"error": "Database not configured"}), 503
 
     try:
-        user_id = request.args.get('user_id')
-        if not user_id:
-            return jsonify({"error": "User ID required"}), 400
+        user_id = g.user_id
 
         # Fetch all date entries (optimize by selecting only date field)
         # Limiting to last 365 days for consistency calculation

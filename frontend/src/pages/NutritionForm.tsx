@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { Dialog, DialogContent, DialogTitle, DialogDescription, DialogHeader } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"; // Assuming you have these or use native select
 import { getApiUrl } from "@/lib/api";
 
@@ -107,6 +108,7 @@ export default function NutritionForm() {
   const [authMode, setAuthMode] = useState<'signup' | 'login'>('signup');
   const [authData, setAuthData] = useState({ name: '', email: '', password: '' });
   const [showResults, setShowResults] = useState(false);
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
 
   const [step, setStep] = useState(0);
   const [direction, setDirection] = useState(0);
@@ -238,9 +240,9 @@ export default function NutritionForm() {
 
       setTimeout(() => {
         setIsLoading(false);
-        // GATE: If no user, go to Auth Step (100). If user, show results.
+        // GATE: If no user, show auth dialog. If user, show results.
         if (!user) {
-          setStep(100);
+          setShowAuthDialog(true);
         } else {
           updateUserWithProfile(userProfile);
           setShowResults(true);
@@ -251,8 +253,8 @@ export default function NutritionForm() {
       clearTimeout(timeoutId);
       console.error(e);
       toast({ title: "Error", description: e.message || "Failed to generate plan." });
-      setStep(14);
       setIsLoading(false);
+      setStep(14);
     }
   };
 
@@ -321,9 +323,9 @@ export default function NutritionForm() {
   // Effect to handle post-authentication logic (Update Profile & Show Results)
   useEffect(() => {
     const handlePostAuth = async () => {
-      // Only proceed if we are in the Auth Step (100) and the user is now authenticated
-      if (step === 100 && user) {
-        // ... (rest is same)
+      // Only proceed if we are showing auth dialog and the user is now authenticated
+      if (showAuthDialog && user) {
+        setShowAuthDialog(false); // Prevent infinite loop
         setIsLoading(true);
         try {
           const tempProfile = localStorage.getItem('tempUserProfile');
@@ -343,7 +345,7 @@ export default function NutritionForm() {
     };
 
     handlePostAuth();
-  }, [user, step]); // Dependencies ensure this runs when user becomes authenticated
+  }, [user, showAuthDialog]); // Dependencies ensure this runs when user becomes authenticated
 
 
   // Results view condition
@@ -824,9 +826,7 @@ export default function NutritionForm() {
               </div>
             </motion.div>
           )
-        }
-
-        {/* 15. Loading */}
+        }        {/* 15. Loading */}
         {
           step === 15 && (
             <motion.div key="15" custom={direction} variants={variants} initial="enter" animate="center" exit="exit" className="w-full flex flex-col items-center justify-center space-y-8 py-12">
@@ -838,52 +838,51 @@ export default function NutritionForm() {
             </motion.div>
           )
         }
+      </AnimatePresence>
 
-        {/* 100. Auth Gate */}
-        {
-          step === 100 && (
-            <motion.div key="100" custom={direction} variants={variants} initial="enter" animate="center" exit="exit" className="w-full space-y-6 text-center">
-              <div className="bg-white/10 backdrop-blur-md border border-white/20 p-8 rounded-2xl shadow-2xl">
-                <Trophy className="w-16 h-16 text-primary mx-auto mb-4" />
-                <h1 className="text-2xl font-bold text-white mb-2">Your Plan is Ready! 🎉</h1>
-                <p className="text-white/70 mb-6">Create a free account to view your personalized plan and save your progress.</p>
+      {/* Auth Gate via Dialog */}
+      <Dialog open={showAuthDialog} onOpenChange={(open) => { if (!open) setShowAuthDialog(false); }}>
+        <DialogContent className="sm:max-w-md bg-slate-900 border-white/20 p-8 shadow-2xl overflow-hidden text-center rounded-2xl">
+          <DialogHeader className="sr-only">
+              <DialogTitle>Sign up or Login</DialogTitle>
+              <DialogDescription>Create an account to view your personalized plan.</DialogDescription>
+          </DialogHeader>
+          <Trophy className="w-16 h-16 text-primary mx-auto mb-4" />
+          <h1 className="text-2xl font-bold text-white mb-2">Your Plan is Ready! 🎉</h1>
+          <p className="text-white/70 mb-6">Create a free account to view your personalized plan and save your progress.</p>
 
-                <div className="space-y-4 text-left">
-                  {authMode === 'signup' && (
-                    <div>
-                      <Label className="text-white">Name</Label>
-                      <Input value={authData.name} onChange={e => setAuthData({ ...authData, name: e.target.value })} className="bg-black/20 border-white/10 text-white" placeholder="John Doe" />
-                    </div>
-                  )}
-                  <div>
-                    <Label className="text-white">Email</Label>
-                    <Input value={authData.email} onChange={e => setAuthData({ ...authData, email: e.target.value })} className="bg-black/20 border-white/10 text-white" placeholder="john@example.com" />
-                  </div>
-                  <div>
-                    <Label className="text-white">Password</Label>
-                    <Input type="password" value={authData.password} onChange={e => setAuthData({ ...authData, password: e.target.value })} className="bg-black/20 border-white/10 text-white" placeholder="••••••••" />
-                  </div>
-
-                  <Button onClick={handleAuth} className="w-full h-12 text-lg font-bold bg-primary text-primary-foreground hover:bg-primary/90 mt-2">
-                    {isLoading ? "Signing in..." : (authMode === 'signup' ? "Create Account & View Plan" : "Login & View Plan")}
-                  </Button>
-                </div>
-
-                <div className="mt-6 text-sm text-white/50">
-                  {authMode === 'signup' ? "Already have an account? " : "Don't have an account? "}
-                  <button onClick={() => setAuthMode(authMode === 'signup' ? 'login' : 'signup')} className="text-primary hover:underline font-bold">
-                    {authMode === 'signup' ? "Login" : "Sign Up"}
-                  </button>
-                </div>
+          <div className="space-y-4 text-left">
+            {authMode === 'signup' && (
+              <div>
+                <Label className="text-white">Name</Label>
+                <Input value={authData.name} onChange={e => setAuthData({ ...authData, name: e.target.value })} className="bg-black/20 border-white/10 text-white" placeholder="John Doe" />
               </div>
-            </motion.div>
-          )
-        }
+            )}
+            <div>
+              <Label className="text-white">Email</Label>
+              <Input value={authData.email} onChange={e => setAuthData({ ...authData, email: e.target.value })} className="bg-black/20 border-white/10 text-white" placeholder="john@example.com" />
+            </div>
+            <div>
+              <Label className="text-white">Password</Label>
+              <Input type="password" value={authData.password} onChange={e => setAuthData({ ...authData, password: e.target.value })} className="bg-black/20 border-white/10 text-white" placeholder="••••••••" />
+            </div>
 
-      </AnimatePresence >
+            <Button onClick={handleAuth} className="w-full h-12 text-lg font-bold bg-primary text-primary-foreground hover:bg-primary/90 mt-2">
+              {isLoading ? "Signing in..." : (authMode === 'signup' ? "Create Account & View Plan" : "Login & View Plan")}
+            </Button>
+          </div>
+
+          <div className="mt-6 text-sm text-white/50">
+            {authMode === 'signup' ? "Already have an account? " : "Don't have an account? "}
+            <button onClick={() => setAuthMode(authMode === 'signup' ? 'login' : 'signup')} className="text-primary hover:underline font-bold">
+              {authMode === 'signup' ? "Login" : "Sign Up"}
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {
-        step < 15 && step !== 100 && (
+        step < 15 && !showAuthDialog && (
           <div className="w-full max-w-md px-4 mt-8">
             {/* Progress Bar content */}
             <div className="w-full bg-secondary h-1.5 rounded-full overflow-hidden">

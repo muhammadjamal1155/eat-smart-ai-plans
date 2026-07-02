@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
 from services.recommendation_service import RecommendationService
+from core.extensions import limiter
 import os
 import smtplib
 from email.mime.text import MIMEText
@@ -8,6 +9,7 @@ from email.mime.multipart import MIMEMultipart
 api = Blueprint('api', __name__)
 
 @api.route('/recommend', methods=['POST'])
+@limiter.limit("5 per minute")
 def recommend():
     data = request.json
     service = RecommendationService.get_instance()
@@ -46,6 +48,7 @@ def reset_password():
     return jsonify({"message": "Password reset link sent (simulated)", "status": "success"})
 
 @api.route('/api/email-grocery-list', methods=['POST'])
+@limiter.limit("5 per minute")
 def email_grocery_list():
     data = request.json
     email = data.get('email')
@@ -94,6 +97,7 @@ def email_grocery_list():
         return jsonify({"error": str(e)}), 500
 
 @api.route('/api/contact', methods=['POST'])
+@limiter.limit("5 per minute")
 def contact_us():
     data = request.json
     name = data.get('name')

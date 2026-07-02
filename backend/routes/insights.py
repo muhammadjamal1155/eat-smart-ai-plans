@@ -1,8 +1,10 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, g
 import os
 import json
 from openai import OpenAI
 from dotenv import load_dotenv
+from core.auth import require_auth
+from core.extensions import limiter
 
 insights_bp = Blueprint('insights', __name__)
 
@@ -13,6 +15,7 @@ load_dotenv(dotenv_path)
 from core.supabase_client import get_supabase_client
 
 @insights_bp.route('/insights/analyze', methods=['POST'])
+@limiter.limit("5 per minute")
 def analyze_insights():
     try:
         data = request.json
@@ -67,12 +70,12 @@ def analyze_insights():
         return jsonify({"error": str(e)}), 500
 
 @insights_bp.route('/insights/coach', methods=['POST'])
+@require_auth
+@limiter.limit("5 per minute")
 def coach_insights():
     try:
         data = request.json
-        user_id = data.get('user_id')
-        if not user_id:
-             return jsonify({"error": "User ID required"}), 400
+        user_id = g.user_id
 
         # Fetch Data from Supabase
         supabase = get_supabase_client()

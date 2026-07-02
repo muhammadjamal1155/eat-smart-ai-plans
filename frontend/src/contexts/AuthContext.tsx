@@ -130,9 +130,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     // Only update state if data actually changed to prevent loops
-    if (JSON.stringify(fullUser) !== JSON.stringify(user)) {
-      setUser(fullUser);
-    }
+    setUser(prevUser => {
+      if (JSON.stringify(fullUser) !== JSON.stringify(prevUser)) {
+        return fullUser;
+      }
+      return prevUser;
+    });
   };
 
   const signIn = async (email: string, password: string) => {

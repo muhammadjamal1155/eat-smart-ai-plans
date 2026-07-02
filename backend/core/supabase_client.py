@@ -2,13 +2,14 @@ import os
 import requests
 import json
 from dotenv import load_dotenv
+from flask import request, has_request_context
 
 # Load env variables
 dotenv_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env')
 load_dotenv(dotenv_path)
 
 SUPABASE_URL = os.environ.get("SUPABASE_URL") or os.environ.get("VITE_SUPABASE_URL")
-SUPABASE_KEY = os.environ.get("SUPABASE_KEY") or os.environ.get("VITE_SUPABASE_ANON_KEY")
+SUPABASE_KEY = os.environ.get("VITE_SUPABASE_ANON_KEY") or os.environ.get("SUPABASE_SERVICE_KEY") or os.environ.get("SUPABASE_KEY")
 
 class SupabaseClient:
     def __init__(self, url, key):
@@ -18,7 +19,9 @@ class SupabaseClient:
             "apikey": key,
             "Authorization": f"Bearer {key}",
             "Content-Type": "application/json",
-            "Prefer": "return=representation"
+            "Prefer": "return=representation",
+            "User-Agent": "EatSmartBackend/1.0",
+            "Connection": "close"
         }
 
     def table(self, table_name):
@@ -27,7 +30,7 @@ class SupabaseClient:
 class SupabaseQueryBuilder:
     def __init__(self, base_url, headers, table_name):
         self.url = f"{base_url}/rest/v1/{table_name}"
-        self.headers = headers
+        self.headers = headers.copy()
         self.params = {}
         self.method = "GET"
         self.json_data = None
@@ -55,6 +58,15 @@ class SupabaseQueryBuilder:
         # Merge extra headers
         headers = {**self.headers, **self.extra_headers}
         
+        # Inject user token for RLS if available in Flask request context
+        try:
+            if has_request_context():
+                auth_header = request.headers.get('Authorization')
+                if auth_header:
+                    headers['Authorization'] = auth_header
+        except Exception:
+            pass
+
         if self.method == "POST":
              response = requests.post(self.url, headers=headers, json=self.json_data, params=self.params)
         elif self.method == "PATCH":
